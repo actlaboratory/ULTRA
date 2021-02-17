@@ -1,0 +1,17 @@
+*.pyc
+*.log
+__pycache__
+settings.ini
+keymap.ini
+*.bat
+*log.txt
+build/
+dist/
+*.obj
+*.exp
+*.lib
+*.spec
+pl_auto_save
+runCMD.bat
+accounts
+sources/twitcasting/users.dat
