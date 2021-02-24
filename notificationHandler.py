@@ -2,6 +2,7 @@
 
 import webbrowser
 import globalVars
+import wx.adv
 
 class NotificationHandler:
 	def loadSettings(self):
@@ -26,20 +27,15 @@ class NotificationHandler:
 		"""
 		self.loadSettings()
 		if self.baloon:
-			# バルーンを出す
-			pass
+			b = wx.adv.NotificationMessage("ULTRA", _("配信開始：%s") %(userName))
+			b.Show()
 		if self.sound:
-			self.playSound()
+			# dummy
+			# とりあえずビープを鳴らすようにしておく
+			import winsound
+			winsound.Beep(800, 100)
 		if self.openBrowser:
 			webbrowser.open_new(link)
 		if self.record:
 			# 録画処理に渡す
 			pass
-
-	def playSound(self):
-		"""通知音を鳴らす
-		"""
-		# dummy
-		# とりあえずビープを鳴らすようにしておく
-		import winsound
-		winsound.Beep(800, 100)
