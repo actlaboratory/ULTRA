@@ -120,8 +120,11 @@ class Twitcasting(threading.Thread):
 		self.loadUserList()
 		obj = json.loads(text)
 		for i in obj["movies"]:
-			if i["broadcaster"]["id"] in self.users.keys():
+			userId = i["broadcaster"]["id"]
+			if userId in self.users.keys():
 				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"])
+				self.users[userId] = i["broadcaster"]["screen_id"]
+				self.saveUserList()
 
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
