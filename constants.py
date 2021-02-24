@@ -22,11 +22,11 @@ SUPPORTING_LANGUAGE={"ja-JP": "日本語","en-US": "English"}
 #各種ファイル名
 LOG_PREFIX="ultra"
 LOG_FILE_NAME="ultra.log"
-SETTING_FILE_NAME="settings.ini"
-KEYMAP_FILE_NAME="keymap.ini"
-TC_USER_DATA = "sources\\twitcasting\\users.dat"
+SETTING_FILE_NAME="data\\settings.ini"
+KEYMAP_FILE_NAME="data\\keymap.ini"
+TC_USER_DATA = "data\\twitcasting\\users.dat"
 # 各サービスのアカウントデータの格納場所
-AC_TWITCASTING = "accounts\\twitcasting.bin"
+AC_TWITCASTING = "data\\twitcasting\\account.bin"
 
 
 

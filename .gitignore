@@ -13,5 +13,5 @@ dist/
 *.spec
 pl_auto_save
 runCMD.bat
-accounts
-sources/twitcasting/users.dat
+account.bin
+users.dat
