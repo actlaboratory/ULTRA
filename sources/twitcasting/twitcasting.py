@@ -21,6 +21,7 @@ class Twitcasting(threading.Thread):
 		"""
 		super().__init__(daemon=True)
 		self.running = False
+		self.loadUserList()
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -92,6 +93,7 @@ class Twitcasting(threading.Thread):
 				self.users = json.load(f)
 		except:
 			self.users = {}
+			self.saveUserList()
 
 	def saveUserList(self):
 		"""ユーザリストをファイルに保存
@@ -100,8 +102,6 @@ class Twitcasting(threading.Thread):
 			with open(constants.TC_USER_DATA, "w") as f:
 				json.dump(self.users, f)
 		except:
-			import traceback
-			traceback.print_exc()
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
 
 	def run(self):
