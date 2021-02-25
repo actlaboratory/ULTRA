@@ -6,7 +6,7 @@ import update
 import globalVars
 import proxyUtil
 import notificationHandler
-from sources.twitcasting import twitcasting
+from sources import twitcasting
 
 class Main(AppBase.MainBase):
 	def __init__(self):
