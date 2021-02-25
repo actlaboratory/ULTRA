@@ -28,6 +28,7 @@ class DefaultSettings:
 			"record": False,
 			"openBrowser": False,
 			"sound": False,
+			"soundFile": "",
 		}
 		config["twitcasting"] = {
 			"checkLive": False,

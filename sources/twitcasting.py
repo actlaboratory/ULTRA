@@ -91,7 +91,7 @@ class Twitcasting(threading.Thread):
 		try:
 			with open(constants.TC_USER_DATA, "r") as f:
 				self.users = json.load(f)
-		except:
+		except FileNotFoundError:
 			self.users = {}
 			self.saveUserList()
 
@@ -167,7 +167,9 @@ class Twitcasting(threading.Thread):
 		if self.users[user]["specific"]:
 			for i in items:
 				config[i] = self.users[user][i]
+			config["soundFile"] = self.users[user]["soundFile"]
 		else:
 			for i in items:
 				config[i] = globalVars.app.config.getboolean("notification", i, False)
+			config["soundFile"] = globalVars.app.config["notification"]["soundFile"]
 		return config

@@ -3,6 +3,7 @@
 import webbrowser
 import globalVars
 import wx.adv
+from soundPlayer import fxPlayer
 
 class NotificationHandler:
 	def loadSettings(self, config):
@@ -14,11 +15,13 @@ class NotificationHandler:
 		if type(config) == dict:
 			self.baloon = config["baloon"]
 			self.sound = config["sound"]
+			self.soundFile = config["soundFile"]
 			self.openBrowser = config["openBrowser"]
 			self.record = config["record"]
 		else:
 			self.baloon = globalVars.app.config.getboolean("notification", "baloon", True)
 			self.sound = globalVars.app.config.getboolean("notification", "sound", False)
+			self.soundFile = globalVars.app.config["notification"]["soundFile"]
 			self.openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
 			self.record = globalVars.app.config.getboolean("notification", "record", False)
 
@@ -41,10 +44,7 @@ class NotificationHandler:
 			b = wx.adv.NotificationMessage("ULTRA", _("配信開始：%s") %(userName))
 			b.Show()
 		if self.sound:
-			# dummy
-			# とりあえずビープを鳴らすようにしておく
-			import winsound
-			winsound.Beep(800, 100)
+			fxPlayer.playFx(self.soundFile)
 		if self.openBrowser:
 			webbrowser.open_new(link)
 		if self.record:
