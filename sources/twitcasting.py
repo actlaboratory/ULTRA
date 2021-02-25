@@ -122,8 +122,8 @@ class Twitcasting(threading.Thread):
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
-				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"])
-				self.users[userId] = i["broadcaster"]["screen_id"]
+				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"], self.getConfig(userId))
+				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
 				self.saveUserList()
 
 	def getUserIdFromScreenId(self, screenId):
@@ -151,3 +151,23 @@ class Twitcasting(threading.Thread):
 			self.setToken()
 			return True
 		return False
+
+	def getConfig(self, user):
+		"""通知方法の設定を取得。ユーザ専用の設定があればそれを、なければデフォルト値を返す。
+		:param user: ユーザID。self.usersの主キー。
+		:type user: str
+		"""
+		items = (
+			"baloon",
+			"record",
+			"openBrowser",
+			"sound",
+		)
+		config = {}
+		if self.users[user]["specific"]:
+			for i in items:
+				config[i] = self.users[user][i]
+		else:
+			for i in items:
+				config[i] = globalVars.app.config.getboolean("notification", i, False)
+		return config
