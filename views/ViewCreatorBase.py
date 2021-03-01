@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #View CreatorBase
-#Copyright (C) 2019-2020 yamahubuki <itiro.ishino@gmail.com>
+#Copyright (C) 2019-2021 yamahubuki <itiro.ishino@gmail.com>
 #Copyright (C) 2019-2020 Hiroki Fujii <hfujii@hisystron.com>
 
 import ctypes
@@ -38,8 +38,13 @@ GridSizer = -1
 FlexGridSizer = -2
 GridBagSizer = -3
 
+#テーマカラー
 MODE_WHITE=0
 MODE_DARK=1
+
+#テキストの折り返し
+MODE_NOWRAP=0
+MODE_WRAPPING=2
 
 class ViewCreatorBase():
 	def __init__(self,mode,parent,parentSizer=None,orient=wx.HORIZONTAL,space=0,label="",style=0,proportion=0,margin=20):
@@ -63,12 +68,15 @@ class ViewCreatorBase():
 		}
 		
 		#表示モード
-		if mode==MODE_WHITE or mode=="white":
-			self.mode=MODE_WHITE
-		elif mode==MODE_DARK or mode=="dark":
-			self.mode=MODE_DARK
+		if type(mode)==int:
+			self.mode=mode
+		elif type(mode)==str:
+			if mode.lower()=="dark":
+				self.mode=MODE_DARK
+			else:
+				self.mode=MODE_WHITE
 		else:
-			raise ValueError("モードはwhiteかdarkで指定してください。")
+			raise ValueError("モードは整数値またはwhiteかdarkの文字列で指定してください。")
 
 		#初期設定フォント
 		self.font=fontManager.FontManager()
@@ -230,7 +238,7 @@ class ViewCreatorBase():
 			self._setFace(hCheckBox,mode=SKIP_COLOUR)
 			hSizer.Add(hCheckBox)
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScCheckbox(hPanel.GetHandle())
 			self.AddSpace()
 			return hCheckBox
@@ -244,7 +252,7 @@ class ViewCreatorBase():
 				hSizer.Add(hCheckBox)
 				hCheckBoxes.append(hCheckBox)
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScCheckbox(hPanel.GetHandle())
 			self.AddSpace()
 			return hCheckBoxes
@@ -269,7 +277,7 @@ class ViewCreatorBase():
 			hSizer.Add(hCheckBox)
 			self.AddSpace()
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScCheckbox(hPanel.GetHandle())
 			self.AddSpace()
 			return hCheckBox
@@ -289,7 +297,7 @@ class ViewCreatorBase():
 				hSizer.Add(hCheckBox)
 				hCheckBoxes.append(hCheckBox)
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScCheckbox(hPanel.GetHandle())
 			self.AddSpace()
 			return hCheckBoxes
@@ -330,7 +338,7 @@ class ViewCreatorBase():
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
 			self.AddSpace()
 
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScRadioButton(hPanel.GetHandle())
 
 			return hRadio
@@ -350,7 +358,7 @@ class ViewCreatorBase():
 			Add(self.sizer,hPanel,proportion,sizerFlag,margin)
 			self.AddSpace()
 
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				viewHelper.ScRadioButton(hPanel.GetHandle())
 
 			return radios
@@ -403,7 +411,9 @@ class ViewCreatorBase():
 		self.sizer.Layout()
 		return htab
 
-	def inputbox(self,text, event=None, defaultValue="", style=0, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def inputbox(self,text, event=None, defaultValue="", style=wx.BORDER_RAISED, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+		if self.mode&MODE_WRAPPING==MODE_NOWRAP:
+			style|=wx.TE_DONTWRAP
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hTextCtrl=self.winObject["textCtrl"](parent, wx.ID_ANY,size=(x,-1),name=text,value=defaultValue,style=style | wx.BORDER_RAISED, enableTabFocus=enableTabFocus)
@@ -537,14 +547,14 @@ class ViewCreatorBase():
 
 	def _setFace(self,target,mode=NORMAL):
 		if mode==NORMAL:
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				target.SetBackgroundColour("#000000")		#背景色＝黒
 				target.SetForegroundColour("#ffffff")		#文字色＝白
 			else:
 				target.SetBackgroundColour("#ffffff")		#背景色＝白
 				target.SetForegroundColour("#000000")		#文字色＝黒
 		elif (mode==BUTTON_COLOUR):
-			if self.mode==MODE_DARK:
+			if self.mode&MODE_DARK==MODE_DARK:
 				target.SetBackgroundColour("#444444")		#背景色＝灰色
 				target.SetForegroundColour("#ffffff")		#文字色＝白
 		#end skip
@@ -562,6 +572,14 @@ class ViewCreatorBase():
 		assert(isinstance(self.sizer,wx.GridBagSizer))
 		self.sizer.SetItemSpan(wx.GBSpan(row,col))
 
+	#configから読み取った値からmodeの整数値を生成して返す
+	def config2modeValue(color="white",wrapping="off"):
+		if type(color)!=str or type(wrapping)!=str:
+			raise ValueError
+		mode=0
+		if color.lower()=="dark":mode+=MODE_DARK
+		if wrapping.lower()=="on":mode+=MODE_WRAPPING
+		return mode
 
 #parentで指定したsizerの下に、新たなBoxSizerを設置
 def BoxSizer(parent,orient=wx.VERTICAL,flg=0,border=0):

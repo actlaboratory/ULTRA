@@ -7,6 +7,7 @@ import _winxptheme
 
 import constants
 import globalVars
+import views.ViewCreator
 
 from logging import getLogger
 
@@ -18,7 +19,10 @@ class BaseDialog(object):
 		self.log=getLogger("%s.%s" % (constants.LOG_PREFIX,self.identifier))
 		self.app=globalVars.app
 		self.value=None
-		self.viewMode=globalVars.app.config.getstring("view","colorMode","white",("white","dark"))
+		self.viewMode=views.ViewCreator.ViewCreator.config2modeValue(
+			globalVars.app.config.getstring("view","colorMode","white",("white","dark")),
+			globalVars.app.config.getstring("view","textWrapping","off",("on","off"))
+		)
 
 	def Initialize(self, parent,ttl,style=wx.DEFAULT_DIALOG_STYLE | wx.BORDER_DEFAULT):
 		"""タイトルを指定して、ウィンドウを初期化し、親の中央に配置するように設定。"""

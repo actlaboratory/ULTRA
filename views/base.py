@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 #views base class
 #Copyright (C) 2019 Yukio Nozawa <personal@nyanchangames.com>
-#Copyright (C) 2020 yamahubuki <itiro.ishino@gmail.com>
+#Copyright (C) 2020-2021 yamahubuki <itiro.ishino@gmail.com>
 
 import _winxptheme
 import wx
@@ -25,7 +25,10 @@ class BaseView(object):
 		self.identifier=identifier
 		self.log=getLogger("%s.%s" % (constants.LOG_PREFIX,self.identifier))
 		self.shortcutEnable=True
-		self.viewMode=globalVars.app.config.getstring("view","colorMode","white",("white","dark"))
+		self.viewMode=views.ViewCreator.ViewCreator.config2modeValue(
+			globalVars.app.config.getstring("view","colorMode","white",("white","dark")),
+			globalVars.app.config.getstring("view","textWrapping","off",("on","off"))
+		)
 		self.app=globalVars.app
 
 	def Initialize(self, ttl, x, y,px,py,style=wx.DEFAULT_FRAME_STYLE,space=0):

@@ -3,11 +3,11 @@
 
 import wx
 import constants, update
-from views import baseDialog, ViewCreator, mkDialog
+from views import baseDialog, ViewCreator
 
 
 def versionDialog():
-    d = dialog("versionInfoDialog")
+    d = dialog()
     d.Initialize()
     d.Show()
 
