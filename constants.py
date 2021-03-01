@@ -25,6 +25,7 @@ LOG_FILE_NAME="ultra.log"
 SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = "data\\twitcasting\\users.dat"
+FFMPEG_PATH = "bin\\ffmpeg.exe"
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = "data\\twitcasting\\account.bin"
 

@@ -4,6 +4,7 @@ import webbrowser
 import globalVars
 import wx.adv
 from soundPlayer import fxPlayer
+import recorder
 
 class NotificationHandler:
 	def loadSettings(self, config):
@@ -25,7 +26,7 @@ class NotificationHandler:
 			self.openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
 			self.record = globalVars.app.config.getboolean("notification", "record", False)
 
-	def notify(self, userName, displayName, link, stream, config=None):
+	def notify(self, userName, displayName, link, stream, time, config=None):
 		"""新着ライブの通知
 
 		:param userName: 配信者のユーザ名
@@ -36,6 +37,8 @@ class NotificationHandler:
 		:type link: str
 		:param stream: ストリーミングのURL
 		:type stream: str
+		:param time: 放送開始日時のUnixタイムスタンプまたはdatetime.datetimeオブジェクト
+		:type time: int/datetime.datetime
 		:param config: 通知条件の設定。指定しなければデフォルト値が読み込まれる。
 		:type config: dict
 		"""
@@ -48,5 +51,5 @@ class NotificationHandler:
 		if self.openBrowser:
 			webbrowser.open_new(link)
 		if self.record:
-			# 録画処理に渡す
-			pass
+			r = recorder.Recorder(stream, userName, time)
+			r.start()

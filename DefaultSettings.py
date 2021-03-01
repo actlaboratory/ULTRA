@@ -33,6 +33,13 @@ class DefaultSettings:
 		config["twitcasting"] = {
 			"checkLive": False,
 		}
+		config["record"] = {
+			"dir": "output",
+			"createSubDir": True,
+			"subDirName": "%user%",
+			"fileName": "%user%_%year%%month%%day%_%hour%%minute%%second%",
+			"extension": "ts",
+		}
 		return config
 
 initialValues={}

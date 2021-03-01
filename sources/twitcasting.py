@@ -122,7 +122,7 @@ class Twitcasting(threading.Thread):
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
-				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"], self.getConfig(userId))
+				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId))
 				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
 				self.saveUserList()
 
