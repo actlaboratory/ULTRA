@@ -28,9 +28,6 @@ TC_USER_DATA = "data\\twitcasting\\users.dat"
 FFMPEG_PATH = "bin\\ffmpeg.exe"
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = "data\\twitcasting\\account.bin"
-
-
-
 #フォントの設定可能サイズ範囲
 FONT_MIN_SIZE=5
 FONT_MAX_SIZE=35
@@ -56,3 +53,4 @@ TC_PORT = 9339
 
 # その他
 NOT_FOUND = -1
+TC_WSS_URL = "wss://realtime.twitcasting.tv/lives"

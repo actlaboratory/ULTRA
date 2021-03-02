@@ -7,6 +7,8 @@ import globalVars
 import proxyUtil
 import notificationHandler
 from sources import twitcasting
+import threading
+import sys
 
 class Main(AppBase.MainBase):
 	def __init__(self):
@@ -20,6 +22,7 @@ class Main(AppBase.MainBase):
 			self.proxyEnviron.set_environ()
 		else:
 			self.proxyEnviron = None
+		self.installThreadExcepthook()
 		# アップデートを実行
 		if self.config.getboolean("general", "update"):
 			globalVars.update.update(True)
@@ -37,6 +40,22 @@ class Main(AppBase.MainBase):
 	def setGlobalVars(self):
 		globalVars.update = update.update()
 		return
+
+	def installThreadExcepthook(self):
+		_init = threading.Thread.__init__
+
+		def init(self, *args, **kwargs):
+			_init(self, *args, **kwargs)
+			_run = self.run
+
+			def run(*args, **kwargs):
+				try:
+					_run(*args, **kwargs)
+				except:
+					sys.excepthook(*sys.exc_info())
+			self.run = run
+
+		threading.Thread.__init__ = init
 
 	def OnExit(self):
 		#設定の保存やリソースの開放など、終了前に行いたい処理があれば記述できる

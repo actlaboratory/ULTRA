@@ -5,6 +5,8 @@ import os
 import sys
 import simpleDialog
 import traceback
+import winsound
+import requests.exceptions
 
 #カレントディレクトリを設定
 if hasattr(sys,"frozen"): os.chdir(os.path.dirname(sys.executable))
@@ -12,15 +14,27 @@ else: os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 def exchandler(type, exc, tb):
 	msg=traceback.format_exception(type, exc, tb)
-	print("".join(msg))
+	if type == requests.exceptions.ConnectionError:
+		simpleDialog.errorDialog(_("通信に失敗しました。インターネット接続を確認してください。プログラムを終了します。"))
+	elif type == requests.exceptions.ProxyError:
+		simpleDialog.errorDialog(_("通信に失敗しました。プロキシサーバーの設定を確認してください。プログラムを終了します。"))
+	else:
+		if not hasattr(sys, "frozen"):
+			print("".join(msg))
+			winsound.Beep(1000, 1000)
+			try:
+				globalVars.app.say(str(msg[-1]))
+			except:
+				pass
+		else:
+			simpleDialog.winDialog("error", "An error has occured. Contact to the developer for further assistance. Detail:" + "\n".join(msg[-2:]))
 	try:
 		f=open("errorLog.txt", "a")
 		f.writelines(msg)
 		f.close()
 	except:
 		pass
-	simpleDialog.winDialog("error", "An error has occured. Contact to the developer for further assistance. Detail:" + "\n".join(msg[-2:]))
-	sys.exit(1)
+	os._exit(1)
 
 sys.excepthook=exchandler
 
