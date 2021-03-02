@@ -35,7 +35,8 @@ class Recorder(threading.Thread):
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
 		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["fileName"]))
-		path = "%s.%s" %("\\".join(lst), globalVars.app.config["record"]["extension"])
+		ext = globalVars.app.config.getstring("record", "extension", "ts", constants.SUPPORTED_FILETYPE)
+		path = "%s.%s" %("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		return os.path.abspath(path)

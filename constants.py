@@ -54,3 +54,4 @@ TC_PORT = 9339
 # その他
 NOT_FOUND = -1
 TC_WSS_URL = "wss://realtime.twitcasting.tv/lives"
+SUPPORTED_FILETYPE = ("ts", "mp3",)
