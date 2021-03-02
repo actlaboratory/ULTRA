@@ -8,6 +8,7 @@ import datetime
 import threading
 import globalVars
 import os
+from logging import getLogger
 
 class Recorder(threading.Thread):
 	def __init__(self, stream, userName, time):
@@ -25,6 +26,7 @@ class Recorder(threading.Thread):
 		self.stream = stream
 		self.userName = userName
 		self.time = time
+		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
 		super().__init__()
 
 	def getOutputFile(self):
@@ -39,7 +41,16 @@ class Recorder(threading.Thread):
 		path = "%s.%s" %("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
-		return os.path.abspath(path)
+		path = os.path.abspath(path)
+		if os.path.exists(path):
+			count = 1
+			base = os.path.splitext(path)[0]
+			tmp = "%s (%i)%s" %(base, count, ext)
+			while os.path.exists(tmp):
+				count += 1
+				tmp = "%s (%i)%s" %(base, count, ext)
+			path = tmp
+		return path
 
 	def extractVariable(self, fileName):
 		"""変数を使って指定したファイル名から正しい名前を得る
@@ -91,4 +102,5 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		subprocess.run(self.getCommand())
+		subprocess.Popen(self.getCommand())
+		self.log.info("saved: %s" %self.getOutputFile())
