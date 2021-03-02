@@ -31,10 +31,10 @@ class Recorder(threading.Thread):
 		"""設定値を元に、出力ファイルのパスを取得
 		"""		
 		lst = []
-		lst.append(globalVars.app.config["record"]["dir"])
+		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["dir"]))
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
-			lst.append(globalVars.app.config["record"]["subDirName"])
-		lst.append(globalVars.app.config["record"]["fileName"])
+			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
+		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["fileName"]))
 		path = "%s.%s" %("\\".join(lst), globalVars.app.config["record"]["extension"])
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -58,6 +58,25 @@ class Recorder(threading.Thread):
 		for key, value in map.items():
 			fileName = fileName.replace(key, value)
 		return fileName
+
+	def replaceUnusableChar(self, st):
+		"""ファイル名・フォルダ名として使用できない文字があれば使用できる文字に置換する
+
+		:param st: ファイル名・フォルダ名
+		:type st: str
+		"""
+		map = {
+			"\\": "￥",
+			"/": "／",
+			":": "：",
+			"*": "＊",
+			"?": "？",
+			"\"": "”",
+			"<": "＜",
+			">": "＞",
+			"|": "｜",
+		}
+		return st.translate(str.maketrans(map))
 
 	def getCommand(self):
 		"""コマンドラインで実行する文字列を取得
