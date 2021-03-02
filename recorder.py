@@ -45,10 +45,10 @@ class Recorder(threading.Thread):
 		if os.path.exists(path):
 			count = 1
 			base = os.path.splitext(path)[0]
-			tmp = "%s (%i)%s" %(base, count, ext)
+			tmp = "%s (%i).%s" %(base, count, ext)
 			while os.path.exists(tmp):
 				count += 1
-				tmp = "%s (%i)%s" %(base, count, ext)
+				tmp = "%s (%i).%s" %(base, count, ext)
 			path = tmp
 		return path
 
@@ -95,6 +95,8 @@ class Recorder(threading.Thread):
 		"""
 		cmd = [
 			constants.FFMPEG_PATH,
+			"-loglevel",
+			"error",
 			"-i",
 			self.stream,
 			self.getOutputFile(),
@@ -102,5 +104,8 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		subprocess.Popen(self.getCommand())
+		result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.getOutputFile())
+		while len(result.stdout) > 0:
+			self.log.info("FFMPEG returned some errors.")
+			result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
