@@ -21,6 +21,7 @@ from simpleDialog import *
 
 from views import mkDialog
 from views import sample
+from views import urlEdit
 from views import versionDialog
 
 class MainView(BaseView):
@@ -46,11 +47,17 @@ class Menu(BaseMenu):
 
 		#メニューの大項目を作る
 		self.hFileMenu=wx.Menu()
+		self.hTwitcastingMenu=wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
 		#ファイルメニュー
 		self.RegisterMenuCommand(self.hFileMenu,[
 				"FILE_EXAMPLE",
+		])
+
+		# ツイキャスメニューの中身
+		self.RegisterMenuCommand(self.hTwitcastingMenu, [
+			"TC_RECORD_ARCHIVE",
 		])
 
 		#ヘルプメニューの中身
@@ -60,8 +67,9 @@ class Menu(BaseMenu):
 		])
 
 		#メニューバーの生成
-		self.hMenuBar.Append(self.hFileMenu,_("ファイル"))
-		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ"))
+		self.hMenuBar.Append(self.hFileMenu,_("ファイル(&F)"))
+		self.hMenuBar.Append(self.hTwitcastingMenu, "&TwitCasting")
+		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ(&H)"))
 		target.SetMenuBar(self.hMenuBar)
 
 class Events(BaseEvents):
@@ -78,6 +86,13 @@ class Events(BaseEvents):
 			d = sample.Dialog()
 			d.Initialize()
 			r = d.Show()
+
+		# ツイキャス：過去ライブの録画
+		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):
+			d = urlEdit.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_NO: return
+			globalVars.app.tc.downloadArchive(d.getData())
 
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()

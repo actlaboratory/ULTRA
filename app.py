@@ -30,10 +30,10 @@ class Main(AppBase.MainBase):
 		from views import main
 		self.hMainView=main.MainView()
 		self.notificationHandler = notificationHandler.NotificationHandler()
-		tc = twitcasting.Twitcasting()
+		self.tc = twitcasting.Twitcasting()
 		# 「ツイキャスの監視を有効化」の設定値を確認
 		if self.config.getboolean("twitcasting", "checkLive", False):
-			tc.start()
+			self.tc.start()
 		self.hMainView.Show()
 		return True
 

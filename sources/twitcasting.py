@@ -14,6 +14,8 @@ import webbrowser
 import time
 import threading
 import os
+import re
+import recorder
 
 class Twitcasting(threading.Thread):
 	def __init__(self):
@@ -173,3 +175,59 @@ class Twitcasting(threading.Thread):
 				config[i] = globalVars.app.config.getboolean("notification", i, False)
 			config["soundFile"] = globalVars.app.config["notification"]["soundFile"]
 		return config
+
+	def downloadArchive(self, url):
+		"""過去ライブをダウンロード
+
+		:param url: 再生ページのURL
+		:type url: str
+		"""
+		stream = self.getStreamFromUrl(url)
+		movieInfo = self.getMovieInfoFromUrl(url)
+		if None in (stream, movieInfo):
+			return
+		r = recorder.Recorder(stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"])
+		r.start()
+
+	def showNotFoundError(self):
+		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す
+		"""
+		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。"))
+
+	def getStreamFromUrl(self, url):
+		"""再生ページのURLからストリーミングのURLを得る
+
+		:param url: 再生ページのURL
+		:type url: str
+		"""
+		req = requests.get(url)
+		if req.status_code != 200:
+			self.showNotFoundError()
+			return
+		body = req.text
+		try:
+			start = re.search("https:\\\/\\\/dl\d\d\.twitcasting\.tv\\\/tc\.vod\\\/", body).start()
+		except:
+			self.showNotFoundError()
+			return
+		end = body.find("\"", start)
+		stream = body[start:end]
+		stream = stream.replace("\\/", "/")
+		return stream
+
+	def getMovieInfoFromUrl(self, url):
+		"""ライブページのURLからムービー情報を取得
+
+		:param url: 再生ページのURL
+		:type url: str
+		"""
+		if not self.running:
+			if not self.loadToken():
+				self.displayTokenError()
+				return
+		id = url[url.rfind("/") + 1:]
+		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
+		if req.status_code != 200:
+			self.showNotFoundError()
+			return
+		return req.json()
