@@ -24,6 +24,7 @@ class Twitcasting(threading.Thread):
 		super().__init__(daemon=True)
 		self.running = False
 		self.loadUserList()
+		self.tokenInitialized = 0
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -35,7 +36,10 @@ class Twitcasting(threading.Thread):
 			return False
 		self.token = token
 		self.setHeader()
-		return self.verifyCredentials()
+		result = self.verifyCredentials()
+		if result:
+			self.tokenInitialized = 1
+		return result
 
 	def verifyCredentials(self):
 		"""トークンが正しく機能しているかどうかを確認する
@@ -109,9 +113,10 @@ class Twitcasting(threading.Thread):
 	def run(self):
 		"""新着ライブの監視を開始
 		"""
-		if not self.loadToken():
-			self.displayTokenError()
-			return
+		if self.tokenInitialized == 0:
+			if not self.loadToken():
+				self.showTokenError()
+				return
 		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.received)
 		self.socket.run_forever()
 		self.running = True
@@ -135,8 +140,15 @@ class Twitcasting(threading.Thread):
 		:type screenId: str
 		"""
 		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %screenId, headers=self.header)
-		if req.status_code == 404:
-			return constants.NOT_FOUND
+		if req.status_code != 200:
+			if req.status_code == 1000:
+				self.showTokenError()
+				return
+			elif req.status_code == 404:
+				return constants.NOT_FOUND
+			else:
+				self.showError(req.status_code)
+				return
 		return req.json()["user"]["id"]
 
 	def exit(self):
@@ -144,15 +156,6 @@ class Twitcasting(threading.Thread):
 		"""
 		if hasattr(self, "socket"):
 			self.socket.close()
-
-	def displayTokenError(self):
-		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
-		"""
-		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("設定されているアクセストークンが不正です。ブラウザを起動し、再度認証作業を行いますか？"))
-		if d == wx.ID_YES:
-			self.setToken()
-			return True
-		return False
 
 	def getConfig(self, user):
 		"""通知方法の設定を取得。ユーザ専用の設定があればそれを、なければデフォルト値を返す。
@@ -183,16 +186,13 @@ class Twitcasting(threading.Thread):
 		:type url: str
 		"""
 		stream = self.getStreamFromUrl(url)
+		if stream == None:
+			return
 		movieInfo = self.getMovieInfoFromUrl(url)
-		if None in (stream, movieInfo):
+		if movieInfo == None:
 			return
 		r = recorder.Recorder(stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"])
 		r.start()
-
-	def showNotFoundError(self):
-		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す
-		"""
-		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。"))
 
 	def getStreamFromUrl(self, url):
 		"""再生ページのURLからストリーミングのURLを得る
@@ -200,8 +200,12 @@ class Twitcasting(threading.Thread):
 		:param url: 再生ページのURL
 		:type url: str
 		"""
-		req = requests.get(url)
-		if req.status_code != 200:
+		try:
+			req = requests.get(url)
+		except:
+			self.showNotFoundError()
+			return
+		if req.status_code == 404:
 			self.showNotFoundError()
 			return
 		body = req.text
@@ -221,13 +225,61 @@ class Twitcasting(threading.Thread):
 		:param url: 再生ページのURL
 		:type url: str
 		"""
-		if not self.running:
+		if self.tokenInitialized == 0:
 			if not self.loadToken():
-				self.displayTokenError()
+				self.showTokenError()
 				return
 		id = url[url.rfind("/") + 1:]
 		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
 		if req.status_code != 200:
-			self.showNotFoundError()
-			return
+			if req.status_code == 404:
+				self.showNotFoundError()
+				return
+			elif req.status_code == 1000:
+				self.showTokenError()
+				return
+			else:
+				self.showError(req.status_code)
+				return
 		return req.json()
+
+	# 各種エラーを表示する
+	def showTokenError(self):
+		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
+		"""
+		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("設定されているアクセストークンが不正です。ブラウザを起動し、再度認証作業を行いますか？"))
+		if d == wx.ID_YES:
+			self.setToken()
+			return True
+		return False
+
+	def showNotFoundError(self):
+		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す
+		"""
+		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。"))
+
+	def showError(self, code):
+		"""ツイキャスAPIが返すエラーコードに応じてメッセージを出す。Invalid TokenについてはshowTokenError()を使用することを想定しているため未実装。
+
+		:param code: エラーコード
+		:type code: int
+		"""
+		if code == 2000:
+			simpleDialog.errorDialog(_("ツイキャスAPIの実行回数が上限に達しました。しばらくたってから、再度実行してください。"))
+		elif code == 500:
+			simpleDialog.errorDialog(_("ツイキャスAPIが500エラーを返しました。しばらく待ってから、再度接続してください。"))
+		elif code == 2001:
+			simpleDialog.errorDialog(_("現在ツイキャスとの連携機能を使用できません。開発者に連絡してください。"))
+		else:
+			detail = {
+				1001: "Validation Error",
+				1002: "Invalid WebHook URL",
+				2002: "Protected",
+				2003: "Duplicate",
+				2004: "Too Many Comments",
+				2005: "Out Of Scope",
+				2006: "Email Unverified",
+				400: "Bad Request",
+				403: "Forbidden",
+			}
+			simpleDialog.errorDialog(_("ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s") %(detail[code]))
