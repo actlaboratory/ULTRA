@@ -50,6 +50,7 @@ class Recorder(threading.Thread):
 				count += 1
 				tmp = "%s (%i).%s" %(base, count, ext)
 			path = tmp
+		self.path = path
 		return path
 
 	def extractVariable(self, fileName):
@@ -105,7 +106,8 @@ class Recorder(threading.Thread):
 
 	def run(self):
 		result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-		self.log.info("saved: %s" %self.getOutputFile())
+		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.")
 			result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+			self.log.info("saved: %s" %self.path)
