@@ -12,19 +12,30 @@ import views.auth
 import simpleDialog
 import webbrowser
 import time
-import threading
 import os
 import re
 import recorder
+from sources.base import SourceBase
+from logging import getLogger
 
-class Twitcasting(threading.Thread):
+class Twitcasting(SourceBase):
 	def __init__(self):
-		"""コンストラクタ
+		super().__init__()
+		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
+		self.initialized = 0
+
+	def initialize(self):
+		"""アクセストークンの読み込み
 		"""
-		super().__init__(daemon=True)
-		self.running = False
-		self.loadUserList()
-		self.tokenInitialized = 0
+		if not self.loadToken():
+			self.log.info("Failed to load access token.")
+			if not self.showTokenError():
+				self.log.debug("User chose no from confirmation dialog.")
+				return False
+		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.received)
+		self.log.info("WSS module loaded.")
+		self.initialized = 1
+		return True
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -36,10 +47,7 @@ class Twitcasting(threading.Thread):
 			return False
 		self.token = token
 		self.setHeader()
-		result = self.verifyCredentials()
-		if result:
-			self.tokenInitialized = 1
-		return result
+		return self.verifyCredentials()
 
 	def verifyCredentials(self):
 		"""トークンが正しく機能しているかどうかを確認する
@@ -113,13 +121,9 @@ class Twitcasting(threading.Thread):
 	def run(self):
 		"""新着ライブの監視を開始
 		"""
-		if self.tokenInitialized == 0:
-			if not self.loadToken():
-				self.showTokenError()
-				return
-		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.received)
+		if self.initialized == 0 and not self.initialize():
+			return
 		self.socket.run_forever()
-		self.running = True
 
 	def received(self, text):
 		"""通知受信時
@@ -129,7 +133,7 @@ class Twitcasting(threading.Thread):
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
-				globalVars.app.notificationHandler.notify(i["broadcaster"]["screen_id"], i["broadcaster"]["name"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId))
+				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
 				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
 				self.saveUserList()
 
@@ -191,7 +195,7 @@ class Twitcasting(threading.Thread):
 		movieInfo = self.getMovieInfoFromUrl(url)
 		if movieInfo == None:
 			return
-		r = recorder.Recorder(stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"])
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"])
 		r.start()
 
 	def getStreamFromUrl(self, url):
@@ -225,10 +229,8 @@ class Twitcasting(threading.Thread):
 		:param url: 再生ページのURL
 		:type url: str
 		"""
-		if self.tokenInitialized == 0:
-			if not self.loadToken():
-				self.showTokenError()
-				return
+		if self.initialized == 0 and not self.initialize():
+			return
 		id = url[url.rfind("/") + 1:]
 		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
 		if req.status_code != 200:
@@ -283,3 +285,6 @@ class Twitcasting(threading.Thread):
 				403: "Forbidden",
 			}
 			simpleDialog.errorDialog(_("ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s") %(detail[code]))
+
+	def onRecord(self, path, movieId):
+		pass

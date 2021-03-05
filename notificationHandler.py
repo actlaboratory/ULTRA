@@ -26,13 +26,13 @@ class NotificationHandler:
 			self.openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
 			self.record = globalVars.app.config.getboolean("notification", "record", False)
 
-	def notify(self, userName, displayName, link, stream, time, config=None):
+	def notify(self, source, userName, link, stream, time, config=None, movie=""):
 		"""新着ライブの通知
 
+		:param source: SourceBaseクラスを継承したオブジェクト
+		:param source: source
 		:param userName: 配信者のユーザ名
 		:type userName: str
-		:param displayName: 配信者の表示名
-		:type displayName: str
 		:param link: 配信ページへのリンク
 		:type link: str
 		:param stream: ストリーミングのURL
@@ -41,6 +41,8 @@ class NotificationHandler:
 		:type time: int/datetime.datetime
 		:param config: 通知条件の設定。指定しなければデフォルト値が読み込まれる。
 		:type config: dict
+		:param movie: 通知対象の動画を識別するための文字列
+		:type movie: str
 		"""
 		self.loadSettings(config)
 		if self.baloon:
@@ -51,5 +53,5 @@ class NotificationHandler:
 		if self.openBrowser:
 			webbrowser.open_new(link)
 		if self.record:
-			r = recorder.Recorder(stream, userName, time)
+			r = recorder.Recorder(source, stream, userName, time, movie)
 			r.start()

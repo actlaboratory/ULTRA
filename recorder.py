@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # ストリーミング録画モジュール
 
-import views.recording
 import constants
 import subprocess
 import datetime
@@ -11,15 +10,19 @@ import os
 from logging import getLogger
 
 class Recorder(threading.Thread):
-	def __init__(self, stream, userName, time):
+	def __init__(self, source, stream, userName, time, movie=""):
 		"""コンストラクタ
 
+		:param source: SourceBaseクラスを継承したオブジェクト。
+		:type source: Source
 		:param stream: ストリーミングURL
 		:type stream: str
 		:param userName: 配信者のユーザ名
 		:type user: str
 		:param time: 放送開始日時のUnixタイムスタンプまたはdatetime.datetimeオブジェクト
 		:type time: int/datetime.datetime
+		:param movie: 録画対象の動画を識別できる文字列
+		:type movie: str
 		"""        
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
@@ -27,6 +30,8 @@ class Recorder(threading.Thread):
 		self.userName = userName
 		self.time = time
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
+		self.source = source
+		self.movie = movie
 		super().__init__()
 
 	def getOutputFile(self):
@@ -105,9 +110,13 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+		cmd = self.getCommand()
+		self.source.onRecord(self.path, self.movie)
+		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.")
-			result = subprocess.run(self.getCommand(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+			cmd = self.getCommand()
+			self.source.onRecord(self.path, self.movie)
+			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 			self.log.info("saved: %s" %self.path)
