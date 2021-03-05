@@ -17,6 +17,9 @@ import re
 import recorder
 from sources.base import SourceBase
 from logging import getLogger
+import threading
+import csv
+import datetime
 
 class Twitcasting(SourceBase):
 	def __init__(self):
@@ -287,4 +290,107 @@ class Twitcasting(SourceBase):
 			simpleDialog.errorDialog(_("ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s") %(detail[code]))
 
 	def onRecord(self, path, movieId):
-		pass
+		c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
+		c.start()
+
+class CommentGetter(threading.Thread):
+	"""コメントの取得と保存
+	"""
+	def __init__(self, tc, path, movie):
+		"""コンストラクタ
+
+		:param tc: TwitCastingオブジェクト
+		:type tc: TwitCasting
+		:param path: コメントの保存先
+		:type path: str
+		:param movie: movie ID
+		:type movie: str
+		"""
+		super().__init__()
+		self.path = path
+		self.comments = []
+		self.lastCommentId = ""
+		self.movie = movie
+		self.tc = tc
+
+	def run(self):
+		if not self.getAllComments():
+			return
+		self.saveComment()
+		while self.isLive():
+			time.sleep(10)
+			tmp = self.getComments(slice_id=self.lastCommentId)
+			self.fixCommentDuplication(tmp, self.comments)
+			self.comments = tmp + self.comments
+			if len(self.comments) > 0:
+				self.lastCommentId = self.comments[0]["id"]
+			self.saveComment()
+
+	def saveComment(self):
+		"""コメントをファイルに保存する
+		"""
+		result = []
+		for i in self.comments:
+			timestamp = datetime.datetime.fromtimestamp(i["created"])
+			timestamp = timestamp.strftime("%Y/%m/%d %H:%M:%S")
+			result.append([
+				i["from_user"]["name"],
+				i["message"],
+				timestamp,
+			])
+		result.reverse()
+		with open(self.path, "w") as f:
+			writer = csv.writer(f, delimiter="\t")
+			writer.writerows(result)
+
+	def getAllComments(self):
+		"""現時点で届いているコメントを全て取得する。
+		"""
+		all = []
+		tmp = self.getComments()
+		if tmp == None:
+			return False
+		self.fixCommentDuplication(tmp, all)
+		while len(tmp) > 0:
+			all = all + tmp
+			tmp = self.getComments(offset=len(all))
+			if tmp == None:
+				break
+			self.fixCommentDuplication(tmp, all)
+		self.comments = all
+		if len(self.comments) > 0:
+			self.lastCommentId = self.comments[0]["id"]
+		return True
+
+	def fixCommentDuplication(self, new, base):
+		"""コメントの重複回避
+		"""
+		rm = []
+		for i in range(len(new)):
+			if new[i] in base:
+				rm.append(i)
+		rm.reverse()
+		for i in rm:
+			del new[i]
+
+	def getComments(self, offset=0, limit=50, slice_id=""):
+		"""ツイキャスAPIにアクセスしてコメントを取得する。各パラメータの使用方法はツイキャスAPIに準ずる。
+		"""
+		param = {
+			"offset": offset,
+			"limit": limit,
+			"slice_id": slice_id,
+		}
+		result = requests.get("https://apiv2.twitcasting.tv/movies/%s/comments" %self.movie, param, headers=self.tc.header)
+		if result.status_code != 200:
+			return
+		dict = result.json()
+		return dict["comments"]
+
+	def isLive(self):
+		"""配信中かどうかを調べる
+		"""
+		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
+		if req.status_code != 200:
+			return False
+		return req.json()["movie"]["is_live"]
