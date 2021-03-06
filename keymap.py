@@ -10,8 +10,12 @@ class KeymapHandler(keymapHandlerBase.KeymapHandlerBase):
 		super().__init__(dict, filter, permitConfrict=permitConfrict)
 
 
-#•¡”ƒƒjƒ…[‚É‘Î‚·‚éƒL[‚ÌŠ„‚è“–‚Ä‚Ìd•¡‚ğ‹–‚·‚©”Û‚©‚ğ’²‚×‚é
-#items‚É‚Í’²‚×‚½‚¢AcceleratorEntry‚ÌƒŠƒXƒg‚ğ“ü‚ê‚é
+str2key = keymapHandlerBase.str2key
+def makeEntry(*pArgs, **kArgs):
+	return keymapHandlerBase.makeEntry(*pArgs,*kArgs)
+
+#è¤‡æ•°ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã«å¯¾ã™ã‚‹ã‚­ãƒ¼ã®å‰²ã‚Šå½“ã¦ã®é‡è¤‡ã‚’è¨±ã™ã‹å¦ã‹ã‚’èª¿ã¹ã‚‹
+#itemsã«ã¯èª¿ã¹ãŸã„AcceleratorEntryã®ãƒªã‚¹ãƒˆã‚’å…¥ã‚Œã‚‹
 def permitConfrict(items,log):
 	return False
 
