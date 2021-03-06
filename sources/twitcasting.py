@@ -148,13 +148,13 @@ class Twitcasting(SourceBase):
 		"""
 		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %screenId, headers=self.header)
 		if req.status_code != 200:
-			if req.status_code == 1000:
+			if req.json()["error"]["code"] == 1000:
 				self.showTokenError()
 				return
 			elif req.status_code == 404:
 				return constants.NOT_FOUND
 			else:
-				self.showError(req.status_code)
+				self.showError(req.json()["error"]["code"])
 				return
 		return req.json()["user"]["id"]
 
@@ -240,11 +240,11 @@ class Twitcasting(SourceBase):
 			if req.status_code == 404:
 				self.showNotFoundError()
 				return
-			elif req.status_code == 1000:
+			elif req.json()["error"]["code"] == 1000:
 				self.showTokenError()
 				return
 			else:
-				self.showError(req.status_code)
+				self.showError(req.json()["error"]["code"])
 				return
 		return req.json()
 
@@ -348,14 +348,10 @@ class CommentGetter(threading.Thread):
 		"""
 		all = []
 		tmp = self.getComments()
-		if tmp == None:
-			return False
 		self.fixCommentDuplication(tmp, all)
 		while len(tmp) > 0:
 			all = all + tmp
 			tmp = self.getComments(offset=len(all))
-			if tmp == None:
-				break
 			self.fixCommentDuplication(tmp, all)
 		self.comments = all
 		if len(self.comments) > 0:
@@ -383,7 +379,11 @@ class CommentGetter(threading.Thread):
 		}
 		result = requests.get("https://apiv2.twitcasting.tv/movies/%s/comments" %self.movie, param, headers=self.tc.header)
 		if result.status_code != 200:
-			return
+			if result.json()["error"]["code"] == 1000:
+				self.tc.showTokenError()
+			else:
+				self.tc.showError(result.json()["error"]["code"])
+			return []
 		dict = result.json()
 		return dict["comments"]
 
@@ -392,5 +392,9 @@ class CommentGetter(threading.Thread):
 		"""
 		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
 		if req.status_code != 200:
+			if req.json()["error"]["code"] == 1000:
+				return self.tc.showTokenError()
+			else:
+				self.tc.showError(req.json()["error"]["code"])
 			return False
 		return req.json()["movie"]["is_live"]
