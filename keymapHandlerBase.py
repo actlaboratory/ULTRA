@@ -626,7 +626,7 @@ class KeyFilterBase:
 			フィルタを一般的な設定に構成する。
 
 			supportInputCharには、そのウィンドウでの文字入力の可否を設定する。
-			ここでTrueを設定すると、Home,BS,Enterなど文字入力と競合する修飾キーを単体でショートカットとして利用可能になる
+			ここでFalseを設定すると、Home,BS,Enterなど文字入力と競合する修飾キーを単体でショートカットとして利用可能になる
 
 			isSystemには、システム内部で設定する場合にはTrue、ユーザが独自で設定する場合にはFalseを指定する。
 			ユーザが独自にキーをカスタマイズする場合に、指定することが望ましくないキーの組み合わせをブロックする。
@@ -667,11 +667,12 @@ class KeyFilterBase:
 			self.functionKey|=str2StandaloneKey.keys()
 		else:
 			self.AddDisablePattern("APPLICATIONS")				#コンテキストメニューの表示
-			self.AddDisablePattern("SHIFT+F10")				#コンテキストメニューの表示
+			self.AddDisablePattern("SHIFT+F10")					#コンテキストメニューの表示
 			self.AddDisablePattern("F10")						#ALTキーの代わり
 			self.AddDisablePattern("ESCAPE")					#操作の取り消し
 			self.AddDisablePattern("ALT+F4")					#アプリケーションの終了
-			self.AddDisablePattern("ALT+SPACE")				#リストビュー等で全ての選択を解除
+			self.AddDisablePattern("SPACE")						#ボタンの押下
+			self.AddDisablePattern("ALT+SPACE")					#リストビュー等で全ての選択を解除
 			self.enableKey|=str2StandaloneKey.keys()
 
 		if arrowCharKey:
