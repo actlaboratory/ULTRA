@@ -423,7 +423,7 @@ class CommentGetter(threading.Thread):
 		try:
 			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
 		except requests.RequestException:
-			return True
+			return False
 		if req.status_code != 200:
 			if req.json()["error"]["code"] == 1000:
 				return self.tc.showTokenError()
