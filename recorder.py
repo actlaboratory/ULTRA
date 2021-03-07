@@ -33,6 +33,7 @@ class Recorder(threading.Thread):
 		self.source = source
 		self.movie = movie
 		super().__init__()
+		self.log.info("stream URL: %s" %self.stream)
 
 	def getOutputFile(self):
 		"""設定値を元に、出力ファイルのパスを取得

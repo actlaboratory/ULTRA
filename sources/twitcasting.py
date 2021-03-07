@@ -36,10 +36,38 @@ class Twitcasting(SourceBase):
 			if not self.showTokenError():
 				self.log.debug("User chose no from confirmation dialog.")
 				return False
-		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.onMessage, on_open=self.onOpen, on_close=self.onClose)
-		self.log.info("WSS module loaded.")
+		self.initSocket()
 		self.initialized = 1
 		return True
+
+	def initSocket(self):
+		"""ソケット通信を準備
+		"""
+		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.onMessage, on_error=self.onError, on_open=self.onOpen, on_close=self.onClose)
+		self.log.info("WSS module loaded.")
+
+	def onMessage(self, text):
+		"""通知受信時
+		"""
+		self.loadUserList()
+		obj = json.loads(text)
+		if "movies" not in obj.keys():
+			return
+		for i in obj["movies"]:
+			userId = i["broadcaster"]["id"]
+			if userId in self.users.keys():
+				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
+				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
+				self.saveUserList()
+
+	def onError(self, error):
+		"""ソケット通信中にエラーが起きた
+		"""
+		time.sleep(3)
+		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
+			self.socket.close()
+			self.initSocket()
+			self.socket.run_forever()
 
 	def onOpen(self):
 		"""ソケット通信が始まった
@@ -138,18 +166,6 @@ class Twitcasting(SourceBase):
 		if self.initialized == 0 and not self.initialize():
 			return
 		self.socket.run_forever()
-
-	def onMessage(self, text):
-		"""通知受信時
-		"""
-		self.loadUserList()
-		obj = json.loads(text)
-		for i in obj["movies"]:
-			userId = i["broadcaster"]["id"]
-			if userId in self.users.keys():
-				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
-				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
-				self.saveUserList()
 
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
@@ -388,7 +404,10 @@ class CommentGetter(threading.Thread):
 			"limit": limit,
 			"slice_id": slice_id,
 		}
-		result = requests.get("https://apiv2.twitcasting.tv/movies/%s/comments" %self.movie, param, headers=self.tc.header)
+		try:
+			result = requests.get("https://apiv2.twitcasting.tv/movies/%s/comments" %self.movie, param, headers=self.tc.header)
+		except requests.RequestException:
+			return []
 		if result.status_code != 200:
 			if result.json()["error"]["code"] == 1000:
 				self.tc.showTokenError()
@@ -401,7 +420,10 @@ class CommentGetter(threading.Thread):
 	def isLive(self):
 		"""配信中かどうかを調べる
 		"""
-		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
+		except requests.RequestException:
+			return True
 		if req.status_code != 200:
 			if req.json()["error"]["code"] == 1000:
 				return self.tc.showTokenError()
