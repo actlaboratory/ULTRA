@@ -26,6 +26,7 @@ class Twitcasting(SourceBase):
 		super().__init__()
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
+		self.running = False
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -35,10 +36,20 @@ class Twitcasting(SourceBase):
 			if not self.showTokenError():
 				self.log.debug("User chose no from confirmation dialog.")
 				return False
-		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.received)
+		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.onMessage, on_open=self.onOpen, on_close=self.onClose)
 		self.log.info("WSS module loaded.")
 		self.initialized = 1
 		return True
+
+	def onOpen(self):
+		"""ソケット通信が始まった
+		"""
+		self.running = True
+
+	def onClose(self):
+		"""ソケット通信が切断された
+		"""
+		self.running = False
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -128,7 +139,7 @@ class Twitcasting(SourceBase):
 			return
 		self.socket.run_forever()
 
-	def received(self, text):
+	def onMessage(self, text):
 		"""通知受信時
 		"""
 		self.loadUserList()
