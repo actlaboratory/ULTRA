@@ -24,7 +24,7 @@ class NotificationHandler:
 			self.sound = globalVars.app.config.getboolean("notification", "sound", False)
 			self.soundFile = globalVars.app.config["notification"]["soundFile"]
 			self.openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
-			self.record = globalVars.app.config.getboolean("notification", "record", False)
+			self.record = globalVars.app.config.getboolean("notification", "record", True)
 
 	def notify(self, source, userName, link, stream, time, config=None, movie=""):
 		"""新着ライブの通知

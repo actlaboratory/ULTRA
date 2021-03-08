@@ -20,6 +20,7 @@ from logging import getLogger
 import threading
 import csv
 import datetime
+import sys
 
 class Twitcasting(SourceBase):
 	def __init__(self):
@@ -27,6 +28,7 @@ class Twitcasting(SourceBase):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
 		self.running = False
+		websocket.enableTrace(not hasattr(sys, "frozen"))
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -58,7 +60,13 @@ class Twitcasting(SourceBase):
 			if userId in self.users.keys():
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
 				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
-				self.saveUserList()
+		rm = []
+		for i in self.users:
+			if "remove" in self.users[i].keys() and (time.time() - self.users[i]["remove"]) >= 0:
+				rm.append(i)
+		for i in rm:
+			self.users.pop(i)
+		self.saveUserList()
 
 	def onError(self, error):
 		"""ソケット通信中にエラーが起きた
@@ -320,6 +328,55 @@ class Twitcasting(SourceBase):
 		if globalVars.app.config.getboolean("twitcasting", "saveComments", False):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
+
+	def addUser(self, userName, temporary=False, specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None):
+		"""ユーザーを追加する。
+
+		:param userName: ユーザ名
+		:type userName: str
+		:param temporary: 一定時間経過後に登録を削除するかどうか
+		:type temporary: bool
+		:param specific: 専用の通知条件を設定するかどうか
+		:type specific: bool
+		:param baloon: バルーン通知の有無。Noneにすると規定値を読み込む。
+		:type baloon: bool
+		:param record: 録画するかどうか。Noneにすると規定値を読み込む。
+		:type record: bool
+		:param openBrowser: ブラウザでライブを開くかどうか。Noneにすると規定値を読み込む。
+		:type openBrowser: bool
+		:param sound: サウンド再生の有無。Noneにすると規定値を読み込む。
+		:type sound: bool
+		:param soundFile: 再生するサウンドファイル。Noneにすると規定値を読み込む。
+		:type soundFile: None
+		"""
+		self.loadUserList()
+		id = self.getUserIdFromScreenId(userName)
+		if id == constants.NOT_FOUND:
+			simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
+			return
+		if baloon == None:
+			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
+		if record == None:
+			record = globalVars.app.config.getboolean("notification", "record", True)
+		if openBrowser == None:
+			openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
+		if sound == None:
+			sound = globalVars.app.config.getboolean("notification", "sound", False)
+		if soundFile == None:
+			soundFile = globalVars.app.config["notification"]["soundFile"]
+		ret = {
+			"user": userName,
+			"specific": specific,
+			"baloon": baloon,
+			"record": record,
+			"openBrowser": openBrowser,
+			"sound": sound,
+			"soundFile": soundFile,
+		}
+		if temporary:
+			ret["remove"] = time.time() + 14400
+		self.users[id] = ret
+		self.saveUserList()
 
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存
