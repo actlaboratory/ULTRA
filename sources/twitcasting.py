@@ -340,12 +340,15 @@ class CommentGetter(threading.Thread):
 		self.lastCommentId = ""
 		self.movie = movie
 		self.tc = tc
+		self.hasError = 0
 
 	def run(self):
 		if not self.getAllComments():
 			return
 		self.saveComment()
 		while self.isLive():
+			if self.hasError == 1:
+				break
 			time.sleep(10)
 			tmp = self.getComments(slice_id=self.lastCommentId)
 			self.fixCommentDuplication(tmp, self.comments)
@@ -376,10 +379,14 @@ class CommentGetter(threading.Thread):
 		"""
 		all = []
 		tmp = self.getComments()
+		if self.hasError == 1:
+			return False
 		self.fixCommentDuplication(tmp, all)
 		while len(tmp) > 0:
 			all = all + tmp
 			tmp = self.getComments(offset=len(all))
+			if self.hasError == 1:
+				return False
 			self.fixCommentDuplication(tmp, all)
 		self.comments = all
 		if len(self.comments) > 0:
@@ -408,10 +415,13 @@ class CommentGetter(threading.Thread):
 		try:
 			result = requests.get("https://apiv2.twitcasting.tv/movies/%s/comments" %self.movie, param, headers=self.tc.header)
 		except requests.RequestException:
+			self.hasError = 1
 			return []
 		if result.status_code != 200:
 			if result.json()["error"]["code"] == 1000:
 				self.tc.showTokenError()
+			elif result.status_code == 404:
+				return []
 			else:
 				self.tc.showError(result.json()["error"]["code"])
 			return []
@@ -424,10 +434,13 @@ class CommentGetter(threading.Thread):
 		try:
 			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %self.movie, headers=self.tc.header)
 		except requests.RequestException:
+			self.hasError = 1
 			return False
 		if req.status_code != 200:
 			if req.json()["error"]["code"] == 1000:
 				return self.tc.showTokenError()
+			elif req.status_code == 404:
+				return False
 			else:
 				self.tc.showError(req.json()["error"]["code"])
 			return False
