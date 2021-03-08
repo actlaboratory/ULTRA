@@ -317,8 +317,9 @@ class Twitcasting(SourceBase):
 			simpleDialog.errorDialog(_("ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s") %(detail[code]))
 
 	def onRecord(self, path, movieId):
-		c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
-		c.start()
+		if globalVars.app.config.getboolean("twitcasting", "saveComments", False):
+			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
+			c.start()
 
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存

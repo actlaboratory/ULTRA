@@ -24,14 +24,15 @@ class DefaultSettings:
 			"sizeY": "600",
 		}
 		config["notification"] = {
-			"baloon": False,
-			"record": False,
+			"baloon": True,
+			"record": True,
 			"openBrowser": False,
 			"sound": False,
 			"soundFile": "",
 		}
 		config["twitcasting"] = {
 			"checkLive": False,
+			"saveComments": False,
 		}
 		config["record"] = {
 			"dir": "output",
