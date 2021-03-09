@@ -48,6 +48,7 @@ class NotificationHandler:
 		if self.baloon:
 			b = wx.adv.NotificationMessage("ULTRA", _("配信開始：%s") %(userName))
 			b.Show()
+			b.Close()
 		if self.sound:
 			fxPlayer.playFx(self.soundFile)
 		if self.openBrowser:
