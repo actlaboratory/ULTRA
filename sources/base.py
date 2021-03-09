@@ -15,7 +15,7 @@ class SourceBase(threading.Thread):
 	def initialize(self):
 		"""アカウントの認証など、準備として必要な作業を行う。
 		"""
-		pass
+		return True
 
 	def run(self):
 		"""スレッドを使う場合、ライブの監視などメインの作業をここに書く。
