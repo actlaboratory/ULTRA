@@ -139,6 +139,7 @@ class Twitcasting(SourceBase):
 		token = manager.getToken()["access_token"]
 		with open(constants.AC_TWITCASTING, "wb") as f:
 			f.write(base64.b64encode(token.encode()))
+		simpleDialog.dialog(_("処理結果"), _("認証が完了しました。"))
 		self.loadToken()
 
 	def setHeader(self):
