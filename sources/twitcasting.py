@@ -175,23 +175,53 @@ class Twitcasting(SourceBase):
 			return
 		self.socket.run_forever()
 
+	def getUserInfo(self, user):
+		"""ユーザ情報を取得
+
+		:param user: ユーザ名またはユーザID
+		:type user: str
+		"""
+		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %user, headers=self.header)
+		if req.status_code != 200:
+			if req.json()["error"]["code"] == 1000:
+				self.showTokenError()
+				return
+			elif req.status_code == 404:
+				simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
+				return
+			else:
+				self.showError(req.json()["error"]["code"])
+				return
+		return req.json()
+
+	def getCurrentLive(self, user):
+		"""ユーザが現在配信中のライブ情報を取得
+
+		:param user: ユーザ名またはユーザID
+		:type user: str
+		"""
+		req = requests.get("https://apiv2.twitcasting.tv/users/%s/current_live" %user, headers=self.header)
+		if req.status_code != 200:
+			if req.json()["error"]["code"] == 1000:
+				self.showTokenError()
+				return
+			elif req.status_code == 404:
+				return
+			else:
+				self.showError(req.json()["error"]["code"])
+				return
+		return req.json()
+
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
 
 		:param screenId: ユーザ名
 		:type screenId: str
 		"""
-		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %screenId, headers=self.header)
-		if req.status_code != 200:
-			if req.json()["error"]["code"] == 1000:
-				self.showTokenError()
-				return
-			elif req.status_code == 404:
-				return constants.NOT_FOUND
-			else:
-				self.showError(req.json()["error"]["code"])
-				return
-		return req.json()["user"]["id"]
+		result = self.getUserInfo(screenId)
+		if result == None:
+			return constants.NOT_FOUND
+		return result["user"]["id"]
 
 	def exit(self):
 		"""新着ライブの監視を終了する
@@ -329,7 +359,7 @@ class Twitcasting(SourceBase):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
 
-	def addUser(self, userName, temporary=False, specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None):
+	def addUser(self, userName, temporary=False, specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None, id=None):
 		"""ユーザーを追加する。
 
 		:param userName: ユーザ名
@@ -348,12 +378,14 @@ class Twitcasting(SourceBase):
 		:type sound: bool
 		:param soundFile: 再生するサウンドファイル。Noneにすると規定値を読み込む。
 		:type soundFile: None
+		:param id: ユーザのID。特別な事情がない限り、このパラメータは指定しなくて良い。
+		:type id: str
 		"""
 		self.loadUserList()
-		id = self.getUserIdFromScreenId(userName)
-		if id == constants.NOT_FOUND:
-			simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
-			return
+		if id == None:
+			id = self.getUserIdFromScreenId(userName)
+			if id == constants.NOT_FOUND:
+				return
 		if baloon == None:
 			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
 		if record == None:
@@ -377,6 +409,23 @@ class Twitcasting(SourceBase):
 			ret["remove"] = time.time() + 14400
 		self.users[id] = ret
 		self.saveUserList()
+
+	def record(self, userName):
+		"""指定したユーザのライブを録画。
+
+		:param userName: ユーザ名
+		:type userName: str
+		"""
+		userInfo = self.getUserInfo(userName)
+		if userInfo == None:
+			return
+		self.addUser(userInfo["user"]["screen_id"], True, True, False, True, False, False, "", userInfo["user"]["id"])
+		if userInfo["user"]["is_live"]:
+			movie = self.getCurrentLive(userName)
+			if movie == None:
+				return
+			r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
+			r.start()
 
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存

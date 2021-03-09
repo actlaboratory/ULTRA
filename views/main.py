@@ -22,6 +22,7 @@ from simpleDialog import *
 from views import mkDialog
 from views import sample
 from views import urlEdit
+from views import userEdit
 from views import versionDialog
 
 class MainView(BaseView):
@@ -60,7 +61,7 @@ class Menu(BaseMenu):
 
 		# ツイキャスメニューの中身
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
-			"TC_RECORD_ARCHIVE",
+			"TC_RECORD_ARCHIVE", "TC_RECORD_USER"
 		])
 
 		#ヘルプメニューの中身
@@ -94,8 +95,15 @@ class Events(BaseEvents):
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):
 			d = urlEdit.Dialog()
 			d.Initialize()
-			if d.Show() == wx.ID_NO: return
+			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.downloadArchive(d.getData())
+
+		# ツイキャス：ユーザ名を指定して録画
+		if selected == menuItemsStore.getRef("TC_RECORD_USER"):
+			d = userEdit.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.tc.record(d.getData())
 
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()
