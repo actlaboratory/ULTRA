@@ -96,8 +96,10 @@ class Events(BaseEvents):
 		# ツイキャス連携の有効化
 		if selected == menuItemsStore.getRef("TC_ENABLE"):
 			if event.IsChecked():
-				if globalVars.app.tc.initialize():
-					globalVars.app.tc.start()
+				if not globalVars.app.tc.initialize():
+					# event.Destroy()
+					return
+				globalVars.app.tc.start()
 			else:
 				globalVars.app.tc.exit()
 			globalVars.app.config["twitcasting"]["enable"] = event.IsChecked()

@@ -29,6 +29,7 @@ class Twitcasting(SourceBase):
 		self.initialized = 0
 		self.running = False
 		websocket.enableTrace(not hasattr(sys, "frozen"))
+		self.enableMenu(False)
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -42,7 +43,13 @@ class Twitcasting(SourceBase):
 				return False
 		self.initSocket()
 		self.initialized = 1
+		self.enableMenu(True)
 		return True
+
+	def enableMenu(self, mode):
+		tc = ("TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
+		for i in tc:
+			globalVars.app.hMainView.menu.EnableMenu(i, mode)
 
 	def initSocket(self):
 		"""ソケット通信を準備
@@ -138,12 +145,13 @@ class Twitcasting(SourceBase):
 				simpleDialog.dialog(_("処理結果"), _("キャンセルされました。"))
 				manager.shutdown()
 				d.Destroy()
-				return
+				return False
 		token = manager.getToken()["access_token"]
 		with open(constants.AC_TWITCASTING, "wb") as f:
 			f.write(base64.b64encode(token.encode()))
 		simpleDialog.dialog(_("処理結果"), _("認証が完了しました。"))
 		self.loadToken()
+		return True
 
 	def setHeader(self):
 		"""ツイキャスAPIと通信する際のヘッダ情報を準備する
@@ -230,7 +238,9 @@ class Twitcasting(SourceBase):
 	def exit(self):
 		"""新着ライブの監視を終了する
 		"""
-		self.socket.close()
+		if hasattr(self, "socket"):
+			self.socket.close()
+		self.enableMenu(False)
 
 	def getConfig(self, user):
 		"""通知方法の設定を取得。ユーザ専用の設定があればそれを、なければデフォルト値を返す。
@@ -321,10 +331,11 @@ class Twitcasting(SourceBase):
 		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
 		"""
 		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("設定されているアクセストークンが不正です。ブラウザを起動し、再度認証作業を行いますか？"))
-		if d == wx.ID_YES:
-			self.setToken()
-			return True
-		return False
+		if d == wx.ID_NO:
+			return False
+		if not self.setToken():
+			return False
+		return True
 
 	def showNotFoundError(self):
 		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す

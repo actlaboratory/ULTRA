@@ -6,6 +6,7 @@
 from typing import Set
 import views.KeyValueSettingDialogBase
 import wx
+import constants
 import globalVars
 
 class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
@@ -104,8 +105,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 
 	def Validation(self, event):
 		user = globalVars.app.tc.getUserIdFromScreenId(self.edits[1].GetValue())
-		print(user)
-		if user == None:
+		if user == constants.NOT_FOUND:
 			return
 		self.edits[0].SetValue(user)
 		event.Skip()
