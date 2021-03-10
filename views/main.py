@@ -97,7 +97,7 @@ class Events(BaseEvents):
 		if selected == menuItemsStore.getRef("TC_ENABLE"):
 			if event.IsChecked():
 				if not globalVars.app.tc.initialize():
-					# event.Destroy()
+					self.parent.menu.CheckMenu("TC_ENABLE", False)
 					return
 				globalVars.app.tc.start()
 			else:
