@@ -109,3 +109,13 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 			return
 		self.edits[0].SetValue(user)
 		event.Skip()
+
+	def InstallControls(self):
+		super().InstallControls()
+		self.edits[2].Bind(wx.EVT_CHECKBOX, self.onSpecifyChanged)
+		self.onSpecifyChanged()
+
+	def onSpecifyChanged(self, event=None):
+		state = self.edits[2].GetValue()
+		for i in range(3, len(self.edits)):
+			self.edits[i].GetParent().Enable(state)
