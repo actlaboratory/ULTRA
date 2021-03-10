@@ -23,6 +23,7 @@ from views import mkDialog
 from views import sample
 from views import urlEdit
 from views import userEdit
+from views import tcManageUser
 from views import versionDialog
 
 class MainView(BaseView):
@@ -61,7 +62,7 @@ class Menu(BaseMenu):
 
 		# ツイキャスメニューの中身
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
-			"TC_RECORD_ARCHIVE", "TC_RECORD_USER"
+			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER"
 		])
 
 		#ヘルプメニューの中身
@@ -104,6 +105,15 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.record(d.getData())
+
+		# ツイキャス：ユーザの管理
+		if selected == menuItemsStore.getRef("TC_MANAGE_USER"):
+			d = tcManageUser.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.tc.users = d.GetValue()
+			globalVars.app.tc.saveUserList()
 
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()
