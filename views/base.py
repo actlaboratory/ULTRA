@@ -220,7 +220,7 @@ class BaseMenu(object):
 		else:
 			if not title:
 				title=menuItemsDic.dic[ref_id]
-			return self._RegisterMenuCommand(menu_handle,ref_id,title,index)
+			return self._RegisterCheckMenuCommand(menu_handle,ref_id,title,index)
 
 	def _RegisterCheckMenuCommand(self,menu_handle,ref_id,title,index=-1):
 		"""チェックメニューアイテム生成補助関数"""
