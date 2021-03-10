@@ -33,6 +33,8 @@ class Twitcasting(SourceBase):
 	def initialize(self):
 		"""アクセストークンの読み込み
 		"""
+		if self.initialized == 1:
+			super().__init__()
 		if not self.loadToken():
 			self.log.info("Failed to load access token.")
 			if not self.showTokenError():
@@ -81,6 +83,7 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が始まった
 		"""
 		self.running = True
+		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 
 	def onClose(self):
 		"""ソケット通信が切断された
@@ -227,8 +230,7 @@ class Twitcasting(SourceBase):
 	def exit(self):
 		"""新着ライブの監視を終了する
 		"""
-		if hasattr(self, "socket"):
-			self.socket.close()
+		self.socket.close()
 
 	def getConfig(self, user):
 		"""通知方法の設定を取得。ユーザ専用の設定があればそれを、なければデフォルト値を返す。

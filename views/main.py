@@ -61,6 +61,7 @@ class Menu(BaseMenu):
 		])
 
 		# ツイキャスメニューの中身
+		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER"
 		])
@@ -91,6 +92,15 @@ class Events(BaseEvents):
 			d = sample.Dialog()
 			d.Initialize()
 			r = d.Show()
+
+		# ツイキャス連携の有効化
+		if selected == menuItemsStore.getRef("TC_ENABLE"):
+			if event.IsChecked():
+				if globalVars.app.tc.initialize():
+					globalVars.app.tc.start()
+			else:
+				globalVars.app.tc.exit()
+			globalVars.app.config["twitcasting"]["enable"] = event.IsChecked()
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):

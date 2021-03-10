@@ -31,7 +31,7 @@ class DefaultSettings:
 			"soundFile": "",
 		}
 		config["twitcasting"] = {
-			"checkLive": False,
+			"enable": True,
 			"saveComments": False,
 		}
 		config["record"] = {
