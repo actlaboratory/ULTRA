@@ -93,6 +93,11 @@ class Events(BaseEvents):
 			d.Initialize()
 			r = d.Show()
 
+		# 終了
+		if selected == menuItemsStore.getRef("EXIT"):
+			self.parent.hFrame.Close(True)
+			globalVars.app.tb.Destroy()
+
 		# ツイキャス連携の有効化
 		if selected == menuItemsStore.getRef("TC_ENABLE"):
 			if event.IsChecked():
@@ -134,3 +139,9 @@ class Events(BaseEvents):
 			d = versionDialog.dialog()
 			d.Initialize()
 			r = d.Show()
+
+	def Exit(self, event):
+		if event.CanVeto():
+			self.parent.hFrame.Hide()
+		else:
+			super().Exit(event)

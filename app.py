@@ -22,7 +22,11 @@ class Main(AppBase.MainBase):
 			self.proxyEnviron.set_environ()
 		else:
 			self.proxyEnviron = None
+		# スレッドで例外が起きてもsys.exceptHookが呼ばれるようにする
 		self.installThreadExcepthook()
+		# タスクバーアイコンの準備
+		import views.tbIcon
+		self.tb = views.tbIcon.TaskbarIcon()
 		# アップデートを実行
 		if self.config.getboolean("general", "update"):
 			globalVars.update.update(True)
