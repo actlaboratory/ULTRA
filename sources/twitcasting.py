@@ -492,7 +492,7 @@ class CommentGetter(threading.Thread):
 				timestamp,
 			])
 		result.reverse()
-		with open(self.path, "w") as f:
+		with open(self.path, "w", encoding="utf-8") as f:
 			writer = csv.writer(f, delimiter="\t")
 			writer.writerows(result)
 
