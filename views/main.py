@@ -57,7 +57,7 @@ class Menu(BaseMenu):
 
 		#ファイルメニュー
 		self.RegisterMenuCommand(self.hFileMenu,[
-				"FILE_EXAMPLE",
+				"FILE_EXAMPLE", "EXIT",
 		])
 
 		# ツイキャスメニューの中身
