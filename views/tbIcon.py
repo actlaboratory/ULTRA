@@ -18,8 +18,10 @@ class TaskbarIcon(wx.adv.TaskBarIcon):
 		bm = BaseMenu("mainView")
 		menu = wx.Menu()
 		menu.Bind(wx.EVT_MENU, globalVars.app.hMainView.events.OnMenuSelect)
-		bm.RegisterMenuCommand(menu, "EXIT")
+		bm.RegisterMenuCommand(menu, [
+			"SHOW", "EXIT",
+		])
 		return menu
 
 	def onDoubleClick(self, event):
-		globalVars.app.hMainView.hFrame.Show()
+		globalVars.app.hMainView.events.show()

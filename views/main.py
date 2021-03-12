@@ -57,7 +57,7 @@ class Menu(BaseMenu):
 
 		#ファイルメニュー
 		self.RegisterMenuCommand(self.hFileMenu,[
-				"FILE_EXAMPLE", "EXIT",
+				"FILE_EXAMPLE", "HIDE", "EXIT",
 		])
 
 		# ツイキャスメニューの中身
@@ -92,6 +92,14 @@ class Events(BaseEvents):
 			d = sample.Dialog()
 			d.Initialize()
 			r = d.Show()
+
+		# ウィンドウを隠す
+		if selected == menuItemsStore.getRef("HIDE"):
+			self.hide()
+		
+		# ウィンドウを表示
+		if selected == menuItemsStore.getRef("SHOW"):
+			self.show()
 
 		# 終了
 		if selected == menuItemsStore.getRef("EXIT"):
@@ -142,6 +150,12 @@ class Events(BaseEvents):
 
 	def Exit(self, event):
 		if event.CanVeto():
-			self.parent.hFrame.Hide()
+			self.hide()
 		else:
 			super().Exit(event)
+
+	def hide(self):
+		self.parent.hFrame.Hide()
+
+	def show(self):
+		self.parent.hFrame.Show()
