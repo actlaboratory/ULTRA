@@ -9,11 +9,14 @@ import wx
 import constants
 import globalVars
 
+SPECIFIC_INDEX = 3
+
 class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 	def __init__(self):
 		columnInfo = [
 			(_("ユーザID"), 0, 200),
 			(_("ユーザ名"), 0, 200),
+			(_("名前"), 0, 200),
 			(_("専用設定"), 0, 200),
 			(_("バルーン通知"), 0, 200),
 			(_("録画"), 0, 100),
@@ -22,6 +25,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 			(_("再生するサウンド"), 0, 200)
 		]
 		user = {}
+		name = {}
 		specific = {}
 		baloon = {}
 		record = {}
@@ -31,6 +35,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 		globalVars.app.tc.loadUserList()
 		for k, v in globalVars.app.tc.users.items():
 			user[k] = v["user"]
+			name[k] = v["name"]
 			specific[k] = v["specific"]
 			if v["specific"]:
 				baloon[k] = v["baloon"]
@@ -44,7 +49,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 				openBrowser[k] = globalVars.app.config.getboolean("notification", "openBrowser", False)
 				sound[k] = globalVars.app.config.getboolean("notification", "sound", False)
 				soundFile[k] = globalVars.app.config["notification"]["soundFile"]
-		super().__init__("tcManageUser", SettingDialog, columnInfo, user, specific, baloon, record, openBrowser, sound, soundFile)
+		super().__init__("tcManageUser", SettingDialog, columnInfo, user, name, specific, baloon, record, openBrowser, sound, soundFile)
 		for i in range(len(columnInfo)):
 			self.SetCheckResultValueString(i, _("有効"), _("無効"))
 
@@ -58,19 +63,20 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 		for i in data[0]:
 			ret[i] = {
 				"user": data[0][i],
-				"specific": data[1][i],
-				"baloon": data[2][i],
-				"record": data[3][i],
-				"openBrowser": data[4][i],
-				"sound": data[5][i],
-				"soundFile": data[6][i],
+				"name": data[1][i],
+				"specific": data[2][i],
+				"baloon": data[3][i],
+				"record": data[4][i],
+				"openBrowser": data[5][i],
+				"sound": data[6][i],
+				"soundFile": data[7][i],
 			}
 		return ret
 
 class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 	"""設定内容を入力するダイアログ"""
 
-	def __init__(self, parent, key="", user="", specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None):
+	def __init__(self, parent, key="", user="", name="", specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None):
 		if baloon == None:
 			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
 		if record == None:
@@ -86,6 +92,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 			[
 				(_("ユーザID"), None),
 				(_("ユーザ名"), user == ""),
+				(_("名前"), None),
 				("", _("専用設定を使用")),
 				("", _("バルーン通知")),
 				("", _("録画")),
@@ -93,8 +100,8 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 				("", _("サウンドを再生")),
 				(_("再生するサウンド"), True),
 			],
-			[None] * 8,
-			key, user, specific, baloon, record, openBrowser, sound, soundFile
+			[None] * 9,
+			key, user, name, specific, baloon, record, openBrowser, sound, soundFile
 		)
 
 	def Initialize(self):
@@ -104,18 +111,22 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 		return self.Validation(event)
 
 	def Validation(self, event):
-		user = globalVars.app.tc.getUserIdFromScreenId(self.edits[1].GetValue())
-		if user == constants.NOT_FOUND:
+		if self.edits[0].GetValue() != "":
+			event.Skip()
 			return
-		self.edits[0].SetValue(user)
+		user = globalVars.app.tc.getUserInfo(self.edits[1].GetValue())
+		if user == None:
+			return
+		self.edits[0].SetValue(user["user"]["id"])
+		self.edits[2].SetValue(user["user"]["name"])
 		event.Skip()
 
 	def InstallControls(self):
 		super().InstallControls()
-		self.edits[2].Bind(wx.EVT_CHECKBOX, self.onSpecifyChanged)
+		self.edits[SPECIFIC_INDEX].Bind(wx.EVT_CHECKBOX, self.onSpecifyChanged)
 		self.onSpecifyChanged()
 
 	def onSpecifyChanged(self, event=None):
-		state = self.edits[2].GetValue()
-		for i in range(3, len(self.edits)):
+		state = self.edits[SPECIFIC_INDEX].GetValue()
+		for i in range(SPECIFIC_INDEX + 1, len(self.edits)):
 			self.edits[i].GetParent().Enable(state)

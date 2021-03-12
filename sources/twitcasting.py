@@ -69,6 +69,7 @@ class Twitcasting(SourceBase):
 			if userId in self.users.keys():
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
 				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
+				self.users[userId]["name"] = i["broadcaster"]["name"]
 		rm = []
 		for i in self.users:
 			if "remove" in self.users[i].keys() and (time.time() - self.users[i]["remove"]) >= 0:
@@ -167,7 +168,7 @@ class Twitcasting(SourceBase):
 		"""通知させたいユーザの情報を読み込む
 		"""
 		try:
-			with open(constants.TC_USER_DATA, "r") as f:
+			with open(constants.TC_USER_DATA, "r", encoding="utf-8") as f:
 				self.users = json.load(f)
 		except FileNotFoundError:
 			self.users = {}
@@ -177,8 +178,8 @@ class Twitcasting(SourceBase):
 		"""ユーザリストをファイルに保存
 		"""
 		try:
-			with open(constants.TC_USER_DATA, "w") as f:
-				json.dump(self.users, f)
+			with open(constants.TC_USER_DATA, "w", encoding="utf-8") as f:
+				json.dump(self.users, f, ensure_ascii=False)
 		except:
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
 
