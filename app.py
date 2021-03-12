@@ -1,6 +1,9 @@
 ﻿# -*- coding: utf-8 -*-
 #Application Main
 
+import win32api
+import win32event
+import winerror
 import AppBase
 import update
 import globalVars
@@ -13,6 +16,14 @@ import sys
 class Main(AppBase.MainBase):
 	def __init__(self):
 		super().__init__()
+
+	def OnInit(self):
+		#多重起動防止
+		globalVars.mutex = win32event.CreateMutex(None, 1, "ULTRA")
+		if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
+			globalVars.mutex = None
+			return False
+		return True
 
 	def initialize(self):
 		self.setGlobalVars()
@@ -65,6 +76,18 @@ class Main(AppBase.MainBase):
 		#設定の保存やリソースの開放など、終了前に行いたい処理があれば記述できる
 		#ビューへのアクセスや終了の抑制はできないので注意。
 
+		self._releaseMutex()
 
 		#戻り値は無視される
 		return 0
+
+	def _releaseMutex(self):
+		if globalVars.mutex != None:
+			try: win32event.ReleaseMutex(globalVars.mutex)
+			except Exception as e:
+				return
+			globalVars.mutex = None
+			self.log.info("mutex object released.")
+
+	def __del__(self):
+		self._releaseMutex()
