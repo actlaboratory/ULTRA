@@ -32,7 +32,7 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
-		super().__init__()
+		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" %self.stream)
 
 	def getOutputFile(self):
@@ -113,11 +113,14 @@ class Recorder(threading.Thread):
 	def run(self):
 		cmd = self.getCommand()
 		self.source.onRecord(self.path, self.movie)
+		globalVars.app.hMainView.addLog(_("録画開始"), _("%sのライブを録画します。") %self.userName)
 		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
+			globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName)
 			self.log.info("FFMPEG returned some errors.")
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 			self.log.info("saved: %s" %self.path)
+		globalVars.app.hMainView.addLog(_("録画終了"), _("%sのライブを録画しました。") %self.userName)

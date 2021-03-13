@@ -67,9 +67,14 @@ class Twitcasting(SourceBase):
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
+				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], _("ツイキャス"))
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
-				self.users[userId]["user"] = i["broadcaster"]["screen_id"]
-				self.users[userId]["name"] = i["broadcaster"]["name"]
+				if self.users[userId]["user"] != i["broadcaster"]["screen_id"]:
+					globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[userId]["user"], "new": i["broadcaster"]["screen_id"]}, _("ツイキャス"))
+					self.users[userId]["user"] = i["broadcaster"]["screen_id"]
+				if self.users[userId]["name"] != i["broadcaster"]["name"]:
+					globalVars.app.hMainView.addLog(_("表示名名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[userId]["name"], "new": i["broadcaster"]["name"]}, _("ツイキャス"))
+					self.users[userId]["name"] = i["broadcaster"]["name"]
 		rm = []
 		for i in self.users:
 			if "remove" in self.users[i].keys() and (time.time() - self.users[i]["remove"]) >= 0:
@@ -468,6 +473,7 @@ class CommentGetter(threading.Thread):
 	def run(self):
 		if not self.getAllComments():
 			return
+		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を開始します。"), _("ツイキャス"))
 		self.saveComment()
 		while self.isLive():
 			if self.hasError == 1:
@@ -479,6 +485,7 @@ class CommentGetter(threading.Thread):
 			if len(self.comments) > 0:
 				self.lastCommentId = self.comments[0]["id"]
 			self.saveComment()
+		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を終了しました。。"), _("ツイキャス"))
 
 	def saveComment(self):
 		"""コメントをファイルに保存する

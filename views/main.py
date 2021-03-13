@@ -41,6 +41,27 @@ class MainView(BaseView):
 			self.app.config.getint(self.identifier,"positionY",50,0)
 		)
 		self.InstallMenuEvent(Menu(self.identifier),self.events.OnMenuSelect)
+		# 状況表示用リストを作成
+		self.listCtrl, self.static = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT)
+		self.listCtrl.AppendColumn(_("タイトル"))
+		self.listCtrl.AppendColumn(_("詳細"))
+		self.listCtrl.AppendColumn(_("ソース"))
+
+	def addLog(self, title, detail, source=""):
+		"""状況表示用リストに項目を追加
+
+		:param title: 「配信通知」など、通知のタイトル
+		:type title: str
+		:param detail: 「○○さんが配信を開始しました」など
+		:type detail: str
+		:param source: 「ツイキャス」など
+		:type source: str
+		"""
+		self.listCtrl.Append([
+			title,
+			detail,
+			source
+		])
 
 
 class Menu(BaseMenu):
