@@ -24,6 +24,7 @@ from views import sample
 from views import urlEdit
 from views import userEdit
 from views import tcManageUser
+from views import settingsDialog
 from views import versionDialog
 
 class MainView(BaseView):
@@ -75,6 +76,7 @@ class Menu(BaseMenu):
 		self.hFileMenu=wx.Menu()
 		self.hServicesMenu = wx.Menu()
 		self.hTwitcastingMenu=wx.Menu()
+		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
 		#ファイルメニュー
@@ -90,6 +92,11 @@ class Menu(BaseMenu):
 			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER"
 		])
 
+		# オプションメニュー
+		self.RegisterMenuCommand(self.hOptionMenu, [
+			"OP_SETTINGS",
+		])
+
 		#ヘルプメニューの中身
 		self.RegisterMenuCommand(self.hHelpMenu,[
 				"HELP_UPDATE",
@@ -99,6 +106,7 @@ class Menu(BaseMenu):
 		#メニューバーの生成
 		self.hMenuBar.Append(self.hFileMenu,_("ファイル(&F)"))
 		self.hMenuBar.Append(self.hServicesMenu, _("サービス(&S)"))
+		self.hMenuBar.Append(self.hOptionMenu, _("オプション(&O)"))
 		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ(&H)"))
 		target.SetMenuBar(self.hMenuBar)
 
@@ -163,6 +171,12 @@ class Events(BaseEvents):
 				return
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
+
+		# 設定
+		if selected == menuItemsStore.getRef("OP_SETTINGS"):
+			d = settingsDialog.Dialog()
+			d.Initialize()
+			d.Show()
 
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()

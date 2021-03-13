@@ -50,6 +50,8 @@ class Main(AppBase.MainBase):
 		if self.config.getboolean("twitcasting", "enable", True) and self.tc.initialize():
 			self.tc.start()
 		self.hMainView.Show()
+		if self.config.getboolean("general", "autoHide", False):
+			self.hMainView.events.hide()
 		return True
 
 	def setGlobalVars(self):

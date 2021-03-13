@@ -54,7 +54,7 @@ class Twitcasting(SourceBase):
 	def initSocket(self):
 		"""ソケット通信を準備
 		"""
-		self.socket = websocket.WebSocketApp("wss://realtime.twitcasting.tv/lives", self.header, on_message=self.onMessage, on_error=self.onError, on_open=self.onOpen, on_close=self.onClose)
+		self.socket = websocket.WebSocketApp(constants.TC_WSS_URL, self.header, on_message=self.onMessage, on_error=self.onError, on_open=self.onOpen, on_close=self.onClose)
 		self.log.info("WSS module loaded.")
 
 	def onMessage(self, text):
@@ -186,6 +186,8 @@ class Twitcasting(SourceBase):
 			with open(constants.TC_USER_DATA, "w", encoding="utf-8") as f:
 				json.dump(self.users, f, ensure_ascii=False)
 		except:
+			import traceback
+			self.log.error("Failed to save users.dat.\n" + traceback.format_exc())
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
 
 	def run(self):
