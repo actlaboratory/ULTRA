@@ -73,6 +73,7 @@ class Menu(BaseMenu):
 
 		#メニューの大項目を作る
 		self.hFileMenu=wx.Menu()
+		self.hServicesMenu = wx.Menu()
 		self.hTwitcastingMenu=wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -81,6 +82,8 @@ class Menu(BaseMenu):
 				"FILE_EXAMPLE", "HIDE", "EXIT",
 		])
 
+		# サービスメニューの中身
+		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
@@ -95,7 +98,7 @@ class Menu(BaseMenu):
 
 		#メニューバーの生成
 		self.hMenuBar.Append(self.hFileMenu,_("ファイル(&F)"))
-		self.hMenuBar.Append(self.hTwitcastingMenu, "&TwitCasting")
+		self.hMenuBar.Append(self.hServicesMenu, _("サービス(&S)"))
 		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ(&H)"))
 		target.SetMenuBar(self.hMenuBar)
 
