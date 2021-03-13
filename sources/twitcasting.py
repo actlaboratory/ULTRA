@@ -338,7 +338,7 @@ class Twitcasting(SourceBase):
 	def showTokenError(self):
 		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
 		"""
-		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("設定されているアクセストークンが不正です。ブラウザを起動し、再度認証作業を行いますか？"))
+		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行いますか？"))
 		if d == wx.ID_NO:
 			return False
 		if not self.setToken():
