@@ -8,8 +8,10 @@ import views.KeyValueSettingDialogBase
 import wx
 import constants
 import globalVars
+import simpleDialog
 
 SPECIFIC_INDEX = 3
+SOUND_INDEX = 7
 
 class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 	def __init__(self):
@@ -100,7 +102,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 				("", _("サウンドを再生")),
 				(_("再生するサウンド"), True),
 			],
-			[None] * 9,
+			[None] * 8 + [(_("参照"), self.browse)],
 			key, user, name, specific, baloon, record, openBrowser, sound, soundFile
 		)
 
@@ -111,6 +113,9 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 		return self.Validation(event)
 
 	def Validation(self, event):
+		if self.edits[1].GetValue() == "":
+			simpleDialog.errorDialog(_("ユーザ名が入力されていません。"))
+			return
 		if self.edits[0].GetValue() != "":
 			event.Skip()
 			return
@@ -124,9 +129,27 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 	def InstallControls(self):
 		super().InstallControls()
 		self.edits[SPECIFIC_INDEX].Bind(wx.EVT_CHECKBOX, self.onSpecifyChanged)
+		self.edits[SOUND_INDEX].Bind	(wx.EVT_CHECKBOX, self.onSoundChanged)
 		self.onSpecifyChanged()
 
 	def onSpecifyChanged(self, event=None):
 		state = self.edits[SPECIFIC_INDEX].GetValue()
 		for i in range(SPECIFIC_INDEX + 1, len(self.edits)):
 			self.edits[i].GetParent().Enable(state)
+		self.buttonObjects[SOUND_INDEX + 1].Enable(state)
+		if state:
+			self.onSoundChanged()
+
+	def onSoundChanged(self, event=None):
+		state = self.edits[SOUND_INDEX].GetValue()
+		for i in range(SOUND_INDEX + 1, len(self.edits)):
+			self.edits[i].GetParent().Enable(state)
+		self.buttonObjects[SOUND_INDEX + 1].Enable(state)
+
+	def browse(self, event):
+		target = self.edits[SOUND_INDEX + 1]
+		dialog = wx.FileDialog(self.wnd, _("効果音ファイルを選択"), wildcard="WAVE files (*.wav)|*.wav", style=wx.FD_OPEN)
+		result = dialog.ShowModal()
+		if result == wx.ID_CANCEL:
+			return
+		target.SetValue(dialog.GetPath())

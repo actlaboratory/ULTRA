@@ -230,6 +230,7 @@ class SettingDialogBase(BaseDialog):
 		self.buttons=buttons
 		self.values=list(v)
 		self.edits=[None]*len(self.valueNames)
+		self.buttonObjects=[None]*len(self.valueNames)
 
 	def Initialize(self,title):
 		super().Initialize(self.parent,title,style=wx.WS_EX_VALIDATE_RECURSIVELY|wx.DEFAULT_FRAME_STYLE)
@@ -251,7 +252,7 @@ class SettingDialogBase(BaseDialog):
 			if name[1]==None:
 				self.edits[i].GetParent().Hide()
 			if self.buttons[i]:
-				dummy=self.creator.button(self.buttons[i][0],self.buttons[i][1],sizerFlag=wx.ALIGN_BOTTOM | wx.BOTTOM, margin=10)
+				self.buttonObjects[i]=self.creator.button(self.buttons[i][0],self.buttons[i][1],sizerFlag=wx.ALIGN_BOTTOM | wx.BOTTOM, margin=10)
 
 		#ボタンエリア
 		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.HORIZONTAL,20,"",wx.ALIGN_RIGHT|wx.TOP, 10)

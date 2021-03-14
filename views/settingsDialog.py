@@ -155,9 +155,7 @@ class Dialog(BaseDialog):
 				conf[v[1]][v[2]] = obj.GetValue()
 
 	def browse(self, event):
-		obj = event.GetEventObject()
-		if obj == self.soundfileBrowse:
-			target = self.soundfile
+		target = self.soundfile
 		dialog = wx.FileDialog(self.wnd, _("効果音ファイルを選択"), wildcard="WAVE files (*.wav)|*.wav", style=wx.FD_OPEN)
 		result = dialog.ShowModal()
 		if result == wx.ID_CANCEL:
