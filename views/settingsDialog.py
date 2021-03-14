@@ -19,23 +19,10 @@ class configType(Enum):
 
 
 class Dialog(BaseDialog):
-	# readerSelection = {
-	# 	"NOSPEECH": _("音声なし"),
-	# 	"AUTO": _("自動選択"),
-	# 	"SAPI5": "SAPI5",
-	# 	"CLIPBOARD": _("クリップボード出力"),
-	# 	"PCTK": "PC-Talker",
-	# 	"NVDA": "NVDA",
-	# 	"JAWS": "JAWS for Windows"
-	# }
 	colorModeSelection = {
 		"white": _("標準"),
 		"dark": _("ダーク")
 	}
-	# textWrappingSelection = {
-	# 	"on":_("画面幅で折り返し"),
-	# 	"off":_("折り返さない")
-	# }
 	languageSelection = constants.SUPPORTING_LANGUAGE
 	extensionSelection = {
 		"ts": _("動画（TS）"),
