@@ -88,6 +88,7 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
+		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER"
 		])
@@ -148,6 +149,10 @@ class Events(BaseEvents):
 			else:
 				globalVars.app.tc.exit()
 			globalVars.app.config["twitcasting"]["enable"] = event.IsChecked()
+
+		# ツイキャス：コメント保存
+		if selected == menuItemsStore.getRef("TC_SAVE_COMMENTS"):
+			globalVars.app.config["twitcasting"]["savecomments"] = event.IsChecked()
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):

@@ -80,10 +80,6 @@ class Dialog(BaseDialog):
 		self.soundfile, static = creator.inputbox(_("再生するサウンド"))
 		self.soundfileBrowse = creator.button(_("参照"), self.browse)
 
-		# twitcasting
-		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("ツイキャス"),style=wx.ALL,margin=20)
-		self.savecomments = creator.checkbox(_("録画時にコメントをテキストファイルに保存する"))
-
 		# record
 		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("録画"),style=wx.ALL,margin=20)
 		self.dir, static = creator.inputbox(_("保存先フォルダ(&F)"))
@@ -117,9 +113,6 @@ class Dialog(BaseDialog):
 		self._setValue(self.openbrowser, "notification", "openBrowser", configType.BOOL, False)
 		self._setValue(self.sound, "notification", "sound", configType.BOOL, False)
 		self._setValue(self.soundfile, "notification", "soundFile", configType.STRING, "")
-
-		# twitcasting
-		self._setValue(self.savecomments, "twitcasting", "saveComments", configType.BOOL, False)
 
 		# record
 		self._setValue(self.dir, "record", "dir", configType.STRING, "output")

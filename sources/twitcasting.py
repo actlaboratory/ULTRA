@@ -32,7 +32,7 @@ class Twitcasting(SourceBase):
 		self.enableMenu(False)
 		self.userData = os.path.abspath(constants.TC_USER_DATA)
 		self.tokenData = os.path.abspath(constants.AC_TWITCASTING)
-
+		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -50,7 +50,7 @@ class Twitcasting(SourceBase):
 		return True
 
 	def enableMenu(self, mode):
-		tc = ("TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
+		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
 		for i in tc:
 			globalVars.app.hMainView.menu.EnableMenu(i, mode)
 
