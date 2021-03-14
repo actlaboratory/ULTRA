@@ -81,7 +81,7 @@ class Menu(BaseMenu):
 
 		#ファイルメニュー
 		self.RegisterMenuCommand(self.hFileMenu,[
-				"FILE_EXAMPLE", "HIDE", "EXIT",
+				"HIDE", "EXIT",
 		])
 
 		# サービスメニューの中身
@@ -120,11 +120,6 @@ class Events(BaseEvents):
 			return
 
 		selected=event.GetId()#メニュー識別しの数値が出る
-
-		if selected==menuItemsStore.getRef("FILE_EXAMPLE"):
-			d = sample.Dialog()
-			d.Initialize()
-			r = d.Show()
 
 		# ウィンドウを隠す
 		if selected == menuItemsStore.getRef("HIDE"):
