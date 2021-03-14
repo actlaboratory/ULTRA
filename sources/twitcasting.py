@@ -22,6 +22,11 @@ import csv
 import datetime
 import sys
 
+# DEBUG
+# 0:何もしない、1:ツイキャスのリアルタイムAPIが返した内容をreceived.txtに保存する
+DEBUG = 0
+DEBUG_FILE = "received.txt"
+
 class Twitcasting(SourceBase):
 	def __init__(self):
 		super().__init__()
@@ -33,6 +38,9 @@ class Twitcasting(SourceBase):
 		self.userData = os.path.abspath(constants.TC_USER_DATA)
 		self.tokenData = os.path.abspath(constants.AC_TWITCASTING)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
+		self.debug = not(hasattr(sys, "frozen")) and DEBUG
+		if self.debug:
+			with open(DEBUG_FILE, "w"): pass
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -63,6 +71,9 @@ class Twitcasting(SourceBase):
 	def onMessage(self, text):
 		"""通知受信時
 		"""
+		if self.debug:
+			with open(DEBUG_FILE, "a", encoding="utf-8") as f:
+				f.write(text + "\n")
 		self.loadUserList()
 		obj = json.loads(text)
 		if "movies" not in obj.keys():
