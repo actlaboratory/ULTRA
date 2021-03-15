@@ -118,9 +118,14 @@ class Dialog(BaseDialog):
 		event.Skip()
 
 	def checkBoxStatusChanged(self, event=None):
+		# proxy
 		result = self.usemanualsetting.GetValue()
 		self.server.Enable(result)
 		self.port.Enable(result)
+		# sound
+		result = self.sound.GetValue()
+		self.soundfile.Enable(result)
+		self.soundfileBrowse.Enable(result)
 
 	def _setValue(self, obj, section, key, t, prm=None, prm2=None):
 		assert isinstance(obj,wx.Window)
