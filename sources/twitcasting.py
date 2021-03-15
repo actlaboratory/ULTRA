@@ -66,6 +66,8 @@ class Twitcasting(SourceBase):
 		:param startup: Trueにすると、ダイアログを表示。Falseにすると、トースト通知を表示。
 		:type startup: bool
 		"""
+		with open(constants.AC_TWITCASTING, "rb") as f:
+			d = pickle.load(f)
 		if self.expires - time.time() < 0:
 			if startup:
 				simpleDialog.dialog(_("アクセストークンの有効期限が切れています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
@@ -74,7 +76,7 @@ class Twitcasting(SourceBase):
 				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 				b.Show()
 				b.Close()
-		elif self.expires - time.time() < constants.TOKEN_EXPIRE_MAX:
+		elif time.time() >d["next"]:
 			if startup:
 				simpleDialog.dialog(_("アクセストークンの有効期限が近づいています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 			else:
@@ -82,6 +84,12 @@ class Twitcasting(SourceBase):
 				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 				b.Show()
 				b.Close()
+			if d["expires"] - time.time() > 86400:
+				d["next"] = time.time() + 86400
+			else:
+				d["next"] = time.time() + 3600
+			with open(constants.AC_TWITCASTING, "wb") as f:
+				pickle.dump(d, f)
 
 	def enableMenu(self, mode):
 		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
@@ -200,6 +208,7 @@ class Twitcasting(SourceBase):
 		data = {
 			"token": base64.b64encode(token["access_token"].encode()),
 			"expires": token["expires_at"],
+			"next": token["expires_at"] - constants.TOKEN_EXPIRE_MAX,
 		}
 		with open(self.tokenData, "wb") as f:
 			pickle.dump(data, f)
