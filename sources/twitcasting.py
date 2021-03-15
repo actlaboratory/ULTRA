@@ -37,8 +37,6 @@ class Twitcasting(SourceBase):
 		self.running = False
 		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
-		self.userData = os.path.abspath(constants.TC_USER_DATA)
-		self.tokenData = os.path.abspath(constants.AC_TWITCASTING)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 		self.debug = not(hasattr(sys, "frozen")) and DEBUG
 		if self.debug:
@@ -170,7 +168,7 @@ class Twitcasting(SourceBase):
 		"""トークン情報をファイルから読み込み
 		"""
 		try:
-			with open(self.tokenData, "rb") as f:
+			with open(constants.AC_TWITCASTING, "rb") as f:
 				data = pickle.load(f)
 		except:
 			return False
@@ -222,7 +220,7 @@ class Twitcasting(SourceBase):
 			"expires": token["expires_at"],
 			"next": token["expires_at"] - constants.TOKEN_EXPIRE_MAX,
 		}
-		with open(self.tokenData, "wb") as f:
+		with open(constants.AC_TWITCASTING, "wb") as f:
 			pickle.dump(data, f)
 		simpleDialog.dialog(_("処理結果"), _("認証が完了しました。"))
 		self.loadToken()
@@ -240,7 +238,7 @@ class Twitcasting(SourceBase):
 		"""通知させたいユーザの情報を読み込む
 		"""
 		try:
-			with open(self.userData, "r", encoding="utf-8") as f:
+			with open(constants.TC_USER_DATA, "r", encoding="utf-8") as f:
 				self.users = json.load(f)
 		except FileNotFoundError:
 			self.users = {}
@@ -250,7 +248,7 @@ class Twitcasting(SourceBase):
 		"""ユーザリストをファイルに保存
 		"""
 		try:
-			with open(self.userData, "w", encoding="utf-8") as f:
+			with open(constants.TC_USER_DATA, "w", encoding="utf-8") as f:
 				json.dump(self.users, f, ensure_ascii=False)
 		except:
 			import traceback

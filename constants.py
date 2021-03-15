@@ -3,6 +3,7 @@
 #Copyright (C) 20XX anonimous <anonimous@sample.com>
 
 import wx
+import os.path
 
 #アプリケーション基本情報
 APP_FULL_NAME = "Universal Live Tracking And Recording App"#アプリケーションの完全な名前
@@ -24,10 +25,10 @@ LOG_PREFIX="ultra"
 LOG_FILE_NAME="ultra.log"
 SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
-TC_USER_DATA = "data\\twitcasting\\users.dat"
-FFMPEG_PATH = "bin\\ffmpeg.exe"
+TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
+FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
-AC_TWITCASTING = "data\\twitcasting\\account.bin"
+AC_TWITCASTING = os.path.abspath("data\\twitcasting\\account.bin")
 #フォントの設定可能サイズ範囲
 FONT_MIN_SIZE=5
 FONT_MAX_SIZE=35
