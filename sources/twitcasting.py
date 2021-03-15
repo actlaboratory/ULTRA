@@ -150,6 +150,7 @@ class Twitcasting(SourceBase):
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
 			self.socket.close()
+			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), _("ツイキャス"))
 			self.initSocket()
 			self.socket.run_forever()
 
@@ -157,6 +158,7 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が始まった
 		"""
 		self.running = True
+		globalVars.app.hMainView.addLog(_("準備完了"), _("接続しました。"), _("ツイキャス"))
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 
 	def onClose(self):
@@ -424,7 +426,7 @@ class Twitcasting(SourceBase):
 	def showTokenError(self):
 		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
 		"""
-		d = simpleDialog.yesNoDialog(_("トークンエラー"), _("利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行いますか？"))
+		d = simpleDialog.yesNoDialog(_("アクセストークンが見つかりません"), _("利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行いますか？"))
 		if d == wx.ID_NO:
 			return False
 		if not self.setToken():
