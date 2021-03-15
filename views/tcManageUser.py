@@ -16,14 +16,14 @@ SOUND_INDEX = 7
 class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 	def __init__(self):
 		columnInfo = [
-			(_("ユーザID"), 0, 200),
-			(_("ユーザ名"), 0, 200),
+			(_("ユーザID"), 0, 300),
+			(_("ユーザ名"), 0, 300),
 			(_("名前"), 0, 200),
-			(_("専用設定"), 0, 200),
-			(_("バルーン通知"), 0, 200),
+			(_("専用設定"), 0, 100),
+			(_("バルーン通知"), 0, 100),
 			(_("録画"), 0, 100),
-			(_("ブラウザで開く"), 0, 200),
-			(_("サウンドを再生"), 0, 200),
+			(_("ブラウザで開く"), 0, 100),
+			(_("サウンドを再生"), 0, 100),
 			(_("再生するサウンド"), 0, 200)
 		]
 		user = {}
@@ -59,6 +59,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 
 	def Initialize(self):
 		super().Initialize(self.app.hMainView.hFrame,_("ユーザの管理"))
+		self.hListCtrl.SetColumnsOrder([1,2,3,4,5,6,7,8])
 		return
 
 	def GetValue(self):
