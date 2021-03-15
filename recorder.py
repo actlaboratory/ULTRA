@@ -128,9 +128,9 @@ class Recorder(threading.Thread):
 				except IOError:
 					self.log.info("#%i failed." %i)
 					time.sleep(30)
-		if i + 1 == max:
-			globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
-			return
+			if i + 1 == max:
+				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
+				return
 		self.source.onRecord(self.path, self.movie)
 		globalVars.app.hMainView.addLog(_("録画開始"), _("%sのライブを録画します。") %self.userName)
 		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
