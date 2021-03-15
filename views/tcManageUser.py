@@ -36,6 +36,8 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 		soundFile = {}
 		globalVars.app.tc.loadUserList()
 		for k, v in globalVars.app.tc.users.items():
+			if "remove" in v.keys():
+				continue
 			user[k] = v["user"]
 			name[k] = v["name"]
 			specific[k] = v["specific"]

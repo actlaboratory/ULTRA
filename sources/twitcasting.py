@@ -424,7 +424,10 @@ class Twitcasting(SourceBase):
 		if id == None:
 			id = self.getUserIdFromScreenId(userName)
 			if id == constants.NOT_FOUND:
-				return
+				return False
+		if id in self.users.keys():
+			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
+			return False
 		if baloon == None:
 			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
 		if record == None:
@@ -437,6 +440,7 @@ class Twitcasting(SourceBase):
 			soundFile = globalVars.app.config["notification"]["soundFile"]
 		ret = {
 			"user": userName,
+			"name": "",
 			"specific": specific,
 			"baloon": baloon,
 			"record": record,
@@ -448,6 +452,7 @@ class Twitcasting(SourceBase):
 			ret["remove"] = time.time() + 14400
 		self.users[id] = ret
 		self.saveUserList()
+		return True
 
 	def record(self, userName):
 		"""指定したユーザのライブを録画。
@@ -458,7 +463,9 @@ class Twitcasting(SourceBase):
 		userInfo = self.getUserInfo(userName)
 		if userInfo == None:
 			return
-		self.addUser(userInfo["user"]["screen_id"], True, True, False, True, False, False, "", userInfo["user"]["id"])
+		result = self.addUser(userInfo["user"]["screen_id"], True, True, False, True, False, False, "", userInfo["user"]["id"])
+		if not result:
+			return
 		if userInfo["user"]["is_live"]:
 			movie = self.getCurrentLive(userName)
 			if movie == None:
