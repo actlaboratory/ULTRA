@@ -161,7 +161,7 @@ class Dialog(BaseDialog):
 
 	def browse(self, event):
 		target = self.soundfile
-		dialog = wx.FileDialog(self.wnd, _("効果音ファイルを選択"), wildcard="WAVE files (*.wav)|*.wav", style=wx.FD_OPEN)
+		dialog = wx.FileDialog(self.wnd, _("効果音ファイルを選択"), wildcard="WAVE files (*.wav)|*.wav|MP3 files(*.mp3)|*.mp3|OGG files(*.ogg)|*.ogg", style=wx.FD_OPEN)
 		result = dialog.ShowModal()
 		if result == wx.ID_CANCEL:
 			return
