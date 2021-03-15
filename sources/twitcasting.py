@@ -28,6 +28,7 @@ DEBUG = 0
 DEBUG_FILE = "received.txt"
 
 class Twitcasting(SourceBase):
+	name = "TwitCasting"
 	def __init__(self):
 		super().__init__()
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))

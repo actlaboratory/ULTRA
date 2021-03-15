@@ -36,7 +36,7 @@ class DefaultSettings:
 			"saveComments": False,
 		}
 		config["record"] = {
-			"dir": "output",
+			"dir": "output\\%source%",
 			"createSubDir": True,
 			"subDirName": "%user%",
 			"fileName": "%user%_%year%%month%%day%_%hour%%minute%%second%",

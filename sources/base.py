@@ -6,6 +6,8 @@ import threading
 class SourceBase(threading.Thread):
 	"""各サービスのライブ監視などを行う際のベースクラス
 	"""
+	# サービスの名前（録画時に使う場合がある）
+	name = ""
 
 	def __init__(self):
 		"""コンストラクタ。このメソッドをオーバーライドして、スレッドを使う必要がある場合には、必ずsuper().__init__()を呼ぶこと。

@@ -66,6 +66,7 @@ class Recorder(threading.Thread):
 		:type fileName: str
 		"""
 		map = {
+			"%source%": self.source.name,
 			"%user%": self.userName,
 			"%year%": self.time.strftime("%Y"),
 			"%month%": self.time.strftime("%m"),
@@ -85,7 +86,6 @@ class Recorder(threading.Thread):
 		:type st: str
 		"""
 		map = {
-			"\\": "￥",
 			"/": "／",
 			":": "：",
 			"*": "＊",
