@@ -497,6 +497,12 @@ class Twitcasting(SourceBase):
 			if id == constants.NOT_FOUND:
 				return False
 		if id in self.users.keys():
+			userInfo = self.getUserInfo(id)
+			if userInfo["user"]["is_live"]:
+				movie = self.getCurrentLive(id)
+				r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
+				r.start()
+				return True
 			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
 			return False
 		if baloon == None:
