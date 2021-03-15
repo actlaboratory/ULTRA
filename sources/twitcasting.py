@@ -76,7 +76,7 @@ class Twitcasting(SourceBase):
 				f.write(text + "\n")
 		self.loadUserList()
 		obj = json.loads(text)
-		if "movies" not in obj.keys():
+		if "movies" not in obj.keys() or obj["movies"] == None:
 			return
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
