@@ -69,7 +69,7 @@ class Recorder(threading.Thread):
 		"""
 		map = {
 			"%source%": self.source.name,
-			"%user%": self.userName,
+			"%user%": self.userName.replace(":", "-"),
 			"%year%": self.time.strftime("%Y"),
 			"%month%": self.time.strftime("%m"),
 			"%day%": self.time.strftime("%d"),
