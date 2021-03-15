@@ -154,7 +154,7 @@ class Twitcasting(SourceBase):
 				data = pickle.load(f)
 		except:
 			return False
-		self.token = data["token"]
+		self.token = base64.b64decode(data["token"]).decode()
 		self.expires = data["expires"]
 		self.setHeader()
 		return self.verifyCredentials()
@@ -198,7 +198,7 @@ class Twitcasting(SourceBase):
 				return False
 		token = manager.getToken()
 		data = {
-			"token": token["access_token"],
+			"token": base64.b64encode(token["access_token"].encode()),
 			"expires": token["expires_at"],
 		}
 		with open(self.tokenData, "wb") as f:
