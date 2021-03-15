@@ -117,7 +117,7 @@ class Recorder(threading.Thread):
 		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
-			globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName)
+			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout))
 			self.log.info("FFMPEG returned some errors.")
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
