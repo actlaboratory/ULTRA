@@ -117,12 +117,7 @@ class Twitcasting(SourceBase):
 			if userId in self.users.keys():
 				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], _("ツイキャス"))
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
-				if self.users[userId]["user"] != i["broadcaster"]["screen_id"]:
-					globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[userId]["user"], "new": i["broadcaster"]["screen_id"]}, _("ツイキャス"))
-					self.users[userId]["user"] = i["broadcaster"]["screen_id"]
-				if self.users[userId]["name"] != i["broadcaster"]["name"]:
-					globalVars.app.hMainView.addLog(_("表示名名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[userId]["name"], "new": i["broadcaster"]["name"]}, _("ツイキャス"))
-					self.users[userId]["name"] = i["broadcaster"]["name"]
+				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
 			if "remove" in self.users[i].keys() and (time.time() - self.users[i]["remove"]) >= 0:
@@ -131,6 +126,23 @@ class Twitcasting(SourceBase):
 			self.users.pop(i)
 		self.saveUserList()
 		self.checkTokenExpires()
+
+	def updateUserInfo(self, id, user, name):
+		"""ユーザ情報を更新
+
+		:param id: 数値のID
+		:type id: str
+		:param user: ユーザ名
+		:type user: str
+		:param name: 名前
+		:type name: str
+		"""
+		if user != self.users[id]["user"]:
+			globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, _("ツイキャス"))
+			self.users[id]["user"] = user
+		if name != self.users[id]["name"]:
+			globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, _("ツイキャス"))
+			self.users[id]["name"] = name
 
 	def onError(self, error):
 		"""ソケット通信中にエラーが起きた
@@ -658,3 +670,18 @@ class CommentGetter(threading.Thread):
 				self.tc.showError(req.json()["error"]["code"])
 			return False
 		return req.json()["movie"]["is_live"]
+
+class UserChecker(threading.Thread):
+	"""ユーザ情報を更新する
+	"""
+	def __init__(self, tc):
+		"""コンストラクタ
+
+		:param tc: TwitCastingオブジェクト
+		:type tc: TwitCasting
+		"""
+		super().__init__(daemon=True)
+		self.tc = tc
+
+	def run(self):
+		pass
