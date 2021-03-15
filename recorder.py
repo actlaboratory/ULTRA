@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # ストリーミング録画モジュール
 
+import wx
 import constants
 import subprocess
+import simpleDialog
 import datetime
 import threading
 import globalVars
@@ -87,7 +89,6 @@ class Recorder(threading.Thread):
 		"""
 		map = {
 			"/": "／",
-			":": "：",
 			"*": "＊",
 			"?": "？",
 			"\"": "”",
@@ -111,14 +112,34 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		cmd = self.getCommand()
+		try:
+			cmd = self.getCommand()
+		except IOError:
+			d = simpleDialog.yesNoDialog(_("録画エラー"), _("録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してください。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択してください。[はい]を選択して録画の保存先を変更することで、正しく録画を開始できる場合があります。"))
+			if d == wx.ID_NO:
+				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
+				return
+			max = 30
+			import time
+			for i in range(max):
+				try:
+					cmd = self.getCommand()
+					break
+				except IOError:
+					self.log.info("#%i failed." %i)
+					time.sleep(30)
+		if i + 1 == max:
+			globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
+			return
 		self.source.onRecord(self.path, self.movie)
 		globalVars.app.hMainView.addLog(_("録画開始"), _("%sのライブを録画します。") %self.userName)
 		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
+			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
+			if "404 Not Found" in result.stdout:
+				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout))
-			self.log.info("FFMPEG returned some errors.")
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
