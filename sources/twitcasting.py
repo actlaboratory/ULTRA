@@ -295,23 +295,26 @@ class Twitcasting(SourceBase):
 		:param url: 再生ページのURL
 		:type url: str
 		"""
-		stream = self.getStreamFromUrl(url)
-		if stream == None:
-			return
 		movieInfo = self.getMovieInfoFromUrl(url)
 		if movieInfo == None:
+			return
+		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
+		if stream == None:
 			return
 		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"])
 		r.start()
 
-	def getStreamFromUrl(self, url):
+	def getStreamFromUrl(self, url, protected=False):
 		"""再生ページのURLからストリーミングのURLを得る
 
 		:param url: 再生ページのURL
 		:type url: str
+		:param protected: 合い言葉が必要かどうか
+		:type protected: bool
 		"""
+		session = requests.session()
 		try:
-			req = requests.get(url)
+			req = session.get(url)
 		except:
 			self.showNotFoundError()
 			return
@@ -319,6 +322,22 @@ class Twitcasting(SourceBase):
 			self.showNotFoundError()
 			return
 		body = req.text
+		if protected:
+			import views.passwordEdit
+			d = views.passwordEdit.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			pw = d.getData()
+			try:
+				req = session.post(url, "password=%s" %pw, headers={"Content-Type": "application/x-www-form-urlencoded"})
+			except:
+				self.showNotFoundError()
+				return
+			if req.status_code == 404:
+				self.showNotFoundError()
+				return
+			body = req.text
 		try:
 			start = re.search("https:\\\/\\\/dl\d\d\.twitcasting\.tv\\\/tc\.vod\\\/", body).start()
 		except:
@@ -365,7 +384,7 @@ class Twitcasting(SourceBase):
 	def showNotFoundError(self):
 		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す
 		"""
-		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。"))
+		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないかを確認してください。"))
 
 	def showError(self, code):
 		"""ツイキャスAPIが返すエラーコードに応じてメッセージを出す。Invalid TokenについてはshowTokenError()を使用することを想定しているため未実装。
