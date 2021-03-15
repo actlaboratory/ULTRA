@@ -10,6 +10,7 @@ import wx
 import re
 import ctypes
 import pywintypes
+import datetime
 
 import constants
 import errorCodes
@@ -44,6 +45,7 @@ class MainView(BaseView):
 		self.InstallMenuEvent(Menu(self.identifier),self.events.OnMenuSelect)
 		# 状況表示用リストを作成
 		self.listCtrl, self.static = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT)
+		self.listCtrl.AppendColumn(_("日時"))
 		self.listCtrl.AppendColumn(_("タイトル"))
 		self.listCtrl.AppendColumn(_("詳細"))
 		self.listCtrl.AppendColumn(_("ソース"))
@@ -58,7 +60,10 @@ class MainView(BaseView):
 		:param source: 「ツイキャス」など
 		:type source: str
 		"""
+		timestamp = datetime.datetime.now()
+		timestamp = timestamp.strftime("%Y/%m/%d %H:%M:%S")
 		self.listCtrl.Append([
+			timestamp,
 			title,
 			detail,
 			source
