@@ -48,7 +48,7 @@ class KeyValueSettingDialogBase(BaseDialog):
 	def InstallControls(self):
 		"""いろんなwidgetを設置する。"""
 		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20,style=wx.ALL,proportion=20)
-		self.hListCtrl, dummy=self.creator.listCtrl(_("現在の登録内容"), proportion=0, sizerFlag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,size=(750,300),style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+		self.hListCtrl, dummy=self.creator.virtualListCtrl(_("現在の登録内容"), proportion=0, sizerFlag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,size=(750,300),style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
 
 		for i,info in enumerate(self.columnInfo):
 			self.hListCtrl.InsertColumn(i,info[0],format=info[1],width=info[2])
