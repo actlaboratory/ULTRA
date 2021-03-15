@@ -90,7 +90,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
-			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER"
+			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_SET_TOKEN", "TC_MANAGE_USER"
 		])
 
 		# オプションメニュー
@@ -163,6 +163,9 @@ class Events(BaseEvents):
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.record(d.getData())
 
+		# ツイキャス：トークンを再設定
+		if selected == menuItemsStore.getRef("TC_SET_TOKEN"):
+			globalVars.app.tc.setToken()
 		# ツイキャス：ユーザの管理
 		if selected == menuItemsStore.getRef("TC_MANAGE_USER"):
 			d = tcManageUser.Dialog()

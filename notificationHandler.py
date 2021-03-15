@@ -1,5 +1,6 @@
 # notification handler for ultra
 
+import constants
 import webbrowser
 import globalVars
 import wx.adv
@@ -46,7 +47,7 @@ class NotificationHandler:
 		"""
 		self.loadSettings(config)
 		if self.baloon:
-			b = wx.adv.NotificationMessage("ULTRA", _("配信開始：%s") %(userName))
+			b = wx.adv.NotificationMessage(constants.APP_NAME, _("配信開始：%s") %(userName))
 			b.Show()
 			b.Close()
 		if self.sound:

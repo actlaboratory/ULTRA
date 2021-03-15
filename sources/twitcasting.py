@@ -3,6 +3,7 @@
 import base64
 import json
 import websocket
+import pickle
 import wx
 import globalVars
 import requests
@@ -54,9 +55,33 @@ class Twitcasting(SourceBase):
 				self.log.debug("User chose no from confirmation dialog.")
 				return False
 		self.initSocket()
+		self.checkTokenExpires(True)
 		self.initialized = 1
 		self.enableMenu(True)
 		return True
+
+	def checkTokenExpires(self, startup=False):
+		"""トークンの有効期限がもうすぐ切れる、あるいは切れたことを通知
+
+		:param startup: Trueにすると、ダイアログを表示。Falseにすると、トースト通知を表示。
+		:type startup: bool
+		"""
+		if self.expires - time.time() < 0:
+			if startup:
+				simpleDialog.dialog(_("アクセストークンの有効期限が切れています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
+			else:
+				import wx.adv
+				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
+				b.Show()
+				b.Close()
+		elif self.expires - time.time() < constants.TOKEN_EXPIRE_MAX:
+			if startup:
+				simpleDialog.dialog(_("アクセストークンの有効期限が近づいています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
+			else:
+				import wx.adv
+				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
+				b.Show()
+				b.Close()
 
 	def enableMenu(self, mode):
 		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
@@ -97,6 +122,7 @@ class Twitcasting(SourceBase):
 		for i in rm:
 			self.users.pop(i)
 		self.saveUserList()
+		self.checkTokenExpires()
 
 	def onError(self, error):
 		"""ソケット通信中にエラーが起きた
@@ -125,10 +151,11 @@ class Twitcasting(SourceBase):
 		"""
 		try:
 			with open(self.tokenData, "rb") as f:
-				token = base64.b64decode(f.read()).decode()
+				data = pickle.load(f)
 		except:
 			return False
-		self.token = token
+		self.token = data["token"]
+		self.expires = data["expires"]
 		self.setHeader()
 		return self.verifyCredentials()
 
@@ -169,9 +196,13 @@ class Twitcasting(SourceBase):
 				manager.shutdown()
 				d.Destroy()
 				return False
-		token = manager.getToken()["access_token"]
+		token = manager.getToken()
+		data = {
+			"token": token["access_token"],
+			"expires": token["expires_at"],
+		}
 		with open(self.tokenData, "wb") as f:
-			f.write(base64.b64encode(token.encode()))
+			pickle.dump(data, f)
 		simpleDialog.dialog(_("処理結果"), _("認証が完了しました。"))
 		self.loadToken()
 		return True
