@@ -3,7 +3,7 @@
 import base64
 import json
 import traceback
-import views.passwordEdit
+import views.SimpleInputDialog
 import wx.adv
 import websocket
 import pickle
@@ -379,11 +379,11 @@ class Twitcasting(SourceBase):
 			return
 		body = req.text
 		if protected:
-			d = views.passwordEdit.Dialog()
+			d = views.SimpleInputDialog.Dialog(_("合い言葉の入力"), _("合い言葉"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL:
 				return
-			pw = d.getData()
+			pw = d.GetData()
 			try:
 				req = session.post(url, "password=%s" %pw, headers={"Content-Type": "application/x-www-form-urlencoded"})
 			except:
@@ -439,7 +439,7 @@ class Twitcasting(SourceBase):
 	def showNotFoundError(self):
 		"""過去ライブのダウンロードを試みた際、失敗したことを通知するメッセージを出す
 		"""
-		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないかを確認してください。"))
+		simpleDialog.errorDialog(_("録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないことを確認してください。"))
 
 	def showError(self, code):
 		"""ツイキャスAPIが返すエラーコードに応じてメッセージを出す。Invalid TokenについてはshowTokenError()を使用することを想定しているため未実装。

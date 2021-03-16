@@ -24,8 +24,7 @@ from simpleDialog import *
 
 from views import mkDialog
 from views import sample
-from views import urlEdit
-from views import userEdit
+from views import SimpleInputDialog
 from views import tcManageUser
 from views import settingsDialog
 from views import versionDialog
@@ -157,17 +156,17 @@ class Events(BaseEvents):
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):
-			d = urlEdit.Dialog()
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("再生ページのURL"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
-			globalVars.app.tc.downloadArchive(d.getData())
+			globalVars.app.tc.downloadArchive(d.GetData())
 
 		# ツイキャス：ユーザ名を指定して録画
 		if selected == menuItemsStore.getRef("TC_RECORD_USER"):
-			d = userEdit.Dialog()
+			d = SimpleInputDialog.Dialog(_("ユーザ名を入力"), _("ユーザ名"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
-			globalVars.app.tc.record(d.getData())
+			globalVars.app.tc.record(d.GetData())
 
 		# ツイキャス：トークンを再設定
 		if selected == menuItemsStore.getRef("TC_SET_TOKEN"):
