@@ -11,6 +11,7 @@ import re
 import ctypes
 import pywintypes
 import datetime
+import win32com
 
 import constants
 import errorCodes
@@ -100,7 +101,7 @@ class Menu(BaseMenu):
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
-			"OP_SETTINGS",
+			"OP_SETTINGS", "OP_STARTUP",
 		])
 
 		#ヘルプメニューの中身
@@ -186,6 +187,10 @@ class Events(BaseEvents):
 			d.Initialize()
 			d.Show()
 
+		# スタートアップに登録
+		if selected == menuItemsStore.getRef("OP_STARTUP"):
+			self.registerStartup()
+
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()
 
@@ -205,3 +210,25 @@ class Events(BaseEvents):
 
 	def show(self):
 		self.parent.hFrame.Show()
+
+	def registerStartup(self):
+		target = os.path.join(
+			os.environ["appdata"],
+			"Microsoft",
+			"Windows",
+			"Start Menu",
+			"Programs",
+			"Startup",
+			"%s.lnk" %constants.APP_NAME
+		)
+		if os.path.exists(target):
+			d = yesNoDialog(_("確認"), _("Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"))
+			if d == wx.ID_YES:
+				os.remove(target)
+				dialog(_("完了"), _("Windows起動時の自動起動を無効化しました。"))
+			return
+		ws = win32com.client.Dispatch("wscript.shell")
+		shortCut = ws.CreateShortcut(target)
+		shortCut.TargetPath = sys.argv[0]
+		shortCut.Save()
+		dialog(_("完了"), _("Windows起動時の自動起動を設定しました。"))

@@ -10,6 +10,7 @@ dic={
 	"TC_SET_TOKEN": _("アクセストークンを設定(&T)"),
 	"TC_MANAGE_USER": _("通知対象ユーザの管理") + "...",
 	"OP_SETTINGS": _("設定(&S)") + "...",
+	"OP_STARTUP": _("Windows起動時の自動起動を有効化(&W)"),
 	"HELP_UPDATE":_("最新バージョンを確認(&U)")+"...",
 	"HELP_VERSIONINFO":_("バージョン情報(&V)")+"...",
 }
