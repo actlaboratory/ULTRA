@@ -87,7 +87,8 @@ class Menu(BaseMenu):
 
 		#ファイルメニュー
 		self.RegisterMenuCommand(self.hFileMenu,[
-				"HIDE", "EXIT",
+				"HIDE",
+				"EXIT",
 		])
 
 		# サービスメニューの中身
@@ -96,18 +97,22 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
-			"TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_SET_TOKEN", "TC_MANAGE_USER"
+			"TC_RECORD_ARCHIVE",
+			"TC_RECORD_USER",
+			"TC_SET_TOKEN",
+			"TC_MANAGE_USER",
 		])
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
-			"OP_SETTINGS", "OP_STARTUP",
+			"OP_SETTINGS",
+			"OP_STARTUP",
 		])
 
 		#ヘルプメニューの中身
 		self.RegisterMenuCommand(self.hHelpMenu,[
-				"HELP_UPDATE",
-				"HELP_VERSIONINFO",
+			"HELP_UPDATE",
+			"HELP_VERSIONINFO",
 		])
 
 		#メニューバーの生成
