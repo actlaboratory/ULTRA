@@ -91,7 +91,7 @@ class Twitcasting(SourceBase):
 				pickle.dump(d, f)
 
 	def enableMenu(self, mode):
-		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_MANAGE_USER")
+		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_SET_TOKEN", "TC_MANAGE_USER")
 		for i in tc:
 			globalVars.app.hMainView.menu.EnableMenu(i, mode)
 

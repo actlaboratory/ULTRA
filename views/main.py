@@ -99,6 +99,7 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
 			"TC_RECORD_USER",
+			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
 		])
@@ -173,9 +174,23 @@ class Events(BaseEvents):
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.record(d.GetData())
 
+		# ツイキャス：トークンを削除
+		if selected == menuItemsStore.getRef("TC_REMOVE_TOKEN"):
+			if not os.path.exists(constants.AC_TWITCASTING):
+				errorDialog(_("すでに削除されています。"))
+				return
+			d = yesNoDialog(_("アクセストークンの削除"), _("ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"))
+			if d == wx.ID_NO:
+				return
+			if globalVars.app.tc.running:
+				globalVars.app.tc.exit()
+			os.remove(constants.AC_TWITCASTING)
+			dialog(_("完了"), _("アクセストークンを削除しました。"))
+
 		# ツイキャス：トークンを再設定
 		if selected == menuItemsStore.getRef("TC_SET_TOKEN"):
 			globalVars.app.tc.setToken()
+
 		# ツイキャス：ユーザの管理
 		if selected == menuItemsStore.getRef("TC_MANAGE_USER"):
 			d = tcManageUser.Dialog()
@@ -195,9 +210,11 @@ class Events(BaseEvents):
 		if selected == menuItemsStore.getRef("OP_STARTUP"):
 			self.registerStartup()
 
+		# 更新の確認
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
 			globalVars.update.update()
 
+		# バージョン情報
 		if selected==menuItemsStore.getRef("HELP_VERSIONINFO"):
 			d = versionDialog.dialog()
 			d.Initialize()
