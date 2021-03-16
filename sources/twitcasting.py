@@ -2,6 +2,9 @@
 
 import base64
 import json
+import traceback
+import views.passwordEdit
+import wx.adv
 import websocket
 import pickle
 import wx
@@ -70,7 +73,6 @@ class Twitcasting(SourceBase):
 			if startup:
 				simpleDialog.dialog(_("アクセストークンの有効期限が切れています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 			else:
-				import wx.adv
 				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 				b.Show()
 				b.Close()
@@ -78,7 +80,6 @@ class Twitcasting(SourceBase):
 			if startup:
 				simpleDialog.dialog(_("アクセストークンの有効期限が近づいています"), _("本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 			else:
-				import wx.adv
 				b = wx.adv.NotificationMessage(constants.APP_NAME, _("アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"))
 				b.Show()
 				b.Close()
@@ -118,8 +119,13 @@ class Twitcasting(SourceBase):
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
-			if "remove" in self.users[i].keys() and (time.time() - self.users[i]["remove"]) >= 0:
+			if "remove" in self.users[i].keys() and (self.users[i]["remove"] - time.time()) < 0:
 				rm.append(i)
+				globalVars.app.hMainView.addLog(_("録画対象の削除"), _("%sのライブを、録画対象から削除しました。") %self.users[i]["user"])
+				b = wx.adv.NotificationMessage(constants.APP_NAME, _("%sのライブを、録画対象から削除しました。") %self.users[i]["user"])
+				b.Show()
+				b.Close()
+		rm.reverse()
 		for i in rm:
 			self.users.pop(i)
 		self.saveUserList()
@@ -145,7 +151,6 @@ class Twitcasting(SourceBase):
 	def onError(self, error):
 		"""ソケット通信中にエラーが起きた
 		"""
-		import traceback
 		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
@@ -253,7 +258,6 @@ class Twitcasting(SourceBase):
 			with open(constants.TC_USER_DATA, "w", encoding="utf-8") as f:
 				json.dump(self.users, f, ensure_ascii=False)
 		except:
-			import traceback
 			self.log.error("Failed to save users.dat.\n" + traceback.format_exc())
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
 
@@ -375,7 +379,6 @@ class Twitcasting(SourceBase):
 			return
 		body = req.text
 		if protected:
-			import views.passwordEdit
 			d = views.passwordEdit.Dialog()
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL:
@@ -543,6 +546,7 @@ class Twitcasting(SourceBase):
 		result = self.addUser(userInfo["user"]["screen_id"], True, True, False, True, False, False, "", userInfo["user"]["id"])
 		if not result:
 			return
+		globalVars.app.hMainView.addLog(_("ユーザ名を指定して録画"), _("%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されます。") %userInfo["user"]["screen_id"])
 		if userInfo["user"]["is_live"]:
 			movie = self.getCurrentLive(userName)
 			if movie == None:
