@@ -10,6 +10,7 @@ import threading
 import globalVars
 import os
 from logging import getLogger
+			
 
 class Recorder(threading.Thread):
 	def __init__(self, source, stream, userName, time, movie=""):
@@ -145,3 +146,17 @@ class Recorder(threading.Thread):
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 			self.log.info("saved: %s" %self.path)
 		globalVars.app.hMainView.addLog(_("録画終了"), _("%sのライブを録画しました。") %self.userName)
+
+	def getTargetUser(self):
+		"""誰のライブを録画中かを返す
+		"""
+		return self.userName
+
+def getRecordingUsers():
+	"""現在録画中のユーザ名のリストを返す
+	"""
+	ret = []
+	for i in threading.enumerate():
+		if type(i) == Recorder:
+			ret.append(i.getTargetUser())
+	return ret

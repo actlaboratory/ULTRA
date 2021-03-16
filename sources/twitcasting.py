@@ -498,7 +498,7 @@ class Twitcasting(SourceBase):
 				return False
 		if id in self.users.keys():
 			userInfo = self.getUserInfo(id)
-			if userInfo["user"]["is_live"]:
+			if userInfo["user"]["is_live"] and userInfo["user"]["screen_id"] not in recorder.getRecordingUsers():
 				movie = self.getCurrentLive(id)
 				r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
 				r.start()
