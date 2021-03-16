@@ -12,6 +12,7 @@ import ctypes
 import pywintypes
 import datetime
 import win32com
+from recorder import getRecordingUsers
 
 import constants
 import errorCodes
@@ -137,8 +138,7 @@ class Events(BaseEvents):
 
 		# 終了
 		if selected == menuItemsStore.getRef("EXIT"):
-			self.parent.hFrame.Close(True)
-			globalVars.app.tb.Destroy()
+			self.exitWithConfirmation()
 
 		# ツイキャス連携の有効化
 		if selected == menuItemsStore.getRef("TC_ENABLE"):
@@ -210,6 +210,14 @@ class Events(BaseEvents):
 
 	def show(self):
 		self.parent.hFrame.Show()
+
+	def exitWithConfirmation(self):
+		if getRecordingUsers() != []:
+			d = yesNoDialog(_("確認"), _("録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろしいですか？"))
+			if d == wx.ID_NO:
+				return
+		self.parent.hFrame.Close(True)
+		globalVars.app.tb.Destroy()
 
 	def registerStartup(self):
 		target = os.path.join(
