@@ -222,7 +222,12 @@ class Events(BaseEvents):
 
 	def Exit(self, event):
 		if event.CanVeto():
-			self.hide()
+			# Alt+F4が押された
+			if globalVars.app.config.getboolean("general", "minimizeOnExit", True):
+				self.hide()
+			else:
+				super().Exit(event)
+				globalVars.app.tb.Destroy()
 		else:
 			super().Exit(event)
 

@@ -52,6 +52,7 @@ class Dialog(BaseDialog):
 		# general
 		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,views.ViewCreator.GridBagSizer,label=_("一般"),style=wx.ALL,margin=20)
 		self.autohide = creator.checkbox(_("起動時にウィンドウを隠す(&H)"))
+		self.minimizeonexit = creator.checkbox(_("終了時にタスクトレイに最小化(&M)"))
 
 		# view
 		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,views.ViewCreator.GridBagSizer,label=_("表示/言語"),style=wx.ALL,margin=20)
@@ -89,6 +90,7 @@ class Dialog(BaseDialog):
 	def load(self):
 		# general
 		self._setValue(self.autohide,"general","autohide",configType.BOOL,False)
+		self._setValue(self.minimizeonexit, "general", "minimizeOnExit", configType.BOOL, True)
 
 		# view
 		self._setValue(self.language,"general","language",configType.DIC,self.languageSelection)
