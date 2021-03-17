@@ -2,16 +2,25 @@
 # source base
 
 import threading
+import globalVars
 
 class SourceBase(threading.Thread):
 	"""各サービスのライブ監視などを行う際のベースクラス
 	"""
 	# サービスの名前（録画時に使う場合がある）
 	name = ""
+	# ユーザに見せるサービスの名前
+	friendlyName = ""
+	# 動作状況リストで使うインデックス
+	index = 0
 
 	def __init__(self):
 		"""コンストラクタ。このメソッドをオーバーライドして、スレッドを使う必要がある場合には、必ずsuper().__init__()を呼ぶこと。
 		"""
+		globalVars.app.hMainView.statusList.InsertItem(self.index, self.friendlyName)
+		self.initThread()
+
+	def initThread(self):
 		super().__init__(daemon=True)
 
 	def initialize(self):
@@ -31,3 +40,11 @@ class SourceBase(threading.Thread):
 		:type path: str
 		"""
 		pass
+
+	def setStatus(self, status):
+		"""動作状況表示を更新
+
+		:param status: 現在の状況
+		:type status: str
+		"""
+		globalVars.app.hMainView.statusList.SetItem(self.index, 1, status)

@@ -38,12 +38,18 @@ class MainView(BaseView):
 			self.app.config.getint(self.identifier,"positionY",50,0)
 		)
 		self.InstallMenuEvent(Menu(self.identifier),self.events.OnMenuSelect)
-		# 状況表示用リストを作成
-		self.listCtrl, self.static = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT)
-		self.listCtrl.AppendColumn(_("日時"))
-		self.listCtrl.AppendColumn(_("タイトル"))
-		self.listCtrl.AppendColumn(_("詳細"))
-		self.listCtrl.AppendColumn(_("ソース"))
+		# 履歴表示用リストを作成
+		self.logList, self.logStatic = self.creator.listCtrl(_("動作履歴"), style=wx.LC_REPORT)
+		self.logList.AppendColumn(_("日時"))
+		self.logList.AppendColumn(_("タイトル"))
+		self.logList.AppendColumn(_("詳細"))
+		self.logList.AppendColumn(_("サービス"))
+		# 状況表示のリスト
+		self.statusList, self.statusStatic = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT)
+		self.statusList.AppendColumn(_("サービス"))
+		self.statusList.AppendColumn(_("状態"))
+		# 「準備完了」を表示
+		self.addLog(_("準備完了"), _("%sを起動しました。") %constants.APP_NAME)
 
 	def addLog(self, title, detail, source=""):
 		"""状況表示用リストに項目を追加
@@ -57,13 +63,12 @@ class MainView(BaseView):
 		"""
 		timestamp = datetime.datetime.now()
 		timestamp = timestamp.strftime("%Y/%m/%d %H:%M:%S")
-		self.listCtrl.Append([
+		self.logList.Append([
 			timestamp,
 			title,
 			detail,
 			source
 		])
-
 
 class Menu(BaseMenu):
 	def Apply(self,target):
@@ -117,6 +122,8 @@ class Menu(BaseMenu):
 		self.hMenuBar.Append(self.hOptionMenu, _("オプション(&O)"))
 		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ(&H)"))
 		target.SetMenuBar(self.hMenuBar)
+		# 「ウィンドウを隠す」を無効化
+		self.EnableMenu("HIDE", False)
 
 class Events(BaseEvents):
 	def OnMenuSelect(self,event):
@@ -222,7 +229,7 @@ class Events(BaseEvents):
 	def Exit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
-			if globalVars.app.config.getboolean("general", "minimizeOnExit", True):
+			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
 				self.hide()
 			else:
 				super().Exit(event)

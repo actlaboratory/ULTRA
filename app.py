@@ -9,7 +9,6 @@ import update
 import globalVars
 import proxyUtil
 import notificationHandler
-from sources import twitcasting
 import threading
 import sys
 
@@ -45,6 +44,7 @@ class Main(AppBase.MainBase):
 		from views import main
 		self.hMainView=main.MainView()
 		self.notificationHandler = notificationHandler.NotificationHandler()
+		from sources import twitcasting
 		self.tc = twitcasting.Twitcasting()
 		# 「ツイキャスの監視を有効化」の設定値を確認
 		if self.config.getboolean("twitcasting", "enable", True) and self.tc.initialize():

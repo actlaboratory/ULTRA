@@ -6,6 +6,7 @@ import constants
 import subprocess
 import simpleDialog
 import datetime
+from time import sleep
 import threading
 import globalVars
 import os
@@ -121,14 +122,13 @@ class Recorder(threading.Thread):
 				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
 				return
 			max = 30
-			import time
 			for i in range(max):
 				try:
 					cmd = self.getCommand()
 					break
 				except IOError:
 					self.log.info("#%i failed." %i)
-					time.sleep(30)
+					sleep(30)
 			if i + 1 == max:
 				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
 				return
@@ -141,6 +141,7 @@ class Recorder(threading.Thread):
 			if "404 Not Found" in result.stdout:
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout))
+			sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
