@@ -141,6 +141,7 @@ class Recorder(threading.Thread):
 			if "404 Not Found" in result.stdout:
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout))
+			time.sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
