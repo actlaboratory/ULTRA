@@ -132,3 +132,13 @@ class MaiｎBase(wx.App):
 		hours=bias//60
 		minutes=bias%60
 		self.timezone=datetime.timezone(datetime.timedelta(hours=hours,minutes=minutes))
+
+	def getAppPath(self):
+		"""アプリの絶対パスを返す
+		"""
+		if self.frozen:
+			# exeファイルで実行されている
+			return sys.executable
+		else:
+			# pyファイルで実行されている
+			return os.path.join(os.path.dirname(__file__), os.path.basename(sys.argv[0]))

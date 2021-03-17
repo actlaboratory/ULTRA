@@ -257,6 +257,6 @@ class Events(BaseEvents):
 			return
 		ws = win32com.client.Dispatch("wscript.shell")
 		shortCut = ws.CreateShortcut(target)
-		shortCut.TargetPath = sys.argv[0]
+		shortCut.TargetPath = globalVars.app.getAppPath()
 		shortCut.Save()
 		dialog(_("完了"), _("Windows起動時の自動起動を設定しました。"))
