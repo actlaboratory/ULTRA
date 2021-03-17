@@ -34,6 +34,9 @@ DEBUG_FILE = "received.txt"
 
 class Twitcasting(SourceBase):
 	name = "TwitCasting"
+	friendlyName = _("ツイキャス")
+	index = 0
+
 	def __init__(self):
 		super().__init__()
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
@@ -50,7 +53,7 @@ class Twitcasting(SourceBase):
 		"""アクセストークンの読み込み
 		"""
 		if self.initialized == 1:
-			super().__init__()
+			self.initThread()
 		if not self.loadToken():
 			self.log.info("Failed to load access token.")
 			if not self.showTokenError():
@@ -115,7 +118,7 @@ class Twitcasting(SourceBase):
 		for i in obj["movies"]:
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
-				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], _("ツイキャス"))
+				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
@@ -143,10 +146,10 @@ class Twitcasting(SourceBase):
 		:type name: str
 		"""
 		if user != self.users[id]["user"]:
-			globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, _("ツイキャス"))
+			globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, self.friendlyName)
 			self.users[id]["user"] = user
 		if name != self.users[id]["name"]:
-			globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, _("ツイキャス"))
+			globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, self.friendlyName)
 			self.users[id]["name"] = name
 
 	def updateUser(self):
@@ -160,7 +163,8 @@ class Twitcasting(SourceBase):
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
 			self.socket.close()
-			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), _("ツイキャス"))
+			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
+			self.setStatus(_("接続試行中"))
 			self.initSocket()
 			self.socket.run_forever()
 
@@ -168,13 +172,16 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が始まった
 		"""
 		self.running = True
-		globalVars.app.hMainView.addLog(_("準備完了"), _("接続しました。"), _("ツイキャス"))
+		globalVars.app.hMainView.addLog(_("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
+		self.setStatus(_("接続済み"))
 
 	def onClose(self):
 		"""ソケット通信が切断された
 		"""
 		self.running = False
+		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
+		self.setStatus(_("未接続"))
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -585,7 +592,7 @@ class CommentGetter(threading.Thread):
 	def run(self):
 		if not self.getAllComments():
 			return
-		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を開始します。"), _("ツイキャス"))
+		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を開始します。"), self.tc.friendlyName)
 		self.saveComment()
 		while self.isLive():
 			if self.hasError == 1:
@@ -597,7 +604,7 @@ class CommentGetter(threading.Thread):
 			if len(self.comments) > 0:
 				self.lastCommentId = self.comments[0]["id"]
 			self.saveComment()
-		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を終了しました。。"), _("ツイキャス"))
+		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を終了しました。"), self.tc.friendlyName)
 
 	def saveComment(self):
 		"""コメントをファイルに保存する
@@ -703,12 +710,12 @@ class UserChecker(threading.Thread):
 		self.users = deepcopy(tuple(self.tc.users.keys()))
 
 	def run(self):
-		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), _("ツイキャス"))
+		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), self.tc.friendlyName)
 		for i in self.users:
 			if i in self.tc.users:
-				globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("%sの情報を取得しています。") %self.tc.users[i]["user"], _("ツイキャス"))
+				globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("%sの情報を取得しています。") %self.tc.users[i]["user"], self.tc.friendlyName)
 				userInfo = self.tc.getUserInfo(i, False)
 				if userInfo:
 					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
 			time.sleep(60)
-		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), _("ツイキャス"))
+		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
