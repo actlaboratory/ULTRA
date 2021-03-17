@@ -3,16 +3,11 @@
 #Copyright (C) 2019 Yukio Nozawa <personal@nyanchangames.com>
 #Copyright (C) 2019-2020 yamahubuki <itiro.ishino@gmail.com>
 
-import logging
 import os
 import sys
 import wx
-import re
-import ctypes
-import pywintypes
 import datetime
 import win32com
-from recorder import getRecordingUsers
 
 import constants
 import errorCodes
@@ -20,10 +15,9 @@ import globalVars
 import menuItemsStore
 
 from .base import *
+from recorder import getRecordingUsers
 from simpleDialog import *
 
-from views import mkDialog
-from views import sample
 from views import SimpleInputDialog
 from views import tcManageUser
 from views import settingsDialog
