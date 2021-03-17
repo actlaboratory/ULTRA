@@ -50,7 +50,7 @@ class Dialog(BaseDialog):
 		self.tab = self.creator.tabCtrl(_("カテゴリ選択"))
 
 		# general
-		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,views.ViewCreator.GridBagSizer,label=_("一般"),style=wx.ALL,margin=20)
+		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,label=_("一般"),space=20,style=wx.ALL,margin=20)
 		self.autohide = creator.checkbox(_("起動時にウィンドウを隠す(&H)"))
 		self.minimizeonexit = creator.checkbox(_("終了時にタスクトレイに最小化(&M)"))
 
@@ -60,19 +60,26 @@ class Dialog(BaseDialog):
 		self.colormode, static = creator.combobox(_("画面表示モード(&D)"), list(self.colorModeSelection.values()))
 
 		# notification
-		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("通知"),style=wx.ALL,margin=20)
+		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("通知"),style=wx.ALL|wx.EXPAND,margin=20)
 		self.baloon = creator.checkbox(_("バルーン通知"))
 		self.record = creator.checkbox(_("録画"))
 		self.openbrowser = creator.checkbox(_("ブラウザで開く"))
 		self.sound = creator.checkbox(_("サウンドを再生"), self.checkBoxStatusChanged)
-		self.soundfile, static = creator.inputbox(_("再生するサウンド"))
-		self.soundfileBrowse = creator.button(_("参照"), self.browse)
+		creator=views.ViewCreator.ViewCreator(self.viewMode,creator.GetPanel(),creator.GetSizer(),wx.HORIZONTAL,space=5,style=wx.ALL|wx.EXPAND,margin=0)
+		self.soundfile, static = creator.inputbox(_("再生するサウンド"), proportion=1,textLayout=wx.VERTICAL)
+		self.soundfile.hideScrollBar(wx.HORIZONTAL)
+		self.soundfileBrowse = creator.button(_("参照"), self.browse,sizerFlag=wx.BOTTOM|wx.ALIGN_BOTTOM,margin=10)
 
 		# record
-		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("録画"),style=wx.ALL,margin=20)
-		self.dir, static = creator.inputbox(_("保存先フォルダ(&F)"))
+		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("録画"),style=wx.ALL|wx.EXPAND,margin=20)
+		dirArea=views.ViewCreator.ViewCreator(self.viewMode,creator.GetPanel(),creator.GetSizer(),wx.HORIZONTAL,space=5,style=wx.ALL|wx.EXPAND,margin=0)
+		self.dir, static = dirArea.inputbox(_("保存先フォルダ(&F)"),proportion=1,textLayout=wx.VERTICAL)
+		self.dir.hideScrollBar(wx.HORIZONTAL)
+		self.dirBrowse = dirArea.button(_("参照"), self.browse,sizerFlag=wx.BOTTOM|wx.ALIGN_BOTTOM,margin=10)
+
 		self.createsubdir = creator.checkbox(_("ユーザごとにサブフォルダを作成(&S)"))
-		self.filename, static = creator.inputbox(_("保存ファイル名(&N)"))
+		self.filename, static = creator.inputbox(_("保存ファイル名(&N)"),sizerFlag=wx.EXPAND)
+		self.filename.hideScrollBar(wx.HORIZONTAL)
 		self.extension, static = creator.combobox(_("ファイル形式(&T)"), list(self.extensionSelection.values()))
 
 		# network
@@ -80,6 +87,7 @@ class Dialog(BaseDialog):
 		self.update = creator.checkbox(_("起動時に更新を確認(&U)"))
 		self.usemanualsetting = creator.checkbox(_("プロキシサーバーの情報を手動で設定する(&M)"), self.checkBoxStatusChanged)
 		self.server, static = creator.inputbox(_("サーバーURL"))
+		self.server.hideScrollBar(wx.HORIZONTAL)
 		self.port, static = creator.spinCtrl(_("ポート番号"), 0, 65535, defaultValue=8080)
 
 		# buttons
