@@ -5,6 +5,7 @@ dic={
 	"TC_SUB": _("ツイキャス(&T)"),
 	"TC_ENABLE": _("ツイキャス連携機能を有効化"),
 	"TC_SAVE_COMMENTS": _("録画時にコメントをテキストファイルに保存する "),
+	"TC_UPDATE_USER": _("ユーザ情報を更新(&U)"),
 	"TC_RECORD_ARCHIVE": _("過去ライブのダウンロード") + "...",
 	"TC_RECORD_USER": _("指定したユーザのライブを録画") + "...",
 	"TC_REMOVE_TOKEN": _("アクセストークンを削除(&R)"),

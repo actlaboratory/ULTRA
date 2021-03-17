@@ -92,6 +92,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
+			"TC_UPDATE_USER",
 			"TC_RECORD_USER",
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
@@ -153,6 +154,10 @@ class Events(BaseEvents):
 		# ツイキャス：コメント保存
 		if selected == menuItemsStore.getRef("TC_SAVE_COMMENTS"):
 			globalVars.app.config["twitcasting"]["savecomments"] = event.IsChecked()
+
+		# ツイキャス：ユーザ情報を更新
+		if selected == menuItemsStore.getRef("TC_UPDATE_USER"):
+			globalVars.app.tc.updateUser()
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):

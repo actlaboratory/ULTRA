@@ -4,6 +4,7 @@ import base64
 import json
 import traceback
 import views.SimpleInputDialog
+from copy import deepcopy
 import wx.adv
 import websocket
 import pickle
@@ -91,7 +92,7 @@ class Twitcasting(SourceBase):
 				pickle.dump(d, f)
 
 	def enableMenu(self, mode):
-		tc = ("TC_SAVE_COMMENTS", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_SET_TOKEN", "TC_MANAGE_USER")
+		tc = ("TC_SAVE_COMMENTS", "TC_UPDATE_USER", "TC_RECORD_ARCHIVE", "TC_RECORD_USER", "TC_SET_TOKEN", "TC_MANAGE_USER")
 		for i in tc:
 			globalVars.app.hMainView.menu.EnableMenu(i, mode)
 
@@ -147,6 +148,10 @@ class Twitcasting(SourceBase):
 		if name != self.users[id]["name"]:
 			globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, _("ツイキャス"))
 			self.users[id]["name"] = name
+
+	def updateUser(self):
+		u = UserChecker(self)
+		u.start()
 
 	def onError(self, error):
 		"""ソケット通信中にエラーが起きた
@@ -268,11 +273,13 @@ class Twitcasting(SourceBase):
 			return
 		self.socket.run_forever()
 
-	def getUserInfo(self, user):
+	def getUserInfo(self, user, showNotFound=True):
 		"""ユーザ情報を取得
 
 		:param user: ユーザ名またはユーザID
 		:type user: str
+		:param showNotFound: 見つからなかったときにエラーを表示
+		:type showNotFound: bool
 		"""
 		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %user, headers=self.header)
 		if req.status_code != 200:
@@ -692,6 +699,16 @@ class UserChecker(threading.Thread):
 		"""
 		super().__init__(daemon=True)
 		self.tc = tc
+		self.tc.loadUserList()
+		self.users = deepcopy(tuple(self.tc.users.keys()))
 
 	def run(self):
-		pass
+		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), _("ツイキャス"))
+		for i in self.users:
+			if i in self.tc.users:
+				globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("%sの情報を取得しています。") %self.tc.users[i]["user"], _("ツイキャス"))
+				userInfo = self.tc.getUserInfo(i, False)
+				if userInfo:
+					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
+			time.sleep(60)
+		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), _("ツイキャス"))
