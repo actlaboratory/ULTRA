@@ -54,7 +54,11 @@ class Twitcasting(SourceBase):
 		"""
 		if self.initialized == 1:
 			self.initThread()
+		self.netflag = 0
 		if not self.loadToken():
+			if self.netflag:
+				self.netflag = 0
+				return False
 			self.log.info("Failed to load access token.")
 			if not self.showTokenError():
 				self.log.debug("User chose no from confirmation dialog.")
@@ -201,7 +205,13 @@ class Twitcasting(SourceBase):
 	def verifyCredentials(self):
 		"""トークンが正しく機能しているかどうかを確認する
 		"""
-		result = requests.get("https://apiv2.twitcasting.tv/verify_credentials", headers = self.header)
+		try:
+			result = requests.get("https://apiv2.twitcasting.tv/verify_credentials", headers = self.header)
+		except requests.RequestException as e:
+			self.log.error(traceback.format_exc())
+			simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
+			self.netflag = 1
+			return False
 		return result.status_code == 200
 
 	def setToken(self):
