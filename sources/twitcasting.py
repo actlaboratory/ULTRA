@@ -174,12 +174,14 @@ class Twitcasting(SourceBase):
 		self.running = True
 		globalVars.app.hMainView.addLog(_("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
+		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
 
 	def onClose(self):
 		"""ソケット通信が切断された
 		"""
 		self.running = False
+		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
 

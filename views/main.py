@@ -122,6 +122,8 @@ class Menu(BaseMenu):
 		self.hMenuBar.Append(self.hOptionMenu, _("オプション(&O)"))
 		self.hMenuBar.Append(self.hHelpMenu,_("ヘルプ(&H)"))
 		target.SetMenuBar(self.hMenuBar)
+		# 「ウィンドウを隠す」を無効化
+		self.EnableMenu("HIDE", False)
 
 class Events(BaseEvents):
 	def OnMenuSelect(self,event):
@@ -227,7 +229,7 @@ class Events(BaseEvents):
 	def Exit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
-			if globalVars.app.config.getboolean("general", "minimizeOnExit", True):
+			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
 				self.hide()
 			else:
 				super().Exit(event)
