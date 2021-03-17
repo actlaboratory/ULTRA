@@ -4,8 +4,11 @@
 
 defaultKeymap={}
 
-defaultKeymap["mainView"]={
-	"FILE_EXAMPLE": "ctrl+F12/shift+delete/ctrl+c/INSERT/ctrl+BACK",
+defaultKeymap["MAINVIEW"]={
 	"HELP_UPDATE":"",
 	"HELP_VERSIONINFO":"",
+}
+
+defaultKeymap["HOTKEY"]={
+	"SHOW":"",
 }

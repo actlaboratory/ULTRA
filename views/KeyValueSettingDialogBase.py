@@ -247,8 +247,10 @@ class SettingDialogBase(BaseDialog):
 				self.edits[i]=self.creator.checkbox(name[1],state=self.values[i], x=500)
 			elif name[1]:
 				self.edits[i],dummy=self.creator.inputbox(name[0],x=500,defaultValue=self.values[i], textLayout=wx.VERTICAL)
+				self.edits[i].hideScrollBar(wx.HORIZONTAL)
 			else:
 				self.edits[i],dummy=self.creator.inputbox(name[0],x=500,defaultValue=self.values[i],style=wx.TE_READONLY, textLayout=wx.VERTICAL)
+				self.edits[i].hideScrollBar(wx.HORIZONTAL)
 			if name[1]==None:
 				self.edits[i].GetParent().Hide()
 			if self.buttons[i]:

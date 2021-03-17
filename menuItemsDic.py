@@ -1,3 +1,16 @@
+
+
+import re
+
+def getValueString(ref_id):
+	""" ナビキーとダイアログ文字列を消去した文字列を取り出し """
+	dicVal = dic[ref_id]
+	s = re.sub("\.\.\.$", "", dicVal)
+	s = re.sub("\(&.\)$", "", s)
+	return re.sub("&", "", s)
+
+
+
 dic={
 	"SHOW": _("ウィンドウを表示(&S)"),
 	"HIDE": _("ウィンドウを隠す(&H)"),
@@ -12,6 +25,8 @@ dic={
 	"TC_SET_TOKEN": _("アクセストークンを設定(&T)"),
 	"TC_MANAGE_USER": _("通知対象ユーザの管理(&M)") + "...",
 	"OP_SETTINGS": _("設定(&S)") + "...",
+	"OP_SHORTCUT": _("キーボードショートカットの設定(&K)") + "...",
+	"OP_HOTKEY": _("グローバルホットキーの設定(&H)") + "...",
 	"OP_STARTUP": _("Windows起動時の自動起動を有効化(&W)"),
 	"HELP_UPDATE":_("最新バージョンを確認(&U)")+"...",
 	"HELP_VERSIONINFO":_("バージョン情報(&V)")+"...",

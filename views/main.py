@@ -9,15 +9,18 @@ import wx
 import datetime
 import win32com
 
+import ConfigManager
 import constants
 import errorCodes
 import globalVars
+import hotkeyHandler
 import menuItemsStore
 
 from .base import *
 from recorder import getRecordingUsers
 from simpleDialog import *
 
+from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
 from views import settingsDialog
@@ -38,6 +41,8 @@ class MainView(BaseView):
 			self.app.config.getint(self.identifier,"positionY",50,0)
 		)
 		self.InstallMenuEvent(Menu(self.identifier),self.events.OnMenuSelect)
+		self.applyHotKey()
+
 		# 履歴表示用リストを作成
 		self.logList, self.logStatic = self.creator.listCtrl(_("動作履歴"), style=wx.LC_REPORT)
 		self.logList.AppendColumn(_("日時"))
@@ -69,6 +74,17 @@ class MainView(BaseView):
 			detail,
 			source
 		])
+
+	def applyHotKey(self):
+		self.hotkey = hotkeyHandler.HotkeyHandler(None,hotkeyHandler.HotkeyFilter().SetDefault())
+		if self.hotkey.addFile(constants.KEYMAP_FILE_NAME,["HOTKEY"])==errorCodes.OK:
+			errors=self.hotkey.GetError("HOTKEY")
+			if errors:
+				tmp=_(constants.KEYMAP_FILE_NAME+"で設定されたホットキーが正しくありません。キーの重複、存在しないキー名の指定、使用できないキーパターンの指定などが考えられます。以下のキーの設定内容をご確認ください。\n\n")
+				for v in errors:
+					tmp+=v+"\n"
+				dialog(_("エラー"),tmp)
+			self.hotkey.Set("HOTKEY",self.hFrame)
 
 class Menu(BaseMenu):
 	def Apply(self,target):
@@ -107,6 +123,8 @@ class Menu(BaseMenu):
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
 			"OP_SETTINGS",
+			"OP_SHORTCUT",
+			"OP_HOTKEY",
 			"OP_STARTUP",
 		])
 
@@ -212,6 +230,21 @@ class Events(BaseEvents):
 			d.Initialize()
 			d.Show()
 
+		# キーボードショートカットの設定
+		if selected == menuItemsStore.getRef("OP_SHORTCUT"):
+			if self.setKeymap("MainView",_("ショートカットキーの設定"),filter=keymap.KeyFilter().SetDefault(False,False)):
+				#ショートカットキーの変更適用とメニューバーの再描画
+				self.parent.menu.InitShortcut()
+				self.parent.menu.ApplyShortcut(self.parent.hFrame)
+				self.parent.menu.Apply(self.parent.hFrame)
+
+		# グローバルホットキーの設定
+		if selected==menuItemsStore.getRef("OP_HOTKEY"):
+			if self.setKeymap("HOTKEY",_("グローバルホットキーの設定"), self.parent.hotkey,filter=self.parent.hotkey.filter):
+				#変更適用
+				self.parent.hotkey.UnSet("HOTKEY",self.parent.hFrame)
+				self.parent.applyHotKey()
+
 		# スタートアップに登録
 		if selected == menuItemsStore.getRef("OP_STARTUP"):
 			self.registerStartup()
@@ -272,3 +305,47 @@ class Events(BaseEvents):
 		shortCut.TargetPath = globalVars.app.getAppPath()
 		shortCut.Save()
 		dialog(_("完了"), _("Windows起動時の自動起動を設定しました。"))
+
+	def setKeymap(self, identifier,ttl, keymap=None,filter=None):
+		if keymap:
+			try:
+				keys=keymap.map[identifier.upper()]
+			except KeyError:
+				keys={}
+		else:
+			try:
+				keys=self.parent.menu.keymap.map[identifier.upper()]
+			except KeyError:
+				keys={}
+		keyData={}
+		menuData={}
+		for refName in defaultKeymap.defaultKeymap[identifier.upper()].keys():
+			title=menuItemsDic.getValueString(refName)
+			if refName in keys:
+				keyData[title]=keys[refName]
+			else:
+				keyData[title]=_("なし")
+			menuData[title]=refName
+
+		entries=[]
+		for map in (self.parent.menu.keymap,self.parent.hotkey):
+			for i in map.entries.keys():
+				if identifier.upper()!=i:	#今回の変更対象以外のビューのものが対象
+					entries.extend(map.entries[i])
+		d=views.globalKeyConfig.Dialog(keyData,menuData,entries,filter)
+		d.Initialize(ttl)
+		if d.Show()==wx.ID_CANCEL: return False
+
+		result={}
+		keyData,menuData=d.GetValue()
+
+		#キーマップの既存設定を置き換える
+		newMap=ConfigManager.ConfigManager()
+		newMap.read(constants.KEYMAP_FILE_NAME)
+		for name,key in keyData.items():
+			if key!=_("なし"):
+				newMap[identifier.upper()][menuData[name]]=key
+			else:
+				newMap[identifier.upper()][menuData[name]]=""
+		newMap.write()
+		return True
