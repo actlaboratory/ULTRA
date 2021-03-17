@@ -224,6 +224,7 @@ class Events(BaseEvents):
 				globalVars.app.tb.Destroy()
 		else:
 			super().Exit(event)
+			globalVars.app.tb.Destroy()
 
 	def hide(self):
 		self.parent.hFrame.Hide()
@@ -237,7 +238,6 @@ class Events(BaseEvents):
 			if d == wx.ID_NO:
 				return
 		self.parent.hFrame.Close(True)
-		globalVars.app.tb.Destroy()
 
 	def registerStartup(self):
 		target = os.path.join(
