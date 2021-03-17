@@ -122,14 +122,13 @@ class Recorder(threading.Thread):
 				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
 				return
 			max = 30
-			import time
 			for i in range(max):
 				try:
 					cmd = self.getCommand()
 					break
 				except IOError:
 					self.log.info("#%i failed." %i)
-					time.sleep(30)
+					sleep(30)
 			if i + 1 == max:
 				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
 				return
