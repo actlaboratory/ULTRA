@@ -114,7 +114,12 @@ class Twitcasting(SourceBase):
 		"""
 		if self.debug:
 			with open(DEBUG_FILE, "a", encoding="utf-8") as f:
-				f.write(text + "\n")
+				timestamp = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+				f.write(timestamp + "\n")
+				data = json.loads(text)
+				data = json.dumps(data, indent="\t", ensure_ascii=False)
+				f.write(data + "\n")
+				f.write("----------" + "\n")
 		self.loadUserList()
 		obj = json.loads(text)
 		if "movies" not in obj.keys() or obj["movies"] == None:
