@@ -134,7 +134,7 @@ class Dialog(BaseDialog):
 		self.port.Enable(result)
 		# sound
 		result = self.sound.GetValue()
-		self.soundfile.Enable(result)
+		self.soundfile.GetParent().Enable(result)
 		self.soundfileBrowse.Enable(result)
 
 	def _setValue(self, obj, section, key, t, prm=None, prm2=None):
