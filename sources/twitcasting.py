@@ -468,6 +468,31 @@ class Twitcasting(SourceBase):
 				return
 		return req.json()
 
+	def getMovieInfo(self, id):
+		"""ムービー情報を取得
+
+		:param id: ムービーID
+		:type id: str
+		"""
+		if self.initialized == 0 and not self.initialize():
+			return
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
+		except requests.RequestException as e:
+			self.log.error(traceback.format_exc())
+			return
+		if req.status_code != 200:
+			if req.status_code == 404:
+				self.showNotFoundError()
+				return
+			elif req.json()["error"]["code"] == 1000:
+				self.showTokenError()
+				return
+			else:
+				self.showError(req.json()["error"]["code"])
+				return
+		return req.json()
+
 	# 各種エラーを表示する
 	def showTokenError(self):
 		"""「有効なトークンがありません」というエラーを出す。「はい」を選ぶと認証開始。
@@ -617,11 +642,17 @@ class CommentGetter(threading.Thread):
 		self.movie = movie
 		self.tc = tc
 		self.hasError = 0
+		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.commentGetter"))
 
 	def run(self):
 		if not self.getAllComments():
 			return
-		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を開始します。"), self.tc.friendlyName)
+		movieInfo = self.tc.getMovieInfo(self.movie)
+		if movieInfo == None:
+			self.log.info("Failed to get movie info(ID:%s" %self.movie)
+			return
+		self.userName = movieInfo["broadcaster"]["screen_id"]
+		globalVars.app.hMainView.addLog(_("コメント保存開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
 		self.saveComment()
 		while self.isLive():
 			if self.hasError == 1:
@@ -633,7 +664,7 @@ class CommentGetter(threading.Thread):
 			if len(self.comments) > 0:
 				self.lastCommentId = self.comments[0]["id"]
 			self.saveComment()
-		globalVars.app.hMainView.addLog(_("コメント保存"), _("コメントの保存を終了しました。"), self.tc.friendlyName)
+		globalVars.app.hMainView.addLog(_("コメント保存終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
 
 	def saveComment(self):
 		"""コメントをファイルに保存する

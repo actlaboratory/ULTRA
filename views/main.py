@@ -67,13 +67,15 @@ class MainView(BaseView):
 		:type source: str
 		"""
 		timestamp = datetime.datetime.now()
-		timestamp = timestamp.strftime("%Y/%m/%d %H:%M:%S")
-		self.logList.Append([
+		timestamp = timestamp.strftime("%m/%d %H:%M:%S")
+		data = [
 			timestamp,
 			title,
 			detail,
 			source
-		])
+		]
+		self.logList.Append(data)
+		self.log.info("display:\n" + "\n".join(data) + "\n")
 
 	def applyHotKey(self):
 		self.hotkey = hotkeyHandler.HotkeyHandler(None,hotkeyHandler.HotkeyFilter().SetDefault())
