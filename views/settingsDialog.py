@@ -75,7 +75,7 @@ class Dialog(BaseDialog):
 		dirArea=views.ViewCreator.ViewCreator(self.viewMode,creator.GetPanel(),creator.GetSizer(),wx.HORIZONTAL,space=5,style=wx.ALL|wx.EXPAND,margin=0)
 		self.dir, static = dirArea.inputbox(_("保存先フォルダ(&F)"),proportion=1,textLayout=wx.VERTICAL)
 		self.dir.hideScrollBar(wx.HORIZONTAL)
-		self.dirBrowse = dirArea.button(_("参照"), self.browse,sizerFlag=wx.BOTTOM|wx.ALIGN_BOTTOM,margin=10)
+		self.dirBrowse = dirArea.button(_("参照"), self.browseDir,sizerFlag=wx.BOTTOM|wx.ALIGN_BOTTOM,margin=10)
 
 		self.createsubdir = creator.checkbox(_("ユーザごとにサブフォルダを作成(&S)"))
 		self.filename, static = creator.inputbox(_("保存ファイル名(&N)"),sizerFlag=wx.EXPAND)
@@ -172,6 +172,14 @@ class Dialog(BaseDialog):
 	def browse(self, event):
 		target = self.soundfile
 		dialog = wx.FileDialog(self.wnd, _("効果音ファイルを選択"), wildcard="WAVE files (*.wav)|*.wav|MP3 files(*.mp3)|*.mp3|OGG files(*.ogg)|*.ogg", style=wx.FD_OPEN)
+		result = dialog.ShowModal()
+		if result == wx.ID_CANCEL:
+			return
+		target.SetValue(dialog.GetPath())
+
+	def browseDir(self, event):
+		target = self.dir
+		dialog = wx.DirDialog(self.wnd, _("保存先フォルダを選択"))
 		result = dialog.ShowModal()
 		if result == wx.ID_CANCEL:
 			return
