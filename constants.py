@@ -37,12 +37,14 @@ FONT_MAX_SIZE=35
 NOT_CHECKED=wx.CHK_UNCHECKED
 HALF_CHECKED=wx.CHK_UNDETERMINED
 FULL_CHECKED=wx.CHK_CHECKED
+
 #build関連定数
 BASE_PACKAGE_URL = None
-PACKAGE_CONTAIN_ITEMS = ()#パッケージに含めたいファイルやfolderがあれば指定
+PACKAGE_CONTAIN_ITEMS = ("bin")#パッケージに含めたいファイルやfolderがあれば指定
 NEED_HOOKS = ()#pyinstallerのhookを追加したい場合は指定
 STARTUP_FILE = "ultra.py"#起動用ファイルを指定
 UPDATER_URL = "https://github.com/actlaboratory/updater/releases/download/1.0.0/updater.zip"
+
 # update情報
 UPDATE_URL = "https://actlab.org/api/checkUpdate"
 UPDATER_VERSION = "1.0.0"
