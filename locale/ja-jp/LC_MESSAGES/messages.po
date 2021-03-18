@@ -1,0 +1,990 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ULTRA package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ULTRA\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-03-18 15:53+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: AppBase.py:45
+msgid ""
+"ログ機能の初期化に失敗しました。下記のファイルへのアクセスが可能であることを"
+"確認してください。"
+msgstr ""
+
+#: keymapHandlerBase.py:690 keymapHandlerBase.py:720
+#, python-format
+msgid "%s は存在しないキーです。"
+msgstr ""
+
+#: keymapHandlerBase.py:761
+#, python-format
+msgid "%s は使用できないキーです。"
+msgstr ""
+
+#: keymapHandlerBase.py:770
+msgid "修飾キーのみのパターンは設定できません。"
+msgstr ""
+
+#: keymapHandlerBase.py:772
+msgid "このキーは修飾キーと合わせて指定する必要があります。"
+msgstr ""
+
+#: keymapHandlerBase.py:777
+msgid "修飾キーでないキーを複数指定することはできません。"
+msgstr ""
+
+#: keymapHandlerBase.py:780 keymapHandlerBase.py:788
+msgid "このキーは、SHIFTキー以外の修飾キーと合わせて指定する必要があります。"
+msgstr ""
+
+#: keymapHandlerBase.py:783
+msgid "修飾キーのみの組み合わせは指定できません。"
+msgstr ""
+
+#: keymapHandlerBase.py:792
+msgid "この組み合わせは別の用途で予約されているため、利用できません。"
+msgstr ""
+
+#: menuItemsDic.py:15
+msgid "ウィンドウを表示(&S)"
+msgstr ""
+
+#: menuItemsDic.py:16
+msgid "ウィンドウを隠す(&H)"
+msgstr ""
+
+#: menuItemsDic.py:17
+msgid "終了(&X)"
+msgstr ""
+
+#: menuItemsDic.py:18
+msgid "ツイキャス(&T)"
+msgstr ""
+
+#: menuItemsDic.py:19
+msgid "ツイキャス連携機能を有効化(&E)"
+msgstr ""
+
+#: menuItemsDic.py:20
+msgid "録画時にコメントをテキストファイルに保存する "
+msgstr ""
+
+#: menuItemsDic.py:21
+msgid "ユーザ情報を更新(&U)"
+msgstr ""
+
+#: menuItemsDic.py:22
+msgid "過去ライブのダウンロード(&A)"
+msgstr ""
+
+#: menuItemsDic.py:23
+msgid "指定したユーザのライブを録画(&R)"
+msgstr ""
+
+#: menuItemsDic.py:24
+msgid "アクセストークンを削除"
+msgstr ""
+
+#: menuItemsDic.py:25
+msgid "アクセストークンを設定(&T)"
+msgstr ""
+
+#: menuItemsDic.py:26
+msgid "通知対象ユーザの管理(&M)"
+msgstr ""
+
+#: menuItemsDic.py:27
+msgid "設定(&S)"
+msgstr ""
+
+#: menuItemsDic.py:28
+msgid "キーボードショートカットの設定(&K)"
+msgstr ""
+
+#: menuItemsDic.py:29
+msgid "グローバルホットキーの設定(&H)"
+msgstr ""
+
+#: menuItemsDic.py:30
+msgid "Windows起動時の自動起動を有効化(&W)"
+msgstr ""
+
+#: menuItemsDic.py:31
+msgid "最新バージョンを確認(&U)"
+msgstr ""
+
+#: menuItemsDic.py:32
+msgid "バージョン情報(&V)"
+msgstr ""
+
+#: notificationHandler.py:50
+#, python-format
+msgid "配信開始：%s"
+msgstr ""
+
+#: recorder.py:120 recorder.py:122 recorder.py:133 recorder.py:143
+msgid "録画エラー"
+msgstr ""
+
+#: recorder.py:120
+msgid ""
+"録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してく"
+"ださい。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択し"
+"てください。[はい]を選択して録画の保存先を変更することで、正しく録画を開始で"
+"きる場合があります。"
+msgstr ""
+
+#: recorder.py:122 recorder.py:133
+#, python-format
+msgid "%sのライブの録画処理を中断しました。"
+msgstr ""
+
+#: recorder.py:136
+msgid "録画開始"
+msgstr ""
+
+#: recorder.py:136 recorder.py:149 sources\twitcasting.py:655
+#: sources\twitcasting.py:667
+#, python-format
+msgid "ユーザ：%(user)s、ムービーID：%(movie)s"
+msgstr ""
+
+#: recorder.py:143
+#, python-format
+msgid "%sのライブを録画中にエラーが発生したため、再度録画を開始します。"
+msgstr ""
+
+#: recorder.py:143
+#, python-format
+msgid "詳細：%s"
+msgstr ""
+
+#: recorder.py:149
+msgid "録画終了"
+msgstr ""
+
+#: update.py:50 update.py:59 update.py:73 update.py:79 update.py:90
+#: update.py:98 update.py:103 update.py:108 update.py:160
+#: views\updateDialog.py:39
+msgid "アップデート"
+msgstr ""
+
+#: update.py:50
+msgid "このバージョンではアップデートを使用できません。"
+msgstr ""
+
+#: update.py:59
+msgid ""
+"アップデータが利用できません。お手数ですが、再度ソフトウェアをダウンロードし"
+"てください。"
+msgstr ""
+
+#: update.py:73
+msgid "サーバーへの通信がタイムアウトしました。"
+msgstr ""
+
+#: update.py:79
+msgid "サーバーへの接続に失敗しました。インターネット接続などをご確認ください"
+msgstr ""
+
+#: update.py:85
+msgid "サーバーとの通信中に不明なエラーが発生しました。"
+msgstr ""
+
+#: update.py:90
+msgid "サーバーとの通信に失敗しました。"
+msgstr ""
+
+#: update.py:98
+msgid "現在のバージョンが最新です。アップデートの必要はありません。"
+msgstr ""
+
+#: update.py:103
+msgid "リクエストパラメーターが不正です。開発者まで連絡してください"
+msgstr ""
+
+#: update.py:108
+msgid "アップデーターが登録されていません。開発者に連絡してください。"
+msgstr ""
+
+#: update.py:160
+msgid ""
+"ダウンロードが完了しました。\n"
+"ソフトウェア終了時に、自動でアップデートされます。"
+msgstr ""
+
+#: sources\twitcasting.py:37
+msgid "ツイキャス"
+msgstr ""
+
+#: sources\twitcasting.py:82
+msgid "アクセストークンの有効期限が切れています"
+msgstr ""
+
+#: sources\twitcasting.py:82 sources\twitcasting.py:89
+msgid ""
+"本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"
+msgstr ""
+
+#: sources\twitcasting.py:84
+msgid ""
+"アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセ"
+"ストークンを再度設定する必要があります。"
+msgstr ""
+
+#: sources\twitcasting.py:89
+msgid "アクセストークンの有効期限が近づいています"
+msgstr ""
+
+#: sources\twitcasting.py:91
+msgid ""
+"アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アク"
+"セストークンを再度設定する必要があります。"
+msgstr ""
+
+#: sources\twitcasting.py:130
+msgid "配信開始"
+msgstr ""
+
+#: sources\twitcasting.py:137
+msgid "録画対象の削除"
+msgstr ""
+
+#: sources\twitcasting.py:137 sources\twitcasting.py:138
+#, python-format
+msgid "%sのライブを、録画対象から削除しました。"
+msgstr ""
+
+#: sources\twitcasting.py:158
+msgid "ユーザ名変更"
+msgstr ""
+
+#: sources\twitcasting.py:158 sources\twitcasting.py:161
+#, python-format
+msgid "「%(old)s」→「%(new)s」"
+msgstr ""
+
+#: sources\twitcasting.py:161
+msgid "名前変更"
+msgstr ""
+
+#: sources\twitcasting.py:175 sources\twitcasting.py:194
+msgid "切断"
+msgstr ""
+
+#: sources\twitcasting.py:175
+msgid "インターネット接続が切断されました。再試行します。"
+msgstr ""
+
+#: sources\twitcasting.py:176
+msgid "接続試行中"
+msgstr ""
+
+#: sources\twitcasting.py:184
+msgid "接続完了"
+msgstr ""
+
+#: sources\twitcasting.py:184
+msgid "新着ライブの監視を開始しました。"
+msgstr ""
+
+#: sources\twitcasting.py:187
+msgid "接続済み"
+msgstr ""
+
+#: sources\twitcasting.py:194
+msgid "ツイキャスとの接続を切断しました。"
+msgstr ""
+
+#: sources\twitcasting.py:195
+msgid "未接続"
+msgstr ""
+
+#: sources\twitcasting.py:217
+msgid ""
+"インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できませ"
+"ん。"
+msgstr ""
+
+#: sources\twitcasting.py:234
+msgid ""
+"認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってくださ"
+"い。"
+msgstr ""
+
+#: sources\twitcasting.py:235
+msgid "認証に失敗しました。もう一度お試しください。"
+msgstr ""
+
+#: sources\twitcasting.py:236
+msgid ""
+"しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。"
+msgstr ""
+
+#: sources\twitcasting.py:249 sources\twitcasting.py:261
+msgid "処理結果"
+msgstr ""
+
+#: sources\twitcasting.py:249
+msgid "キャンセルされました。"
+msgstr ""
+
+#: sources\twitcasting.py:261
+msgid "認証が完了しました。"
+msgstr ""
+
+#: sources\twitcasting.py:291
+msgid "ユーザ情報の保存に失敗しました。"
+msgstr ""
+
+#: sources\twitcasting.py:318
+msgid "指定したユーザが見つかりません。"
+msgstr ""
+
+#: sources\twitcasting.py:421
+msgid "合い言葉の入力"
+msgstr ""
+
+#: sources\twitcasting.py:421
+msgid "合い言葉"
+msgstr ""
+
+#: sources\twitcasting.py:500
+msgid "アクセストークンが見つかりません"
+msgstr ""
+
+#: sources\twitcasting.py:500
+msgid ""
+"利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行い"
+"ますか？"
+msgstr ""
+
+#: sources\twitcasting.py:510
+msgid ""
+"録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確"
+"認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないことを"
+"確認してください。"
+msgstr ""
+
+#: sources\twitcasting.py:519
+msgid ""
+"ツイキャスAPIの実行回数が上限に達しました。しばらくたってから、再度実行してく"
+"ださい。"
+msgstr ""
+
+#: sources\twitcasting.py:521
+msgid ""
+"ツイキャスAPIが500エラーを返しました。しばらく待ってから、再度接続してくださ"
+"い。"
+msgstr ""
+
+#: sources\twitcasting.py:523
+msgid "現在ツイキャスとの連携機能を使用できません。開発者に連絡してください。"
+msgstr ""
+
+#: sources\twitcasting.py:536
+#, python-format
+msgid "ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s"
+msgstr ""
+
+#: sources\twitcasting.py:577
+msgid "このユーザはすでに登録されています。"
+msgstr ""
+
+#: sources\twitcasting.py:617
+msgid "ユーザ名を指定して録画"
+msgstr ""
+
+#: sources\twitcasting.py:617
+#, python-format
+msgid ""
+"%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されま"
+"す。"
+msgstr ""
+
+#: sources\twitcasting.py:655
+msgid "コメント保存開始"
+msgstr ""
+
+#: sources\twitcasting.py:667
+msgid "コメント保存終了"
+msgstr ""
+
+#: sources\twitcasting.py:773 sources\twitcasting.py:776
+#: sources\twitcasting.py:781
+msgid "ユーザ情報の更新"
+msgstr ""
+
+#: sources\twitcasting.py:773
+msgid "ユーザ情報の更新を開始します。"
+msgstr ""
+
+#: sources\twitcasting.py:776
+#, python-format
+msgid "%sの情報を取得しています。"
+msgstr ""
+
+#: sources\twitcasting.py:781
+msgid "ユーザ情報の更新が終了しました。"
+msgstr ""
+
+#: views\auth.py:16
+msgid "アカウントの追加"
+msgstr ""
+
+#: views\auth.py:23
+msgid "ブラウザでの操作を待っています..."
+msgstr ""
+
+#: views\auth.py:24 views\KeyValueSettingDialogBase.py:81
+#: views\KeyValueSettingDialogBase.py:262 views\settingsDialog.py:96
+#: views\SimpleInputDialog.py:36 views\updateDialog.py:45
+msgid "キャンセル"
+msgstr ""
+
+#: views\base.py:67
+msgid "現在メニューは操作できません"
+msgstr ""
+
+#: views\base.py:114
+msgid ""
+"で設定されたショートカットキーが正しくありません。キーの重複、存在しないキー"
+"名の指定、使用できないキーパターンの指定などが考えられます。以下のキーの設定"
+"内容をご確認ください。\n"
+"\n"
+msgstr ""
+
+#: views\base.py:117 views\fontManager.py:25 views\fontManager.py:50
+#: views\globalKeyConfig.py:61 views\KeyValueSettingDialogBase.py:282
+#: views\KeyValueSettingDialogBase.py:333 views\main.py:89
+#: views\updateDialog.py:66
+msgid "エラー"
+msgstr ""
+
+#: views\fontManager.py:25
+msgid ""
+"設定されているフォント情報が不正です。デフォルトのフォントを適用します。"
+msgstr ""
+
+#: views\fontManager.py:50
+msgid "原因不明のエラーにより、フォントの変更に失敗しました。"
+msgstr ""
+
+#: views\globalKeyConfig.py:20 views\globalKeyConfig.py:74
+#: views\tcManageUser.py:21 views\tcManageUser.py:100
+msgid "名前"
+msgstr ""
+
+#: views\globalKeyConfig.py:21
+msgid "ショートカット"
+msgstr ""
+
+#: views\globalKeyConfig.py:22 views\globalKeyConfig.py:74
+msgid "識別子"
+msgstr ""
+
+#: views\globalKeyConfig.py:31 views\main.py:238
+msgid "ショートカットキーの設定"
+msgstr ""
+
+#: views\globalKeyConfig.py:54 views\globalKeyConfig.py:71
+#: views\globalKeyConfig.py:102 views\globalKeyConfig.py:107
+#: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
+#: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
+#: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:318
+#: views\main.py:330 views\main.py:349
+msgid "なし"
+msgstr ""
+
+#: views\globalKeyConfig.py:61
+#, python-format
+msgid ""
+"以下の項目において、重複するキー %(key)s が設定されています。\n"
+"\n"
+"%(command)s"
+msgstr ""
+
+#: views\globalKeyConfig.py:74
+msgid "ショートカット1"
+msgstr ""
+
+#: views\globalKeyConfig.py:74
+msgid "ショートカット2"
+msgstr ""
+
+#: views\globalKeyConfig.py:74
+msgid "ショートカット3"
+msgstr ""
+
+#: views\globalKeyConfig.py:74
+msgid "ショートカット4"
+msgstr ""
+
+#: views\globalKeyConfig.py:74
+msgid "ショートカット5"
+msgstr ""
+
+#: views\globalKeyConfig.py:75 views\settingsDialog.py:39
+msgid "設定"
+msgstr ""
+
+#: views\globalKeyConfig.py:80
+msgid "登録内容の入力"
+msgstr ""
+
+#: views\globalKeyConfig.py:122
+msgid "このショートカットは変更できません。"
+msgstr ""
+
+#: views\globalKeyConfig.py:127 views\globalKeyConfig.py:130
+msgid "設定完了"
+msgstr ""
+
+#: views\globalKeyConfig.py:127
+msgid "解除しました。"
+msgstr ""
+
+#: views\globalKeyConfig.py:130
+#, python-format
+msgid "%s に設定しました。"
+msgstr ""
+
+#: views\keyConfig.py:31
+msgid "キー設定"
+msgstr ""
+
+#: views\keyConfig.py:39
+msgid ""
+"設定するには、使用したいキーの組み合わせを押します。\n"
+"設定を解除するには、Escキーを押します。"
+msgstr ""
+
+#: views\keyConfig.py:45
+msgid "設定解除"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:51
+msgid "現在の登録内容"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:72
+msgid "追加(&A)"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:73
+msgid "変更(&M)"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:75
+msgid "削除(&D)"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:80 views\KeyValueSettingDialogBase.py:261
+#: views\SimpleInputDialog.py:35
+msgid "ＯＫ"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:122
+#: views\KeyValueSettingDialogBase.py:152
+#, python-format
+msgid "この%sは既に登録されています。登録を上書きしますか？"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:122
+#: views\KeyValueSettingDialogBase.py:152
+msgid "上書き確認"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:282
+#, python-format
+msgid "%sを空白や半角の=を含む値に設定することはできません。"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:322
+#, python-format
+msgid "%(v1)sと%(v2)sに同じショートカットキー%(key)sが設定されています。\n"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:325
+#, python-format
+msgid ""
+"%(v1)s、%(v2)sなど計%(count)d箇所に同じショートカットキー%(key)sが設定されて"
+"います。\n"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:329
+#, python-format
+msgid ""
+"設定されたショートカット%sが認識できません。お手数ですが、このエラーメッセー"
+"ジを作者へご連絡ください。\n"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:331
+#, python-format
+msgid ""
+"%(command)sに設定されたショートカットキー%(key)sは、別の場所で利用されていま"
+"す。\n"
+msgstr ""
+
+#: views\main.py:47
+msgid "動作履歴"
+msgstr ""
+
+#: views\main.py:48
+msgid "日時"
+msgstr ""
+
+#: views\main.py:49
+msgid "タイトル"
+msgstr ""
+
+#: views\main.py:50
+msgid "詳細"
+msgstr ""
+
+#: views\main.py:51 views\main.py:55
+msgid "サービス"
+msgstr ""
+
+#: views\main.py:54
+msgid "動作状況"
+msgstr ""
+
+#: views\main.py:56
+msgid "状態"
+msgstr ""
+
+#: views\main.py:58
+msgid "準備完了"
+msgstr ""
+
+#: views\main.py:58
+#, python-format
+msgid "%sを起動しました。"
+msgstr ""
+
+#: views\main.py:86
+msgid ""
+"で設定されたホットキーが正しくありません。キーの重複、存在しないキー名の指"
+"定、使用できないキーパターンの指定などが考えられます。以下のキーの設定内容を"
+"ご確認ください。\n"
+"\n"
+msgstr ""
+
+#: views\main.py:141
+msgid "ファイル(&F)"
+msgstr ""
+
+#: views\main.py:142
+msgid "サービス(&S)"
+msgstr ""
+
+#: views\main.py:143
+msgid "オプション(&O)"
+msgstr ""
+
+#: views\main.py:144
+msgid "ヘルプ(&H)"
+msgstr ""
+
+#: views\main.py:192
+msgid "URLを入力"
+msgstr ""
+
+#: views\main.py:192
+msgid "再生ページのURL"
+msgstr ""
+
+#: views\main.py:199
+msgid "ユーザ名を入力"
+msgstr ""
+
+#: views\main.py:199 views\tcManageUser.py:20 views\tcManageUser.py:99
+msgid "ユーザ名"
+msgstr ""
+
+#: views\main.py:207
+msgid "すでに削除されています。"
+msgstr ""
+
+#: views\main.py:209
+msgid "アクセストークンの削除"
+msgstr ""
+
+#: views\main.py:209
+msgid ""
+"ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
+msgstr ""
+
+#: views\main.py:215 views\main.py:304 views\main.py:310
+msgid "完了"
+msgstr ""
+
+#: views\main.py:215
+msgid "アクセストークンを削除しました。"
+msgstr ""
+
+#: views\main.py:246
+msgid "グローバルホットキーの設定"
+msgstr ""
+
+#: views\main.py:285 views\main.py:301
+msgid "確認"
+msgstr ""
+
+#: views\main.py:285
+msgid ""
+"録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
+"しいですか？"
+msgstr ""
+
+#: views\main.py:301
+msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
+msgstr ""
+
+#: views\main.py:304
+msgid "Windows起動時の自動起動を無効化しました。"
+msgstr ""
+
+#: views\main.py:310
+msgid "Windows起動時の自動起動を設定しました。"
+msgstr ""
+
+#: views\settingsDialog.py:23
+msgid "標準"
+msgstr ""
+
+#: views\settingsDialog.py:24
+msgid "ダーク"
+msgstr ""
+
+#: views\settingsDialog.py:28
+msgid "動画（TS）"
+msgstr ""
+
+#: views\settingsDialog.py:29
+msgid "動画（MP4）"
+msgstr ""
+
+#: views\settingsDialog.py:30
+msgid "音声のみ（MP3）"
+msgstr ""
+
+#: views\settingsDialog.py:50
+msgid "カテゴリ選択"
+msgstr ""
+
+#: views\settingsDialog.py:53
+msgid "一般"
+msgstr ""
+
+#: views\settingsDialog.py:54
+msgid "起動時にウィンドウを隠す(&H)"
+msgstr ""
+
+#: views\settingsDialog.py:55
+msgid "終了時にタスクトレイに最小化(&M)"
+msgstr ""
+
+#: views\settingsDialog.py:58
+msgid "表示/言語"
+msgstr ""
+
+#: views\settingsDialog.py:59
+msgid "言語(&L)"
+msgstr ""
+
+#: views\settingsDialog.py:60
+msgid "画面表示モード(&D)"
+msgstr ""
+
+#: views\settingsDialog.py:63
+msgid "通知"
+msgstr ""
+
+#: views\settingsDialog.py:64 views\tcManageUser.py:23
+#: views\tcManageUser.py:102
+msgid "バルーン通知"
+msgstr ""
+
+#: views\settingsDialog.py:65 views\settingsDialog.py:74
+#: views\tcManageUser.py:24 views\tcManageUser.py:103
+msgid "録画"
+msgstr ""
+
+#: views\settingsDialog.py:66 views\tcManageUser.py:25
+#: views\tcManageUser.py:104
+msgid "ブラウザで開く"
+msgstr ""
+
+#: views\settingsDialog.py:67 views\tcManageUser.py:26
+#: views\tcManageUser.py:105
+msgid "サウンドを再生"
+msgstr ""
+
+#: views\settingsDialog.py:69 views\tcManageUser.py:27
+#: views\tcManageUser.py:106
+msgid "再生するサウンド"
+msgstr ""
+
+#: views\settingsDialog.py:71 views\settingsDialog.py:78
+#: views\tcManageUser.py:108
+msgid "参照"
+msgstr ""
+
+#: views\settingsDialog.py:76
+msgid "保存先フォルダ(&F)"
+msgstr ""
+
+#: views\settingsDialog.py:80
+msgid "ユーザごとにサブフォルダを作成(&S)"
+msgstr ""
+
+#: views\settingsDialog.py:81
+msgid "保存ファイル名(&N)"
+msgstr ""
+
+#: views\settingsDialog.py:83
+msgid "ファイル形式(&T)"
+msgstr ""
+
+#: views\settingsDialog.py:86
+msgid "ネットワーク"
+msgstr ""
+
+#: views\settingsDialog.py:87
+msgid "起動時に更新を確認(&U)"
+msgstr ""
+
+#: views\settingsDialog.py:88
+msgid "プロキシサーバーの情報を手動で設定する(&M)"
+msgstr ""
+
+#: views\settingsDialog.py:89
+msgid "サーバーURL"
+msgstr ""
+
+#: views\settingsDialog.py:91
+msgid "ポート番号"
+msgstr ""
+
+#: views\settingsDialog.py:174 views\tcManageUser.py:154
+msgid "効果音ファイルを選択"
+msgstr ""
+
+#: views\settingsDialog.py:182
+msgid "保存先フォルダを選択"
+msgstr ""
+
+#: views\tcManageUser.py:19 views\tcManageUser.py:98
+msgid "ユーザID"
+msgstr ""
+
+#: views\tcManageUser.py:22
+msgid "専用設定"
+msgstr ""
+
+#: views\tcManageUser.py:58
+msgid "有効"
+msgstr ""
+
+#: views\tcManageUser.py:58
+msgid "無効"
+msgstr ""
+
+#: views\tcManageUser.py:61
+msgid "ユーザの管理"
+msgstr ""
+
+#: views\tcManageUser.py:101
+msgid "専用設定を使用"
+msgstr ""
+
+#: views\tcManageUser.py:113
+msgid "通知設定"
+msgstr ""
+
+#: views\tcManageUser.py:120
+msgid "ユーザ名が入力されていません。"
+msgstr ""
+
+#: views\updateDialog.py:23
+#, python-format
+msgid "アップデート - %s"
+msgstr ""
+
+#: views\updateDialog.py:32
+#, python-format
+msgid "version %s にアップデートできます。"
+msgstr ""
+
+#: views\updateDialog.py:33
+msgid "進行状況"
+msgstr ""
+
+#: views\updateDialog.py:35
+#, python-format
+msgid "version %s アップデート情報"
+msgstr ""
+
+#: views\updateDialog.py:41
+msgid "緊急のお知らせがあります。"
+msgstr ""
+
+#: views\updateDialog.py:44
+msgid "お知らせページへ"
+msgstr ""
+
+#: views\updateDialog.py:59
+msgid "アップデートをダウンロード中..."
+msgstr ""
+
+#: views\updateDialog.py:66
+msgid ""
+"updater.exeが見つかりませんでした。誤って削除したかなどをご確認ください。"
+msgstr ""
+
+#: views\versionDialog.py:21
+msgid "バージョン情報"
+msgstr ""
+
+#: views\versionDialog.py:30
+msgid "ソフトウェアバージョン"
+msgstr ""
+
+#: views\versionDialog.py:31
+msgid "アップデータバージョン"
+msgstr ""
+
+#: views\versionDialog.py:33
+msgid "ライセンス"
+msgstr ""
+
+#: views\versionDialog.py:34
+msgid "開発元"
+msgstr ""
+
+#: views\versionDialog.py:35
+msgid "ソフトウェア詳細情報"
+msgstr ""
+
+#: views\versionDialog.py:37
+msgid ""
+"ライセンス/著作権情報については、同梱の license.txt を参照してください。"
+msgstr ""
+
+#: views\versionDialog.py:49
+msgid "閉じる"
+msgstr ""
