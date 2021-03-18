@@ -44,15 +44,16 @@ class MainView(BaseView):
 		self.applyHotKey()
 
 		# 履歴表示用リストを作成
-		self.logList, self.logStatic = self.creator.listCtrl(_("動作履歴"), style=wx.LC_REPORT)
-		self.logList.AppendColumn(_("日時"))
-		self.logList.AppendColumn(_("タイトル"))
-		self.logList.AppendColumn(_("詳細"))
-		self.logList.AppendColumn(_("サービス"))
+		self.logList, self.logStatic = self.creator.listCtrl(_("動作履歴"), style=wx.LC_REPORT,sizerFlag=wx.EXPAND,proportion=2)
+		self.logList.AppendColumn(_("日時"),width=250)
+		self.logList.AppendColumn(_("タイトル"),width=200)
+		self.logList.AppendColumn(_("詳細"),width=400)
+		self.logList.AppendColumn(_("サービス"),width=300)
 		# 状況表示のリスト
-		self.statusList, self.statusStatic = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT)
-		self.statusList.AppendColumn(_("サービス"))
-		self.statusList.AppendColumn(_("状態"))
+		self.creator.AddSpace(10)
+		self.statusList, self.statusStatic = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT,sizerFlag=wx.EXPAND,proportion=1)
+		self.statusList.AppendColumn(_("サービス"),width=300)
+		self.statusList.AppendColumn(_("状態"),width=500)
 		# 「準備完了」を表示
 		self.addLog(_("準備完了"), _("%sを起動しました。") %constants.APP_NAME)
 

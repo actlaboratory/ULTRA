@@ -528,7 +528,7 @@ class ViewCreatorBase():
 			self._setFace(hStaticText)
 			sizer=self.BoxSizer(panel,orient=textLayout)
 			Add(sizer,hStaticText, 0, wx.ALIGN_CENTER_VERTICAL)
-			Add(self.sizer,panel, proportion, sizerFlag,margin)
+			Add(self.sizer,panel, proportion, sizerFlag|wx.ALIGN_CENTER_VERTICAL,margin)
 			return hStaticText,sizer,panel
 		elif isinstance(self.sizer,(wx.GridSizer,wx.FlexGridSizer,wx.GridBagSizer)) and textLayout==None:
 			hStaticText=wx.StaticText(self.parent,wx.ID_ANY,label=text,name=text,size=(0,0))
@@ -542,7 +542,7 @@ class ViewCreatorBase():
 			else:
 				hStaticText=wx.StaticText(self.parent,wx.ID_ANY,label=text,name=text,size=(0,0))
 			self._setFace(hStaticText)
-			Add(self.sizer,hStaticText,0,sizerFlag&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_BOTTOM|wx.EXPAND))
+			Add(self.sizer,hStaticText,0,(sizerFlag|wx.ALIGN_CENTER_VERTICAL)&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_BOTTOM|wx.EXPAND))
 			return hStaticText,self.sizer,self.parent
 
 	def _setFace(self,target,mode=NORMAL):
