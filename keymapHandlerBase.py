@@ -339,9 +339,11 @@ class KeymapHandlerBase():
 				continue
 
 			self.log.debug("read section %s" % identifier)
+			self.entries[identifier]=[]
 			for elem in read.items(identifier):
 				if elem[1]!="":						#空白のものは無視する
 					self.add(identifier,elem[0],elem[1])
+
 
 	def addFile(self, filename,sections=None):
 		"""
@@ -429,7 +431,11 @@ class KeymapHandlerBase():
 			アクセラレーターテーブルを取得する。
 			identifier で、どのビューでのテーブルを取得するかを指定する。
 		"""
-		return wx.AcceleratorTable(self.entries[identifier.upper()])
+		if identifier.upper() in self.entries:
+			return wx.AcceleratorTable(self.entries[identifier.upper()])
+		else:
+			return wx.AcceleratorTable([])
+
 
 	def GetEntries(self,identifier):
 		"""
