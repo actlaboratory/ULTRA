@@ -305,7 +305,11 @@ class Twitcasting(SourceBase):
 		:param showNotFound: 見つからなかったときにエラーを表示
 		:type showNotFound: bool
 		"""
-		req = requests.get("https://apiv2.twitcasting.tv/users/%s" %user, headers=self.header)
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/users/%s" %user, headers=self.header)
+		except requests.RequestException as e:
+			self.log.error(traceback.format_exc())
+			return
 		if req.status_code != 200:
 			if req.json()["error"]["code"] == 1000:
 				self.showTokenError()
@@ -324,7 +328,11 @@ class Twitcasting(SourceBase):
 		:param user: ユーザ名またはユーザID
 		:type user: str
 		"""
-		req = requests.get("https://apiv2.twitcasting.tv/users/%s/current_live" %user, headers=self.header)
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/users/%s/current_live" %user, headers=self.header)
+		except requests.RequestException as e:
+			self.log.error(traceback.format_exc())
+			return
 		if req.status_code != 200:
 			if req.json()["error"]["code"] == 1000:
 				self.showTokenError()
@@ -443,7 +451,11 @@ class Twitcasting(SourceBase):
 		if self.initialized == 0 and not self.initialize():
 			return
 		id = url[url.rfind("/") + 1:]
-		req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" %id, headers=self.header)
+		except requests.RequestException as e:
+			self.log.error(traceback.format_exc())
+			return
 		if req.status_code != 200:
 			if req.status_code == 404:
 				self.showNotFoundError()
