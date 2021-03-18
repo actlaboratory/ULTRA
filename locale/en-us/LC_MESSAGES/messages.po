@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TCV\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-18 16:27+0900\n"
-"PO-Revision-Date: 2021-03-18 17:22+0900\n"
+"POT-Creation-Date: 2021-03-18 23:03+0900\n"
+"PO-Revision-Date: 2021-03-18 23:04+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -933,6 +933,10 @@ msgstr "port number"
 #: views\settingsDialog.py:174 views\tcManageUser.py:154
 msgid "効果音ファイルを選択"
 msgstr "select a sound file"
+
+#: views\settingsDialog.py:174 views\tcManageUser.py:154
+msgid "音声ファイル（.wav/.mp3/.ogg）"
+msgstr "Sound Files(.WAV/.MP3/.OGG)"
 
 #: views\settingsDialog.py:182
 msgid "保存先フォルダを選択"
