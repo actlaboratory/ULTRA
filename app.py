@@ -7,6 +7,7 @@ import winerror
 import AppBase
 import update
 import globalVars
+import pipe
 import proxyUtil
 import notificationHandler
 import threading
@@ -21,8 +22,11 @@ class Main(AppBase.MainBase):
 		globalVars.mutex = win32event.CreateMutex(None, 1, "ULTRA")
 		if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
 			globalVars.mutex = None
+			pipe.sendPipe()
 			return False
-		return True
+		else:
+			pipe.startServer()
+			return True
 
 	def initialize(self):
 		self.setGlobalVars()
@@ -79,6 +83,7 @@ class Main(AppBase.MainBase):
 		#ビューへのアクセスや終了の抑制はできないので注意。
 
 		self._releaseMutex()
+		pipe.stopServer()
 
 		#戻り値は無視される
 		return 0
@@ -93,3 +98,4 @@ class Main(AppBase.MainBase):
 
 	def __del__(self):
 		self._releaseMutex()
+		pipe.stopServer()
