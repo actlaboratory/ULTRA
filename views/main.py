@@ -45,10 +45,10 @@ class MainView(BaseView):
 
 		# 履歴表示用リストを作成
 		self.logList, self.logStatic = self.creator.listCtrl(_("動作履歴"), style=wx.LC_REPORT,sizerFlag=wx.EXPAND,proportion=2)
-		self.logList.AppendColumn(_("日時"),width=250)
 		self.logList.AppendColumn(_("タイトル"),width=200)
 		self.logList.AppendColumn(_("詳細"),width=400)
 		self.logList.AppendColumn(_("サービス"),width=300)
+		self.logList.AppendColumn(_("日時"),width=250)
 		# 状況表示のリスト
 		self.creator.AddSpace(10)
 		self.statusList, self.statusStatic = self.creator.listCtrl(_("動作状況"), style=wx.LC_REPORT,sizerFlag=wx.EXPAND,proportion=1)
@@ -70,10 +70,10 @@ class MainView(BaseView):
 		timestamp = datetime.datetime.now()
 		timestamp = timestamp.strftime("%m/%d %H:%M:%S")
 		data = [
-			timestamp,
 			title,
 			detail,
-			source
+			source,
+			timestamp,
 		]
 		self.logList.Append(data)
 		self.log.info("display:\n" + "\n".join(data) + "\n")
