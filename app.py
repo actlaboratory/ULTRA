@@ -107,7 +107,7 @@ class Main(AppBase.MainBase):
 		:return: (URL, port)のタプル
 		:rtype: tuple
 		"""
-		data = os.environ.get("HTTPS_PROXY")
+		data = os.environ.get("HTTP_PROXY")
 		self.log.debug("Retrieving proxy information from environment variable...")
 		if data == None:
 			self.log.info("Proxy information could not be found.")
