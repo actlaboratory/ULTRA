@@ -211,6 +211,7 @@ class Events(BaseEvents):
 				return
 			if globalVars.app.tc.running:
 				globalVars.app.tc.exit()
+				self.parent.menu.CheckMenu("TC_ENABLE", False)
 			os.remove(constants.AC_TWITCASTING)
 			dialog(_("完了"), _("アクセストークンを削除しました。"))
 
