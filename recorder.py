@@ -134,6 +134,7 @@ class Recorder(threading.Thread):
 				return
 		self.source.onRecord(self.path, self.movie)
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
+		globalVars.app.tb.setAlternateText(_("録画中"))
 		result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
@@ -147,17 +148,19 @@ class Recorder(threading.Thread):
 			result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 			self.log.info("saved: %s" %self.path)
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
+		if getRecordingUsers(self) == []:
+			globalVars.app.tb.setAlternateText()
 
 	def getTargetUser(self):
 		"""誰のライブを録画中かを返す
 		"""
 		return self.userName
 
-def getRecordingUsers():
+def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
 	"""
 	ret = []
 	for i in threading.enumerate():
-		if type(i) == Recorder:
+		if type(i) == Recorder and i != self:
 			ret.append(i.getTargetUser())
 	return ret
