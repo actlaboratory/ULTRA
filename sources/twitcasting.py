@@ -295,7 +295,8 @@ class Twitcasting(SourceBase):
 		"""
 		if self.initialized == 0 and not self.initialize():
 			return
-		self.socket.run_forever()
+		proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
 
 	def getUserInfo(self, user, showNotFound=True):
 		"""ユーザ情報を取得
