@@ -43,6 +43,11 @@ class DefaultSettings:
 			"fileName": "%user%_%year%%month%%day%_%hour%%minute%%second%",
 			"extension": "ts",
 		}
+		config["proxy"] = {
+			"useManualSetting": False,
+			"server": "",
+			"port": 8080
+		}
 		return config
 
 initialValues={}
