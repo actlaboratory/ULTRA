@@ -30,7 +30,7 @@ class DefaultSettings:
 			"record": True,
 			"openBrowser": False,
 			"sound": False,
-			"soundFile": "",
+			"soundFile": "notification.ogg",
 		}
 		config["twitcasting"] = {
 			"enable": False,
