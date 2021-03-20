@@ -46,6 +46,7 @@ class Twitcasting(SourceBase):
 		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
+		self.setStatus(_("未接続"))
 		self.debug = not(hasattr(sys, "frozen")) and DEBUG
 		if self.debug:
 			with open(DEBUG_FILE, "w"): pass
