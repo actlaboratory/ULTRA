@@ -71,7 +71,7 @@ for item in constants.PACKAGE_CONTAIN_ITEMS:
 	if os.path.isdir(item):
 		shutil.copytree(item, os.path.join(package_path, item))
 	if os.path.isfile(item):
-		shutil.copyfile(item, os.path.join(package_name, os.path.basename(item)))
+		shutil.copyfile(item, os.path.join(package_path, os.path.basename(item)))
 for elem in glob.glob("public\\*"):
 	if os.path.isfile(elem):
 		shutil.copyfile(elem, os.path.join(package_path, os.path.basename(elem)))
