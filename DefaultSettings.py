@@ -30,7 +30,7 @@ class DefaultSettings:
 			"record": True,
 			"openBrowser": False,
 			"sound": False,
-			"soundFile": "",
+			"soundFile": "notification.ogg",
 		}
 		config["twitcasting"] = {
 			"enable": False,
@@ -42,6 +42,11 @@ class DefaultSettings:
 			"subDirName": "%user%",
 			"fileName": "%user%_%year%%month%%day%_%hour%%minute%%second%",
 			"extension": "ts",
+		}
+		config["proxy"] = {
+			"useManualSetting": False,
+			"server": "",
+			"port": 8080
 		}
 		return config
 

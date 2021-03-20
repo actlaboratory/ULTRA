@@ -32,11 +32,8 @@ class Main(AppBase.MainBase):
 	def initialize(self):
 		self.setGlobalVars()
 		# プロキシの設定を適用
-		if self.config.getboolean("network", "auto_proxy"):
-			self.proxyEnviron = proxyUtil.virtualProxyEnviron()
-			self.proxyEnviron.set_environ()
-		else:
-			self.proxyEnviron = None
+		self.proxyEnviron = proxyUtil.virtualProxyEnviron()
+		self.setProxyEnviron()
 		# スレッドで例外が起きてもsys.exceptHookが呼ばれるようにする
 		self.installThreadExcepthook()
 		# タスクバーアイコンの準備
@@ -58,6 +55,12 @@ class Main(AppBase.MainBase):
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
 		return True
+
+	def setProxyEnviron(self):
+		if self.config.getboolean("proxy", "usemanualsetting", False) == True:
+			self.proxyEnviron.set_environ(self.config["proxy"]["server"], self.config.getint("proxy", "port", 8080, 0, 65535))
+		else:
+			self.proxyEnviron.set_environ()
 
 	def setGlobalVars(self):
 		globalVars.update = update.update()

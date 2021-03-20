@@ -6,7 +6,7 @@ import wx
 import os.path
 
 #アプリケーション基本情報
-APP_FULL_NAME = "Universal Live Tracking And Recording App"#アプリケーションの完全な名前
+APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
 APP_VERSION="0.0.1"
@@ -40,7 +40,7 @@ FULL_CHECKED=wx.CHK_CHECKED
 
 #build関連定数
 BASE_PACKAGE_URL = None
-PACKAGE_CONTAIN_ITEMS = ("bin","ultra.ico")#パッケージに含めたいファイルやfolderがあれば指定
+PACKAGE_CONTAIN_ITEMS = ("bin", "ultra.ico", "notification.ogg")#パッケージに含めたいファイルやfolderがあれば指定
 NEED_HOOKS = ()#pyinstallerのhookを追加したい場合は指定
 STARTUP_FILE = "ultra.py"#起動用ファイルを指定
 UPDATER_URL = "https://github.com/actlaboratory/updater/releases/download/1.0.0/updater.zip"
