@@ -6,7 +6,7 @@ import wx
 import os.path
 
 #アプリケーション基本情報
-APP_FULL_NAME = "Universal Live Tracking And Recording App"#アプリケーションの完全な名前
+APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
 APP_VERSION="0.0.1"
