@@ -1,0 +1,4 @@
+Universal Live Tracking and Recording App(ULTRA) 更新履歴
+
+2021/XX/XX Version 1.X.X
+1. ツイキャスとの連携機能を使用時、一定時間経過後にツイキャスとの接続が切れてしまう問題に対応しました。

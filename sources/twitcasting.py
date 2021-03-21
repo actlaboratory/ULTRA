@@ -43,6 +43,7 @@ class Twitcasting(SourceBase):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
 		self.running = False
+		self.shouldExit = False
 		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
@@ -198,6 +199,9 @@ class Twitcasting(SourceBase):
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
+		if not self.shouldExit:
+			self.initSocket()
+			self.socket.run_forever()
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -364,8 +368,10 @@ class Twitcasting(SourceBase):
 	def exit(self):
 		"""新着ライブの監視を終了する
 		"""
+		self.shouldExit = True
 		if hasattr(self, "socket"):
 			self.socket.close()
+		self.shouldExit = False
 		self.enableMenu(False)
 
 	def getConfig(self, user):
