@@ -187,6 +187,7 @@ class Twitcasting(SourceBase):
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
+		self.enableMenu(True)
 
 	def onClose(self):
 		"""ソケット通信が切断された
@@ -195,6 +196,8 @@ class Twitcasting(SourceBase):
 		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
+		self.enableMenu(False)
+		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
