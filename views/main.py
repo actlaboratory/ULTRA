@@ -76,7 +76,7 @@ class MainView(BaseView):
 			timestamp,
 		]
 		self.logList.Append(data)
-		self.log.info("display:\n" + "\n".join(data) + "\n")
+		self.log.info("display: " + ",".join(data) + "\n")
 
 	def applyHotKey(self):
 		self.hotkey = hotkeyHandler.HotkeyHandler(None,hotkeyHandler.HotkeyFilter().SetDefault())
