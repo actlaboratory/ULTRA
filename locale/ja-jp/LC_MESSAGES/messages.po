@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-19 23:26+0900\n"
+"POT-Creation-Date: 2021-03-22 09:19+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -155,8 +155,8 @@ msgstr ""
 msgid "録画開始"
 msgstr ""
 
-#: recorder.py:136 recorder.py:150 sources\twitcasting.py:658
-#: sources\twitcasting.py:670
+#: recorder.py:136 recorder.py:150 sources\twitcasting.py:671
+#: sources\twitcasting.py:683
 #, python-format
 msgid "ユーザ：%(user)s、ムービーID：%(movie)s"
 msgstr ""
@@ -233,214 +233,222 @@ msgstr ""
 msgid "ツイキャス"
 msgstr ""
 
-#: sources\twitcasting.py:83
+#: sources\twitcasting.py:50 sources\twitcasting.py:199
+msgid "未接続"
+msgstr ""
+
+#: sources\twitcasting.py:85
 msgid "アクセストークンの有効期限が切れています"
 msgstr ""
 
-#: sources\twitcasting.py:83 sources\twitcasting.py:90
+#: sources\twitcasting.py:85 sources\twitcasting.py:92
 msgid ""
 "本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:85
+#: sources\twitcasting.py:87
 msgid ""
 "アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセ"
 "ストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:90
+#: sources\twitcasting.py:92
 msgid "アクセストークンの有効期限が近づいています"
 msgstr ""
 
-#: sources\twitcasting.py:92
+#: sources\twitcasting.py:94
 msgid ""
 "アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アク"
 "セストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:131
+#: sources\twitcasting.py:133
 msgid "配信開始"
 msgstr ""
 
-#: sources\twitcasting.py:138
+#: sources\twitcasting.py:140
 msgid "録画対象の削除"
 msgstr ""
 
-#: sources\twitcasting.py:138 sources\twitcasting.py:139
+#: sources\twitcasting.py:140 sources\twitcasting.py:141
 #, python-format
 msgid "%sのライブを、録画対象から削除しました。"
 msgstr ""
 
-#: sources\twitcasting.py:159
+#: sources\twitcasting.py:161
 msgid "ユーザ名変更"
 msgstr ""
 
-#: sources\twitcasting.py:159 sources\twitcasting.py:162
+#: sources\twitcasting.py:161 sources\twitcasting.py:164
 #, python-format
 msgid "「%(old)s」→「%(new)s」"
 msgstr ""
 
-#: sources\twitcasting.py:162
+#: sources\twitcasting.py:164
 msgid "名前変更"
 msgstr ""
 
-#: sources\twitcasting.py:176 sources\twitcasting.py:195
+#: sources\twitcasting.py:178 sources\twitcasting.py:198
 msgid "切断"
 msgstr ""
 
-#: sources\twitcasting.py:176
+#: sources\twitcasting.py:178
 msgid "インターネット接続が切断されました。再試行します。"
 msgstr ""
 
-#: sources\twitcasting.py:177
+#: sources\twitcasting.py:179
 msgid "接続試行中"
 msgstr ""
 
-#: sources\twitcasting.py:185
+#: sources\twitcasting.py:187
 msgid "接続完了"
 msgstr ""
 
-#: sources\twitcasting.py:185
+#: sources\twitcasting.py:187
 msgid "新着ライブの監視を開始しました。"
 msgstr ""
 
-#: sources\twitcasting.py:188
+#: sources\twitcasting.py:190
 msgid "接続済み"
 msgstr ""
 
-#: sources\twitcasting.py:195
+#: sources\twitcasting.py:198
 msgid "ツイキャスとの接続を切断しました。"
 msgstr ""
 
-#: sources\twitcasting.py:196
-msgid "未接続"
+#: sources\twitcasting.py:203
+msgid "再接続"
 msgstr ""
 
-#: sources\twitcasting.py:218
+#: sources\twitcasting.py:203
+msgid "ツイキャスとの接続が切断されたため、再度接続します。"
+msgstr ""
+
+#: sources\twitcasting.py:229
 msgid ""
 "インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できませ"
 "ん。"
 msgstr ""
 
-#: sources\twitcasting.py:235
+#: sources\twitcasting.py:246
 msgid ""
 "認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってくださ"
 "い。"
 msgstr ""
 
-#: sources\twitcasting.py:236
+#: sources\twitcasting.py:247
 msgid "認証に失敗しました。もう一度お試しください。"
 msgstr ""
 
-#: sources\twitcasting.py:237
+#: sources\twitcasting.py:248
 msgid ""
 "しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。"
 msgstr ""
 
-#: sources\twitcasting.py:250 sources\twitcasting.py:262
+#: sources\twitcasting.py:261 sources\twitcasting.py:273
 msgid "処理結果"
 msgstr ""
 
-#: sources\twitcasting.py:250
+#: sources\twitcasting.py:261
 msgid "キャンセルされました。"
 msgstr ""
 
-#: sources\twitcasting.py:262
+#: sources\twitcasting.py:273
 msgid "認証が完了しました。"
 msgstr ""
 
-#: sources\twitcasting.py:292
+#: sources\twitcasting.py:303
 msgid "ユーザ情報の保存に失敗しました。"
 msgstr ""
 
-#: sources\twitcasting.py:320
+#: sources\twitcasting.py:331
 msgid "指定したユーザが見つかりません。"
 msgstr ""
 
-#: sources\twitcasting.py:423
+#: sources\twitcasting.py:436
 msgid "合い言葉の入力"
 msgstr ""
 
-#: sources\twitcasting.py:423
+#: sources\twitcasting.py:436
 msgid "合い言葉"
 msgstr ""
 
-#: sources\twitcasting.py:503
+#: sources\twitcasting.py:516
 msgid "アクセストークンが見つかりません"
 msgstr ""
 
-#: sources\twitcasting.py:503
+#: sources\twitcasting.py:516
 msgid ""
 "利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行い"
 "ますか？"
 msgstr ""
 
-#: sources\twitcasting.py:513
+#: sources\twitcasting.py:526
 msgid ""
 "録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確"
 "認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないことを"
 "確認してください。"
 msgstr ""
 
-#: sources\twitcasting.py:522
+#: sources\twitcasting.py:535
 msgid ""
 "ツイキャスAPIの実行回数が上限に達しました。しばらくたってから、再度実行してく"
 "ださい。"
 msgstr ""
 
-#: sources\twitcasting.py:524
+#: sources\twitcasting.py:537
 msgid ""
 "ツイキャスAPIが500エラーを返しました。しばらく待ってから、再度接続してくださ"
 "い。"
 msgstr ""
 
-#: sources\twitcasting.py:526
+#: sources\twitcasting.py:539
 msgid "現在ツイキャスとの連携機能を使用できません。開発者に連絡してください。"
 msgstr ""
 
-#: sources\twitcasting.py:539
+#: sources\twitcasting.py:552
 #, python-format
 msgid "ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s"
 msgstr ""
 
-#: sources\twitcasting.py:580
+#: sources\twitcasting.py:593
 msgid "このユーザはすでに登録されています。"
 msgstr ""
 
-#: sources\twitcasting.py:620
+#: sources\twitcasting.py:633
 msgid "ユーザ名を指定して録画"
 msgstr ""
 
-#: sources\twitcasting.py:620
+#: sources\twitcasting.py:633
 #, python-format
 msgid ""
 "%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されま"
 "す。"
 msgstr ""
 
-#: sources\twitcasting.py:658
+#: sources\twitcasting.py:671
 msgid "コメント保存開始"
 msgstr ""
 
-#: sources\twitcasting.py:670
+#: sources\twitcasting.py:683
 msgid "コメント保存終了"
 msgstr ""
 
-#: sources\twitcasting.py:776 sources\twitcasting.py:779
-#: sources\twitcasting.py:784
+#: sources\twitcasting.py:789 sources\twitcasting.py:792
+#: sources\twitcasting.py:797
 msgid "ユーザ情報の更新"
 msgstr ""
 
-#: sources\twitcasting.py:776
+#: sources\twitcasting.py:789
 msgid "ユーザ情報の更新を開始します。"
 msgstr ""
 
-#: sources\twitcasting.py:779
+#: sources\twitcasting.py:792
 #, python-format
 msgid "%sの情報を取得しています。"
 msgstr ""
 
-#: sources\twitcasting.py:784
+#: sources\twitcasting.py:797
 msgid "ユーザ情報の更新が終了しました。"
 msgstr ""
 
@@ -499,7 +507,7 @@ msgstr ""
 msgid "識別子"
 msgstr ""
 
-#: views\globalKeyConfig.py:31 views\main.py:238
+#: views\globalKeyConfig.py:31 views\main.py:239
 msgid "ショートカットキーの設定"
 msgstr ""
 
@@ -508,7 +516,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:318
-#: views\main.py:330 views\main.py:349
+#: views\main.py:331 views\main.py:350
 msgid "なし"
 msgstr ""
 
@@ -732,37 +740,37 @@ msgid ""
 "ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
 msgstr ""
 
-#: views\main.py:215 views\main.py:304 views\main.py:310
+#: views\main.py:216 views\main.py:305 views\main.py:311
 msgid "完了"
 msgstr ""
 
-#: views\main.py:215
+#: views\main.py:216
 msgid "アクセストークンを削除しました。"
 msgstr ""
 
-#: views\main.py:246
+#: views\main.py:247
 msgid "グローバルホットキーの設定"
 msgstr ""
 
-#: views\main.py:285 views\main.py:301
+#: views\main.py:286 views\main.py:302
 msgid "確認"
 msgstr ""
 
-#: views\main.py:285
+#: views\main.py:286
 msgid ""
 "録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
 "しいですか？"
 msgstr ""
 
-#: views\main.py:301
+#: views\main.py:302
 msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
 msgstr ""
 
-#: views\main.py:304
+#: views\main.py:305
 msgid "Windows起動時の自動起動を無効化しました。"
 msgstr ""
 
-#: views\main.py:310
+#: views\main.py:311
 msgid "Windows起動時の自動起動を設定しました。"
 msgstr ""
 
