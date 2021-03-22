@@ -176,6 +176,7 @@ class Twitcasting(SourceBase):
 		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
+			self.shouldExit = True
 			self.socket.close()
 			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
