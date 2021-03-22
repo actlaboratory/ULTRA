@@ -128,6 +128,8 @@ class Twitcasting(SourceBase):
 		if "movies" not in obj.keys() or obj["movies"] == None:
 			return
 		for i in obj["movies"]:
+			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
+				continue
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
