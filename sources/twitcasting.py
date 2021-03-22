@@ -200,6 +200,7 @@ class Twitcasting(SourceBase):
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
 		if not self.shouldExit:
+			globalVars.app.hMainView.addLog(_("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
 			self.initSocket()
 			self.socket.run_forever()
