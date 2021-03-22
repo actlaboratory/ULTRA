@@ -498,7 +498,6 @@ class Twitcasting(SourceBase):
 			return
 		if req.status_code != 200:
 			if req.status_code == 404:
-				self.showNotFoundError()
 				return
 			elif req.json()["error"]["code"] == 1000:
 				self.showTokenError()
