@@ -200,8 +200,10 @@ class Twitcasting(SourceBase):
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
 		if not self.shouldExit:
+			self.log.debug("Connection does not closed by user.")
 			self.initSocket()
 			self.socket.run_forever()
+		self.shouldExit = False
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -368,10 +370,10 @@ class Twitcasting(SourceBase):
 	def exit(self):
 		"""新着ライブの監視を終了する
 		"""
+		self.log.debug("Exit button pressed.")
 		self.shouldExit = True
 		if hasattr(self, "socket"):
 			self.socket.close()
-		self.shouldExit = False
 		self.enableMenu(False)
 
 	def getConfig(self, user):
