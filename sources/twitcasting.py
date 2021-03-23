@@ -43,6 +43,7 @@ class Twitcasting(SourceBase):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
 		self.running = False
+		self.shouldExit = False
 		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
@@ -127,6 +128,8 @@ class Twitcasting(SourceBase):
 		if "movies" not in obj.keys() or obj["movies"] == None:
 			return
 		for i in obj["movies"]:
+			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
+				continue
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
@@ -173,6 +176,7 @@ class Twitcasting(SourceBase):
 		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
+			self.shouldExit = True
 			self.socket.close()
 			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
@@ -187,6 +191,7 @@ class Twitcasting(SourceBase):
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
+		self.enableMenu(True)
 
 	def onClose(self):
 		"""ソケット通信が切断された
@@ -195,6 +200,14 @@ class Twitcasting(SourceBase):
 		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
+		self.enableMenu(False)
+		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
+		if not self.shouldExit:
+			globalVars.app.hMainView.addLog(_("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
+			self.log.debug("Connection does not closed by user.")
+			self.initSocket()
+			self.socket.run_forever()
+		self.shouldExit = False
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -361,6 +374,8 @@ class Twitcasting(SourceBase):
 	def exit(self):
 		"""新着ライブの監視を終了する
 		"""
+		self.log.debug("Exit button pressed.")
+		self.shouldExit = True
 		if hasattr(self, "socket"):
 			self.socket.close()
 		self.enableMenu(False)
@@ -486,7 +501,6 @@ class Twitcasting(SourceBase):
 			return
 		if req.status_code != 200:
 			if req.status_code == 404:
-				self.showNotFoundError()
 				return
 			elif req.json()["error"]["code"] == 1000:
 				self.showTokenError()
