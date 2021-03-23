@@ -3,7 +3,7 @@ pywin32
 winpaths
 pyinstaller>=4
 pyperclip
-https://github.com/actlaboratory/proxyUtil/archive/refs/tags/0.2.4.zip
+https://github.com/actlaboratory/proxyUtil/archive/0.2.4.zip
 websocket-client==0.57.0
 requests
 https://github.com/actlaboratory/implicitGrantManager/archive/v1.3.0.zip
