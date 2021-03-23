@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.0.0"
-APP_LAST_RELEASE_DATE="2021-03-20"
+APP_VERSION="1.0.1"
+APP_LAST_RELEASE_DATE="2021-03-23"
 APP_COPYRIGHT_YEAR="2021"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -39,7 +39,7 @@ HALF_CHECKED=wx.CHK_UNDETERMINED
 FULL_CHECKED=wx.CHK_CHECKED
 
 #build関連定数
-BASE_PACKAGE_URL = None
+BASE_PACKAGE_URL = "https://github.com/actlaboratory/ULTRA/releases/download/1.0.0/ULTRA-1.0.0.zip"
 PACKAGE_CONTAIN_ITEMS = ("bin", "ultra.ico", "notification.ogg")#パッケージに含めたいファイルやfolderがあれば指定
 NEED_HOOKS = ()#pyinstallerのhookを追加したい場合は指定
 STARTUP_FILE = "ultra.py"#起動用ファイルを指定
