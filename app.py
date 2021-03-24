@@ -89,6 +89,9 @@ class Main(AppBase.MainBase):
 		self._releaseMutex()
 		pipe.stopServer()
 
+		# アップデート
+		globalVars.update.runUpdate()
+
 		#戻り値は無視される
 		return 0
 
