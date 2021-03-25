@@ -164,3 +164,12 @@ def getRecordingUsers(self=None):
 		if type(i) == Recorder and i != self:
 			ret.append(i.getTargetUser())
 	return ret
+
+def getActiveObj(self=None):
+	"""現在動作中のレコーダーオブジェクトのリストを返す
+	"""
+	ret = []
+	for i in threading.enumerate():
+		if type(i) == Recorder and i != self:
+			ret.append(i)
+	return ret
