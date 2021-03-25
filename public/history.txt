@@ -1,5 +1,9 @@
 Universal Live Tracking and Recording App(ULTRA) 更新履歴
 
+2021/XX/XX Version 1.X.X
+1. 特定の場合に、録画に失敗し、プログラムが不正終了する問題に対処しました。
+
+
 2021/03/24 Version 1.0.2
 1. ソフトウェアの更新機能が正しく動作しなかったのを修正しました。
 2. 本ソフトのインストールフォルダ内に「license.txt」が存在しなかったのを修正しました。
