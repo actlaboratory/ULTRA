@@ -298,9 +298,13 @@ class Twitcasting(SourceBase):
 	def saveUserList(self):
 		"""ユーザリストをファイルに保存
 		"""
+		if hasattr(sys, "frozen"):
+			indent = None
+		else:
+			indent = "\t"
 		try:
 			with open(constants.TC_USER_DATA, "w", encoding="utf-8") as f:
-				json.dump(self.users, f, ensure_ascii=False)
+				json.dump(self.users, f, ensure_ascii=False, indent=indent)
 		except:
 			self.log.error("Failed to save users.dat.\n" + traceback.format_exc())
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
