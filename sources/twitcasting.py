@@ -558,80 +558,31 @@ class Twitcasting(SourceBase):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
 
-	def addUser(self, userName, temporary=False, specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None, id=None):
-		"""ユーザーを追加する。
-
-		:param userName: ユーザ名
-		:type userName: str
-		:param temporary: 一定時間経過後に登録を削除するかどうか
-		:type temporary: bool
-		:param specific: 専用の通知条件を設定するかどうか
-		:type specific: bool
-		:param baloon: バルーン通知の有無。Noneにすると規定値を読み込む。
-		:type baloon: bool
-		:param record: 録画するかどうか。Noneにすると規定値を読み込む。
-		:type record: bool
-		:param openBrowser: ブラウザでライブを開くかどうか。Noneにすると規定値を読み込む。
-		:type openBrowser: bool
-		:param sound: サウンド再生の有無。Noneにすると規定値を読み込む。
-		:type sound: bool
-		:param soundFile: 再生するサウンドファイル。Noneにすると規定値を読み込む。
-		:type soundFile: None
-		:param id: ユーザのID。特別な事情がない限り、このパラメータは指定しなくて良い。
-		:type id: str
-		"""
-		self.loadUserList()
-		if id == None:
-			id = self.getUserIdFromScreenId(userName)
-			if id == constants.NOT_FOUND:
-				return False
-		if id in self.users.keys():
-			userInfo = self.getUserInfo(id)
-			if userInfo["user"]["is_live"] and userInfo["user"]["screen_id"] not in recorder.getRecordingUsers():
-				movie = self.getCurrentLive(id)
-				r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
-				r.start()
-				return True
-			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
-			return False
-		if baloon == None:
-			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
-		if record == None:
-			record = globalVars.app.config.getboolean("notification", "record", True)
-		if openBrowser == None:
-			openBrowser = globalVars.app.config.getboolean("notification", "openBrowser", False)
-		if sound == None:
-			sound = globalVars.app.config.getboolean("notification", "sound", False)
-		if soundFile == None:
-			soundFile = globalVars.app.config["notification"]["soundFile"]
-		ret = {
-			"user": userName,
-			"name": "",
-			"specific": specific,
-			"baloon": baloon,
-			"record": record,
-			"openBrowser": openBrowser,
-			"sound": sound,
-			"soundFile": soundFile,
-		}
-		if temporary:
-			ret["remove"] = time.time() + 14400
-		self.users[id] = ret
-		self.saveUserList()
-		return True
-
 	def record(self, userName):
 		"""指定したユーザのライブを録画。
 
 		:param userName: ユーザ名
 		:type userName: str
 		"""
+		self.loadUserList()
 		userInfo = self.getUserInfo(userName)
 		if userInfo == None:
 			return
-		result = self.addUser(userInfo["user"]["screen_id"], True, True, False, True, False, False, "", userInfo["user"]["id"])
-		if not result:
+		if userInfo["user"]["id"] in self.users.keys():
+			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
 			return
+		self.users[userInfo["user"]["id"]] = {
+			"user": userInfo["user"]["screen_id"],
+			"name": userInfo["user"]["name"],
+			"specific": True,
+			"baloon": False,
+			"record": True,
+			"openBrowser": False,
+			"sound": False,
+			"soundFile": "",
+			"remove": (datetime.datetime.now() + datetime.timedelta(hours=10)).timestamp(),
+		}
+		self.saveUserList()
 		globalVars.app.hMainView.addLog(_("ユーザ名を指定して録画"), _("%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されます。") %userInfo["user"]["screen_id"])
 		if userInfo["user"]["is_live"]:
 			movie = self.getCurrentLive(userName)
