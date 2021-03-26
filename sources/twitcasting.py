@@ -568,8 +568,8 @@ class Twitcasting(SourceBase):
 		userInfo = self.getUserInfo(userName)
 		if userInfo == None:
 			return
-		if userInfo["user"]["id"] in self.users.keys():
-			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
+		if userInfo["user"]["screen_id"] in recorder.getRecordingUsers():
+			simpleDialog.errorDialog(_("このユーザのライブはすでに録画中です。"))
 			return
 		self.users[userInfo["user"]["id"]] = {
 			"user": userInfo["user"]["screen_id"],
