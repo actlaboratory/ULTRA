@@ -222,15 +222,16 @@ class Twitcasting(SourceBase):
 		self.setHeader()
 		return self.verifyCredentials()
 
-	def verifyCredentials(self):
+	def verifyCredentials(self, init=True):
 		"""トークンが正しく機能しているかどうかを確認する
 		"""
 		try:
 			result = requests.get("https://apiv2.twitcasting.tv/verify_credentials", headers = self.header)
 		except requests.RequestException as e:
-			self.log.error(traceback.format_exc())
-			simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
-			self.netflag = 1
+			if init:
+				self.log.error(traceback.format_exc())
+				simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
+				self.netflag = 1
 			return False
 		return result.status_code == 200
 
@@ -561,6 +562,16 @@ class Twitcasting(SourceBase):
 		if globalVars.app.config.getboolean("twitcasting", "saveComments", False):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
+
+	def onRecordError(self, movie):
+		movieInfo = self.getMovieInfo(movie)
+		if movieInfo == None:
+			if self.verifyCredentials(False):
+				# ネットには繋がっているがムービー情報が取れない、つまりライブは終わっている
+				return False
+			# ネットには繋がっていない。ライブがまだ続いている可能性もある。
+			return True
+		return movieInfo["movie"]["is_live"]
 
 	def record(self, userName):
 		"""指定したユーザのライブを録画。
