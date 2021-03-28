@@ -114,9 +114,6 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		if self.userName in getRecordingUsers(self):
-			globalVars.app.hMainView.addLog(_("録画スキップ"), _("このユーザのライブはすでに録画中のため、処理をスキップします。"), self.source.friendlyName)
-			return
 		try:
 			cmd = self.getCommand()
 		except IOError:
