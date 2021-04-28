@@ -19,6 +19,7 @@ dic={
 	"TC_ENABLE": _("ツイキャス連携機能を有効化(&E)"),
 	"TC_SAVE_COMMENTS": _("録画時にコメントをテキストファイルに保存する "),
 	"TC_UPDATE_USER": _("ユーザ情報を更新(&U)"),
+	"TC_ADD_TW": _("Twitterでフォローしているユーザを一括追加(&F)"),
 	"TC_RECORD_ARCHIVE": _("過去ライブのダウンロード(&A)") + "...",
 	"TC_RECORD_USER": _("指定したユーザのライブを録画(&R)") + "...",
 	"TC_REMOVE_TOKEN": _("アクセストークンを削除"),
