@@ -619,6 +619,11 @@ class Twitcasting(SourceBase):
 			r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
 			r.start()
 
+	def addUsersFromTwitter(self):
+		"""Twitterでフォローしているユーザを一括追加
+		"""
+		pass
+
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存
 	"""

@@ -190,7 +190,8 @@ class Events(BaseEvents):
 
 		# ツイキャス：Twitterから一括追加
 		if selected == menuItemsStore.getRef("TC_ADD_TW"):
-			pass
+			globalVars.app.tc.addUsersFromTwitter()
+
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("再生ページのURL"))
