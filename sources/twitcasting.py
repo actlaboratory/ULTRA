@@ -622,7 +622,9 @@ class Twitcasting(SourceBase):
 	def addUsersFromTwitter(self):
 		"""Twitterでフォローしているユーザを一括追加
 		"""
-		pass
+		t = TwitterHelper(self)
+		t.initialize()
+		t.start()
 
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存
@@ -781,3 +783,22 @@ class UserChecker(threading.Thread):
 					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
 			time.sleep(60)
 		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
+
+class TwitterHelper(threading.Thread):
+	def __init__(self, tc):
+		super().__init__(daemon=True)
+		self.tc = tc
+
+	def showLog(self, message):
+		"""動作履歴にメッセージを表示
+
+		:param message: メッセージ本文
+		:type message: str
+		"""
+		globalVars.app.hMainView.addLog(_("Twitterでフォローしているユーザを一括追加"), message, self.tc.friendlyName)
+
+	def initialize(self):
+		pass
+
+	def run(self):
+		pass
