@@ -418,7 +418,7 @@ class Twitcasting(SourceBase):
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
 			return
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"])
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv")
 		r.start()
 
 	def getStreamFromUrl(self, url, protected=False):
@@ -431,7 +431,10 @@ class Twitcasting(SourceBase):
 		"""
 		session = requests.session()
 		try:
-			req = session.get(url)
+			req = session.get(url,headers={
+				"Origin": "https://twitcasting.tv",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+			})
 		except:
 			self.showNotFoundError()
 			return
@@ -446,7 +449,11 @@ class Twitcasting(SourceBase):
 				return
 			pw = d.GetData()
 			try:
-				req = session.post(url, "password=%s" %pw, headers={"Content-Type": "application/x-www-form-urlencoded"})
+				req = session.post(url, "password=%s" %pw, headers={
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Origin": "https://twitcasting.tv",
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+				})
 			except:
 				self.showNotFoundError()
 				return

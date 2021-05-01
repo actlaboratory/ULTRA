@@ -14,7 +14,7 @@ from logging import getLogger
 			
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie=""):
+	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -27,6 +27,10 @@ class Recorder(threading.Thread):
 		:type time: int/datetime.datetime
 		:param movie: 録画対象の動画を識別できる文字列
 		:type movie: str
+		:param header: ストリーミングのダウンロード時に追加で指定するHTTPヘッダ
+		:type headers: str
+		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
+		:type userAgent: str
 		"""        
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
@@ -36,6 +40,8 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
+		self.header=header
+		self.userAgent = userAgent
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" %self.stream)
 
@@ -107,6 +113,15 @@ class Recorder(threading.Thread):
 			constants.FFMPEG_PATH,
 			"-loglevel",
 			"error",
+		]
+		if self.header != "":
+			cmd += [
+				"-headers",
+				self.header
+			]
+		cmd += [
+			"-user-agent",
+			self.userAgent,
 			"-i",
 			self.stream,
 			self.getOutputFile(),
@@ -159,6 +174,7 @@ class Recorder(threading.Thread):
 		"""誰のライブを録画中かを返す
 		"""
 		return self.userName
+
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
