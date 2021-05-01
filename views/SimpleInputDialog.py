@@ -29,7 +29,7 @@ class Dialog(BaseDialog):
 
 	def InstallControls(self):
 		"""いろんなwidgetを設置する。"""
-		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20,style=wx.ALL,margin=20)
+		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20,style=wx.ALL|wx.EXPAND,margin=20)
 		self.edit,self.static=self.creator.inputbox(self.detail,x=-1,style=wx.BORDER_RAISED|wx.TE_DONTWRAP,sizerFlag=wx.EXPAND)
 		self.edit.hideScrollBar(wx.HORIZONTAL)
 
