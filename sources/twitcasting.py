@@ -3,6 +3,7 @@
 import base64
 import json
 import traceback
+import twitterService
 import views.SimpleInputDialog
 from copy import deepcopy
 import wx.adv
@@ -253,7 +254,7 @@ class Twitcasting(SourceBase):
 		)
 		webbrowser.open(manager.getUrl())
 		d = views.auth.waitingDialog()
-		d.Initialize()
+		d.Initialize(_("アカウントの追加"))
 		d.Show(False)
 		while True:
 			time.sleep(0.01)
@@ -336,7 +337,8 @@ class Twitcasting(SourceBase):
 				self.showTokenError()
 				return
 			elif req.status_code == 404:
-				simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
+				if showNotFound:
+					simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
 				return
 			else:
 				self.showError(req.json()["error"]["code"])
@@ -622,8 +624,17 @@ class Twitcasting(SourceBase):
 	def addUsersFromTwitter(self):
 		"""Twitterでフォローしているユーザを一括追加
 		"""
-		t = TwitterHelper(self)
-		t.initialize()
+		token = twitterService.getToken()
+		if token == None:
+			return
+		d = views.SimpleInputDialog.Dialog(_("対象ユーザの指定"), _("フォロー中のユーザを取得するアカウントの@からはじまるアカウント名を入力してください。\n後悔アカウント、認証に用いたアカウント、\nまたは認証に用いたアカウントがフォローしている非公開アカウントを指定できます。"), validationPattern="^(@?[a-zA-Z0-9_]*)$")
+		d.Initialize()
+		if d.Show() == wx.ID_CANCEL:
+			return
+		target = re.sub("@?(.*)","\\1", d.GetValue())
+		self.log.debug("target=%s" % target)
+		users = twitterService.getFollowList(token, target)
+		t = TwitterHelper(self, users)
 		t.start()
 
 class CommentGetter(threading.Thread):
@@ -785,9 +796,11 @@ class UserChecker(threading.Thread):
 		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
 
 class TwitterHelper(threading.Thread):
-	def __init__(self, tc):
+	def __init__(self, tc, users):
 		super().__init__(daemon=True)
 		self.tc = tc
+		self.log = getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
+		self.users = users
 
 	def showLog(self, message):
 		"""動作履歴にメッセージを表示
@@ -797,8 +810,25 @@ class TwitterHelper(threading.Thread):
 		"""
 		globalVars.app.hMainView.addLog(_("Twitterでフォローしているユーザを一括追加"), message, self.tc.friendlyName)
 
-	def initialize(self):
-		pass
-
 	def run(self):
-		pass
+		self.showLog(_("処理を開始します。"))
+		for i in self.users:
+			userInfo = self.tc.getUserInfo(i, False)
+			if userInfo != None:
+				userId = userInfo["user"]["id"]
+				self.tc.loadUserList()
+				if userId not in self.tc.users.keys():
+					self.tc.users[userId] = {
+						"user": userInfo["user"]["screen_id"],
+						"name": userInfo["user"]["name"],
+						"specific": False,
+						"baloon": globalVars.app.config.getboolean("notification", "baloon", True),
+						"record": globalVars.app.config.getboolean("notification", "record", True),
+						"openBrowser": globalVars.app.config.getboolean("notification", "openBrowser", False),
+						"sound": globalVars.app.config.getboolean("notification", "sound", False),
+						"soundFile": globalVars.app.config["notification"]["soundFile"],
+					}
+					self.tc.saveUserList()
+					self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
+			time.sleep(30)
+		self.showLog(_("処理が終了しました。"))
