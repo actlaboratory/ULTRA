@@ -129,9 +129,6 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		if self.userName in getRecordingUsers(self):
-			globalVars.app.hMainView.addLog(_("録画スキップ"), _("このユーザのライブはすでに録画中のため、処理をスキップします。"), self.source.friendlyName)
-			return
 		try:
 			cmd = self.getCommand()
 		except IOError:
@@ -158,7 +155,11 @@ class Recorder(threading.Thread):
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
+			if not self.source.onRecordError(self.movie):
+				self.log.info("End of recording")
+				break
 			if "404 Not Found" in result.stdout:
+				self.log.info("not found")
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout), self.source.friendlyName)
 			sleep(15)
@@ -166,6 +167,12 @@ class Recorder(threading.Thread):
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
 			self.log.info("saved: %s" %self.path)
+			if not self.source.onRecordError(self.movie):
+				self.log.info("End of recording")
+				break
+			if "404 Not Found" in result.stdout:
+				self.log.info("not found")
+				break
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()

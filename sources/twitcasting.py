@@ -3,6 +3,7 @@
 import base64
 import json
 import traceback
+import twitterService
 import views.SimpleInputDialog
 from copy import deepcopy
 import wx.adv
@@ -222,15 +223,16 @@ class Twitcasting(SourceBase):
 		self.setHeader()
 		return self.verifyCredentials()
 
-	def verifyCredentials(self):
+	def verifyCredentials(self, init=True):
 		"""トークンが正しく機能しているかどうかを確認する
 		"""
 		try:
 			result = requests.get("https://apiv2.twitcasting.tv/verify_credentials", headers = self.header)
 		except requests.RequestException as e:
-			self.log.error(traceback.format_exc())
-			simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
-			self.netflag = 1
+			if init:
+				self.log.error(traceback.format_exc())
+				simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
+				self.netflag = 1
 			return False
 		return result.status_code == 200
 
@@ -252,7 +254,7 @@ class Twitcasting(SourceBase):
 		)
 		webbrowser.open(manager.getUrl())
 		d = views.auth.waitingDialog()
-		d.Initialize()
+		d.Initialize(_("アカウントの追加"))
 		d.Show(False)
 		while True:
 			time.sleep(0.01)
@@ -335,7 +337,8 @@ class Twitcasting(SourceBase):
 				self.showTokenError()
 				return
 			elif req.status_code == 404:
-				simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
+				if showNotFound:
+					simpleDialog.errorDialog(_("指定したユーザが見つかりません。"))
 				return
 			else:
 				self.showError(req.json()["error"]["code"])
@@ -469,6 +472,9 @@ class Twitcasting(SourceBase):
 		end = body.find("\"", start)
 		stream = body[start:end]
 		stream = stream.replace("\\/", "/")
+		# debug
+		d = session.get(stream, headers={"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", "Accept-Language": "ja,en-US;q=0.7,en;q=0.3", "Accept-Encoding": "gzip, deflate, br", "DNT": "1", "Connection": "keep-alive", "Upgrade-Insecure-Requests": "1"})
+		simpleDialog.debugDialog(d.status_code)
 		return stream
 
 	def getMovieInfoFromUrl(self, url):
@@ -569,6 +575,16 @@ class Twitcasting(SourceBase):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
 
+	def onRecordError(self, movie):
+		movieInfo = self.getMovieInfo(movie)
+		if movieInfo == None:
+			if self.verifyCredentials(False):
+				# ネットには繋がっているがムービー情報が取れない、つまりライブは終わっている
+				return False
+			# ネットには繋がっていない。ライブがまだ続いている可能性もある。
+			return True
+		return movieInfo["movie"]["is_live"]
+
 	def record(self, userName):
 		"""指定したユーザのライブを録画。
 
@@ -611,6 +627,22 @@ class Twitcasting(SourceBase):
 				return
 			r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
 			r.start()
+
+	def addUsersFromTwitter(self):
+		"""Twitterでフォローしているユーザを一括追加
+		"""
+		token = twitterService.getToken()
+		if token == None:
+			return
+		d = views.SimpleInputDialog.Dialog(_("対象ユーザの指定"), _("フォロー中のユーザを取得するアカウントの@からはじまるアカウント名を入力してください。\n後悔アカウント、認証に用いたアカウント、\nまたは認証に用いたアカウントがフォローしている非公開アカウントを指定できます。"), validationPattern="^(@?[a-zA-Z0-9_]*)$")
+		d.Initialize()
+		if d.Show() == wx.ID_CANCEL:
+			return
+		target = re.sub("@?(.*)","\\1", d.GetValue())
+		self.log.debug("target=%s" % target)
+		users = twitterService.getFollowList(token, target)
+		t = TwitterHelper(self, users)
+		t.start()
 
 class CommentGetter(threading.Thread):
 	"""コメントの取得と保存
@@ -769,3 +801,41 @@ class UserChecker(threading.Thread):
 					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
 			time.sleep(60)
 		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
+
+class TwitterHelper(threading.Thread):
+	def __init__(self, tc, users):
+		super().__init__(daemon=True)
+		self.tc = tc
+		self.log = getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
+		self.users = users
+
+	def showLog(self, message):
+		"""動作履歴にメッセージを表示
+
+		:param message: メッセージ本文
+		:type message: str
+		"""
+		globalVars.app.hMainView.addLog(_("Twitterでフォローしているユーザを一括追加"), message, self.tc.friendlyName)
+
+	def run(self):
+		self.showLog(_("処理を開始します。"))
+		for i in self.users:
+			userInfo = self.tc.getUserInfo(i, False)
+			if userInfo != None:
+				userId = userInfo["user"]["id"]
+				self.tc.loadUserList()
+				if userId not in self.tc.users.keys():
+					self.tc.users[userId] = {
+						"user": userInfo["user"]["screen_id"],
+						"name": userInfo["user"]["name"],
+						"specific": False,
+						"baloon": globalVars.app.config.getboolean("notification", "baloon", True),
+						"record": globalVars.app.config.getboolean("notification", "record", True),
+						"openBrowser": globalVars.app.config.getboolean("notification", "openBrowser", False),
+						"sound": globalVars.app.config.getboolean("notification", "sound", False),
+						"soundFile": globalVars.app.config["notification"]["soundFile"],
+					}
+					self.tc.saveUserList()
+					self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
+			time.sleep(30)
+		self.showLog(_("処理が終了しました。"))
