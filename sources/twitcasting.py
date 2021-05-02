@@ -834,5 +834,5 @@ class TwitterHelper(threading.Thread):
 					}
 					self.tc.saveUserList()
 					self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
-			time.sleep(30)
+			time.sleep(60)
 		self.showLog(_("処理が終了しました。"))
