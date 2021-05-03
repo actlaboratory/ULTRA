@@ -816,7 +816,7 @@ class TwitterHelper(threading.Thread):
 		:param message: メッセージ本文
 		:type message: str
 		"""
-		globalVars.app.hMainView.addLog(_("Twitterでフォローしているユーザを一括追加"), message, self.tc.friendlyName)
+		globalVars.app.hMainView.addLog(_("一括追加"), message, self.tc.friendlyName)
 
 	def run(self):
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", False)
