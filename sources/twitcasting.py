@@ -638,6 +638,8 @@ class Twitcasting(SourceBase):
 		target = re.sub("@?(.*)","\\1", d.GetValue())
 		self.log.debug("target=%s" % target)
 		users = twitterService.getFollowList(token, target)
+		if users == None:
+			return
 		t = TwitterHelper(self, users)
 		t.start()
 

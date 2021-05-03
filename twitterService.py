@@ -1,4 +1,4 @@
-# npc service
+# Twitter Service
 # Copyright (C) 2021 yamahubuki <itiro.ishino@gmail.com>
 
 import os
@@ -73,8 +73,8 @@ def getFollowList(token,target):
 		log.error(e)
 		log.error("%s" %(e.response))
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。指定したユーザが存在しないか、フォローしていない非公開アカウントである可能性があります。"))
-		return []
+		return None
 	except Exception:
 		log.error(e)
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。しばらくたってから再度お試しください。状況が改善しない場合には、開発者までお問い合わせください。"))
-		return []
+		return None
