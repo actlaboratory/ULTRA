@@ -9,7 +9,7 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.0.3"
+APP_VERSION="1.1.0"
 APP_LAST_RELEASE_DATE="2021-05-03"
 APP_COPYRIGHT_YEAR="2021"
 APP_LICENSE="Apache License 2.0"
