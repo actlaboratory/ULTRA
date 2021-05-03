@@ -147,10 +147,15 @@ class Twitcasting(SourceBase):
 				b.Show()
 				b.Close()
 		rm.reverse()
-		for i in rm:
-			self.users.pop(i)
-		self.saveUserList()
+		self.removeUsers(rm)
 		self.checkTokenExpires()
+
+	def removeUsers(self, rm):
+		with tlock:
+			self.loadUserList()
+			for i in rm:
+				self.users.pop(i)
+			self.saveUserList()
 
 	def updateUserInfo(self, id, user, name):
 		"""ユーザ情報を更新
