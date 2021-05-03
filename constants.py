@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.0.2"
-APP_LAST_RELEASE_DATE="2021-03-24"
+APP_VERSION="1.1.0"
+APP_LAST_RELEASE_DATE="2021-05-03"
 APP_COPYRIGHT_YEAR="2021"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -54,6 +54,11 @@ UPDATER_WAKE_WORD = "hello"
 TC_CID = "1266762249164619776.2ba35a3fe972584b3ab34e30c0c88ab6b4516d6aaf951c8a02744e21f22b23ba"
 TC_URL = "https://apiv2.twitcasting.tv/oauth2/authorize"
 TC_PORT = 9339
+# Twitter関係
+TWITTER_CONSUMER_KEY = "zAphCyhNj7ElkI5J1aXqH4Gcw"
+TWITTER_CONSUMER_SECRET = "Ioq2aSTDMThRopTD7LH7uA0eYzKYJgtwNe9j4vkDOOTNQoOWh4"
+TWITTER_PORT = 9339
+
 
 # その他
 NOT_FOUND = -1

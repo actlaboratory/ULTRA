@@ -14,7 +14,7 @@ from logging import getLogger
 			
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie=""):
+	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -27,6 +27,10 @@ class Recorder(threading.Thread):
 		:type time: int/datetime.datetime
 		:param movie: 録画対象の動画を識別できる文字列
 		:type movie: str
+		:param header: ストリーミングのダウンロード時に追加で指定するHTTPヘッダ
+		:type headers: str
+		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
+		:type userAgent: str
 		"""        
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
@@ -36,6 +40,8 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
+		self.header=header
+		self.userAgent = userAgent
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" %self.stream)
 
@@ -107,6 +113,15 @@ class Recorder(threading.Thread):
 			constants.FFMPEG_PATH,
 			"-loglevel",
 			"error",
+		]
+		if self.header != "":
+			cmd += [
+				"-headers",
+				self.header
+			]
+		cmd += [
+			"-user-agent",
+			self.userAgent,
 			"-i",
 			self.stream,
 			self.getOutputFile(),
@@ -135,18 +150,29 @@ class Recorder(threading.Thread):
 		self.source.onRecord(self.path, self.movie)
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
-		result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
+		self.log.debug("command: " + " ".join(cmd))
+		result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
 		self.log.info("saved: %s" %self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
+			if not self.source.onRecordError(self.movie):
+				self.log.info("End of recording")
+				break
 			if "404 Not Found" in result.stdout:
+				self.log.info("not found")
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout), self.source.friendlyName)
 			sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
-			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True)
+			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
 			self.log.info("saved: %s" %self.path)
+			if not self.source.onRecordError(self.movie):
+				self.log.info("End of recording")
+				break
+			if "404 Not Found" in result.stdout:
+				self.log.info("not found")
+				break
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
@@ -156,6 +182,7 @@ class Recorder(threading.Thread):
 		"""
 		return self.userName
 
+
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
 	"""
@@ -163,4 +190,13 @@ def getRecordingUsers(self=None):
 	for i in threading.enumerate():
 		if type(i) == Recorder and i != self:
 			ret.append(i.getTargetUser())
+	return ret
+
+def getActiveObj(self=None):
+	"""現在動作中のレコーダーオブジェクトのリストを返す
+	"""
+	ret = []
+	for i in threading.enumerate():
+		if type(i) == Recorder and i != self:
+			ret.append(i)
 	return ret

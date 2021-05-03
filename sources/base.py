@@ -33,11 +33,13 @@ class SourceBase(threading.Thread):
 		"""
 		pass
 
-	def onRecord(self, path):
+	def onRecord(self, path, movie):
 		"""録画を始めたタイミングで呼ばれる
 
 		:param path: 録画の保存先パス
 		:type path: str
+		:param movie: 録画を始める動画の識別子
+		:type movie: str
 		"""
 		pass
 
@@ -48,3 +50,13 @@ class SourceBase(threading.Thread):
 		:type status: str
 		"""
 		globalVars.app.hMainView.statusList.SetItem(self.index, 1, status)
+
+	def onRecordError(self, movie):
+		"""[summary]
+
+		:param movie: エラーが起きた動画の識別子
+		:type movie: str
+		:return: 再試行するかどうか
+		:rtype: bool
+		"""
+		return False

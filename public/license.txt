@@ -17,6 +17,8 @@ Copyright (c)2021 Kazto kashiwamochi,ACT laboratory All rights reserved.
 		Copyright(c) Maxim Kolosov 2009-2013 pyirrlicht@gmail.com
 	websocket-client
 		Copyright 2018 Hiroki Ohtani.
+　　tweepy　(https://www.tweepy.org/)
+　　　　Copyright (c) 2009-2021 Joshua Roesslein
 
 ・MITライセンスに基づく以下のライブラリ
 	AccessibleOutput2　(https://pypi.org/project/accessible-output2/)

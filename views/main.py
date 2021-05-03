@@ -117,6 +117,7 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
 			"TC_UPDATE_USER",
+			"TC_ADD_TW",
 			"TC_RECORD_USER",
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
@@ -186,6 +187,10 @@ class Events(BaseEvents):
 		# ツイキャス：ユーザ情報を更新
 		if selected == menuItemsStore.getRef("TC_UPDATE_USER"):
 			globalVars.app.tc.updateUser()
+
+		# ツイキャス：Twitterから一括追加
+		if selected == menuItemsStore.getRef("TC_ADD_TW"):
+			globalVars.app.tc.addUsersFromTwitter()
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):

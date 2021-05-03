@@ -11,9 +11,9 @@ class waitingDialog(BaseDialog):
 		self.canceled = 0
 		super().__init__("waitingDialog")
 
-	def Initialize(self):
+	def Initialize(self, title):
 		self.log.debug("created")
-		super().Initialize(self.app.hMainView.hFrame,_("アカウントの追加"))
+		super().Initialize(self.app.hMainView.hFrame,title)
 		self.InstallControls()
 		return True
 
