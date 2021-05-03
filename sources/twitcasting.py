@@ -34,6 +34,8 @@ import winsound
 DEBUG = 0
 DEBUG_FILE = "received.txt"
 
+tlock = threading.Lock()
+
 class Twitcasting(SourceBase):
 	name = "TwitCasting"
 	friendlyName = _("ツイキャス")
@@ -160,7 +162,6 @@ class Twitcasting(SourceBase):
 		:param name: 名前
 		:type name: str
 		"""
-		tlock = threading.Lock()
 		with tlock:
 			self.loadUserList()
 			if user != self.users[id]["user"]:
@@ -831,7 +832,6 @@ class TwitterHelper(threading.Thread):
 				userId = userInfo["user"]["id"]
 				self.tc.loadUserList()
 				if userId not in self.tc.users.keys():
-					tlock = threading.Lock()
 					with tlock:
 						self.tc.loadUserList()
 						self.tc.users[userId] = {
