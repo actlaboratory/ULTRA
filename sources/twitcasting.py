@@ -791,6 +791,7 @@ class UserChecker(threading.Thread):
 		self.users = deepcopy(tuple(self.tc.users.keys()))
 
 	def run(self):
+		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", False)
 		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), self.tc.friendlyName)
 		for i in self.users:
 			if i in self.tc.users:
@@ -800,6 +801,7 @@ class UserChecker(threading.Thread):
 					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
 			time.sleep(60)
 		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
+		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", True)
 
 class TwitterHelper(threading.Thread):
 	def __init__(self, tc, users):
@@ -817,6 +819,7 @@ class TwitterHelper(threading.Thread):
 		globalVars.app.hMainView.addLog(_("Twitterでフォローしているユーザを一括追加"), message, self.tc.friendlyName)
 
 	def run(self):
+		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", False)
 		self.showLog(_("処理を開始します。"))
 		for i in self.users:
 			userInfo = self.tc.getUserInfo(i, False)
@@ -824,17 +827,26 @@ class TwitterHelper(threading.Thread):
 				userId = userInfo["user"]["id"]
 				self.tc.loadUserList()
 				if userId not in self.tc.users.keys():
-					self.tc.users[userId] = {
-						"user": userInfo["user"]["screen_id"],
-						"name": userInfo["user"]["name"],
-						"specific": False,
-						"baloon": globalVars.app.config.getboolean("notification", "baloon", True),
-						"record": globalVars.app.config.getboolean("notification", "record", True),
-						"openBrowser": globalVars.app.config.getboolean("notification", "openBrowser", False),
-						"sound": globalVars.app.config.getboolean("notification", "sound", False),
-						"soundFile": globalVars.app.config["notification"]["soundFile"],
-					}
-					self.tc.saveUserList()
+					tlock = threading.Lock()
+					with tlock:
+						self.tc.loadUserList()
+						self.tc.users[userId] = {
+							"user": userInfo["user"]["screen_id"],
+							"name": userInfo["user"]["name"],
+							"specific": False,
+							"baloon": globalVars.app.config.getboolean("notification", "baloon", True),
+							"record": globalVars.app.config.getboolean("notification", "record", True),
+							"openBrowser": globalVars.app.config.getboolean("notification", "openBrowser", False),
+							"sound": globalVars.app.config.getboolean("notification", "sound", False),
+							"soundFile": globalVars.app.config["notification"]["soundFile"],
+						}
+						self.tc.saveUserList()
 					self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
+					self.log.debug("%s added." % i)
+				else:
+					self.log.debug("%s is already added." % i)
+			else:
+				self.log.debug("%s does not exist." % i)
 			time.sleep(60)
 		self.showLog(_("処理が終了しました。"))
+		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", True)
