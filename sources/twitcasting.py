@@ -160,12 +160,16 @@ class Twitcasting(SourceBase):
 		:param name: 名前
 		:type name: str
 		"""
-		if user != self.users[id]["user"]:
-			globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, self.friendlyName)
-			self.users[id]["user"] = user
-		if name != self.users[id]["name"]:
-			globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, self.friendlyName)
-			self.users[id]["name"] = name
+		tlock = threading.Lock()
+		with tlock:
+			self.loadUserList()
+			if user != self.users[id]["user"]:
+				globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, self.friendlyName)
+				self.users[id]["user"] = user
+			if name != self.users[id]["name"]:
+				globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, self.friendlyName)
+				self.users[id]["name"] = name
+			self.saveUserList()
 
 	def updateUser(self):
 		u = UserChecker(self)
