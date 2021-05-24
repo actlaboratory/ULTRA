@@ -14,7 +14,7 @@ from logging import getLogger
 			
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"):
+	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -31,6 +31,8 @@ class Recorder(threading.Thread):
 		:type headers: str
 		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
 		:type userAgent: str
+		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
+		:type skipExisting: bool
 		"""        
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
@@ -42,6 +44,7 @@ class Recorder(threading.Thread):
 		self.movie = movie
 		self.header=header
 		self.userAgent = userAgent
+		self.skipExisting = skipExisting
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" %self.stream)
 
@@ -59,6 +62,10 @@ class Recorder(threading.Thread):
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
 		if os.path.exists(path):
+			if self.skipExisting:
+				self.log.debug("File %s already exists. This recording process will be canceled." % path)
+				globalVars.app.hMainView.addLog(_("録画スキップ"), _("ファイル\"%s\"は既に存在するため、録画処理をスキップします。") % path, self.source.friendlyName)
+				return ""
 			count = 1
 			base = os.path.splitext(path)[0]
 			tmp = "%s (%i).%s" %(base, count, ext)
@@ -129,6 +136,8 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
+		if self.getOutputFile() == "":
+			return
 		try:
 			cmd = self.getCommand()
 		except IOError:

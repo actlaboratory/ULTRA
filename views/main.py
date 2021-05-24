@@ -116,6 +116,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
+			"TC_RECORD_ALL",
 			"TC_UPDATE_USER",
 			"TC_ADD_TW",
 			"TC_RECORD_USER",
@@ -198,6 +199,13 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.downloadArchive(d.GetData())
+
+		# ツイキャス：一括録画
+		if selected == menuItemsStore.getRef("TC_RECORD_ALL"):
+			d = SimpleInputDialog.Dialog(_("ユーザ名を入力"), _("ユーザ名"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.tc.recordAll(d.GetData())
 
 		# ツイキャス：ユーザ名を指定して録画
 		if selected == menuItemsStore.getRef("TC_RECORD_USER"):
