@@ -916,6 +916,7 @@ class ArchiveDownloader(threading.Thread):
 
 	def	 run(self):
 		movies = [i for i in self.getAllMovies() if i["is_recorded"] and (not i["is_protected"])]
+		movies.reverse()
 		globalVars.app.hMainView.addLog(_("一括録画"), _("処理を開始します。対象ライブ数：%i") % len(movies), self.tc.friendlyName)
 		for i in movies:
 			self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
