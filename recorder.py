@@ -12,6 +12,9 @@ import globalVars
 import os
 from logging import getLogger
 			
+# debug
+# 0:何もしない、1:ffmpegのログをカレントディレクトリに保存
+DEBUG = 0
 
 class Recorder(threading.Thread):
 	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
@@ -121,6 +124,8 @@ class Recorder(threading.Thread):
 			"-loglevel",
 			"error",
 		]
+		if DEBUG == 1:
+			cmd.append("-report")
 		if self.header != "":
 			cmd += [
 				"-headers",
