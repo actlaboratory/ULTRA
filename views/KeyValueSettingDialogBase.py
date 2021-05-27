@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #Falcon Key-Value setting view base
-#Copyright (C) 2020 yamahubuki <itiro.ishino@gmail.com>
+#Copyright (C) 2020-2021 yamahubuki <itiro.ishino@gmail.com>
 #Note: All comments except these top lines will be written in Japanese. 
 
 import wx
@@ -26,6 +26,9 @@ class KeyValueSettingDialogBase(BaseDialog):
 		self.settingDialog=settingDialog
 		self.columnInfo=columnInfo
 		self.values=values
+		for v in values:
+			if type(v)!=dict:
+				raise TypeError("value must be dict")
 		self.columnNames=[]
 		self.checkResultValueString=[("○","×")]*len(columnInfo)
 		self.initialized=False
@@ -216,11 +219,13 @@ class SettingDialogBase(BaseDialog):
 
 	def __init__(self,parent,valueNames,buttons,*v):
 		"""
-			valueNamesには各入力欄の名前(「名前」「パス」「ショートカットキー」など)とユーザによる直接入力の可否のタプルのリストを指定。
-			直接入力の可否はTrue/Falseの他、Noneにすると非表示にもできる。非表示でも入力欄自体は存在する為、内部用の値の保持に使える。
+			valueNamesには(各入力欄の名前,入力タイプ)のリストを指定。
+			入力タイプは以下のいずれかを指定する。
+				エディットボックス:True(入力可能)/False(入力不可)/None(非表示)　非表示でも入力欄自体は存在するため、内部用の値の保持に使える。
+				チェックボックス:str(表示文字列としてこちら側が利用される)
+				コンボボックス:選択肢strのiterable
 			buttonsには、設置するボタンの情報をNone(ボタン無)または("参照",self.getRef())のように名前と押された時の動作関数のタプルで定義したもののリストを指定
-			*vには各入力欄の初期値(空欄を省略可能)
-
+			*vには各入力欄の初期値を指定
 		"""
 		super().__init__("valueSettingDialog")
 		if len(valueNames)!=len(v):
@@ -239,20 +244,28 @@ class SettingDialogBase(BaseDialog):
 
 	def InstallControls(self):
 		"""いろんなwidgetを設置する。"""
-		self.baseCreator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20)
+		self.baseCreator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20,style=wx.ALL,margin=20)
 
 		for i,name in enumerate(self.valueNames):
 			self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.baseCreator.GetPanel(),self.baseCreator.GetSizer(),wx.HORIZONTAL,10)
 			if type(name[1])==str:
 				self.edits[i]=self.creator.checkbox(name[1],state=self.values[i], x=500)
-			elif name[1]:
+			elif name[1]==True:
 				self.edits[i],dummy=self.creator.inputbox(name[0],x=500,defaultValue=self.values[i], textLayout=wx.VERTICAL)
 				self.edits[i].hideScrollBar(wx.HORIZONTAL)
-			else:
+			elif name[1]==False:
 				self.edits[i],dummy=self.creator.inputbox(name[0],x=500,defaultValue=self.values[i],style=wx.TE_READONLY, textLayout=wx.VERTICAL)
 				self.edits[i].hideScrollBar(wx.HORIZONTAL)
-			if name[1]==None:
+			elif hasattr(name[1],"__iter__"):
+				state = 0
+				if self.values[i] in name[1]:
+					state = name[1].index(self.values[i])
+				self.edits[i],dummy=self.creator.combobox(name[0],name[1],state=state, x=500,textLayout=wx.VERTICAL)
+			elif name[1]==None:
+				self.edits[i],dummy=self.creator.inputbox(name[0],x=500,defaultValue=self.values[i],style=wx.TE_READONLY, textLayout=wx.VERTICAL)
 				self.edits[i].GetParent().Hide()
+			else:
+				raise TypeError("object type must be str,bool,None, or iterable.")
 			if self.buttons[i]:
 				self.buttonObjects[i]=self.creator.button(self.buttons[i][0],self.buttons[i][1],sizerFlag=wx.ALIGN_BOTTOM | wx.BOTTOM, margin=10)
 
@@ -266,6 +279,8 @@ class SettingDialogBase(BaseDialog):
 		for i in range(len(self.edits)):
 			if isinstance(self.edits[i],wx.CheckBox):
 				ret[i]=self.edits[i].GetValue()
+			elif isinstance(self.edits[i],wx.ComboBox):
+				ret[i]=self.edits[i].GetString(self.edits[i].GetCurrentSelection())
 			else:
 				ret[i]=self.edits[i].GetLineText(0)
 		ret[0]=ret[0].lower()			#iniファイルへの保存の為キーは小文字に統一

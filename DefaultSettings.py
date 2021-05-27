@@ -13,6 +13,7 @@ class DefaultSettings:
 			"locale": "ja-JP",
 			"autoHide": False,
 			"minimizeOnExit": True,
+			"log_level": "0",
 		}
 		config["view"]={
 			"font": "bold 'ＭＳ ゴシック' 22 windows-932",
