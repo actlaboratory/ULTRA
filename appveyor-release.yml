@@ -45,7 +45,7 @@ deploy:
   - provider: GitHub
     description: "ULTRA official release"
     auth_token:
-      secure: UcoHc3nVwi+4feNv3QuMZy2qgZmTVElAD9iMr9UxcEUTA0PP2beWDMuiNhBoNYeA
+      secure: iNSx8v6c+0TP9IyckinrvNWuX+hc7SKruOqRDl9GxdX59sZ2yqB8+UDAtqdPzKIg
     artifact: /(ULTRA-.*\.zip)|(ULTRA-.*\.json)/
     draft: true
     prerelease: false
