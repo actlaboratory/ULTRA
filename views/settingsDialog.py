@@ -168,6 +168,7 @@ class Dialog(BaseDialog):
 				conf[v[1]][v[2]] = list(v[3].keys())[obj.GetSelection()]
 			else:
 				conf[v[1]][v[2]] = obj.GetValue()
+		conf.write()
 
 	def browse(self, event):
 		target = self.soundfile
