@@ -7,6 +7,7 @@ import twitterService
 import views.SimpleInputDialog
 from copy import deepcopy
 import wx.adv
+import errorCodes
 import websocket
 import pickle
 import wx
@@ -432,6 +433,8 @@ class Twitcasting(SourceBase):
 		if stream == None:
 			return
 		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+		if r.shouldSkip():
+			return errorCodes.RECORD_SKIPPED
 		r.start()
 		if join:
 			r.join()
@@ -914,10 +917,20 @@ class ArchiveDownloader(threading.Thread):
 		dict = result.json()
 		return dict["movies"]
 
-	def	 run(self):
+	def run(self):
+		globalVars.app.hMainView.addLog(_("一括録画"), _("ライブ一覧を取得しています。"), self.tc.friendlyName)
 		movies = [i for i in self.getAllMovies() if i["is_recorded"] and (not i["is_protected"])]
 		movies.reverse()
 		globalVars.app.hMainView.addLog(_("一括録画"), _("処理を開始します。対象ライブ数：%i") % len(movies), self.tc.friendlyName)
+		count = 0
+		index = 1
 		for i in movies:
-			self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
-		globalVars.app.hMainView.addLog(_("一括録画"), _("完了。%i件録画しました。") % len(movies), self.tc.friendlyName)
+			globalVars.app.hMainView.addLog(_("一括録画"), _("処理中（%i/%i）") % (index, len(movies)), self.tc.friendlyName)
+			result = self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
+			index += 1
+			time.sleep(5)
+			if result == errorCodes.RECORD_SKIPPED:
+				globalVars.app.hMainView.addLog(_("一括録画"), _("ファイルが既に存在するため、録画をスキップします。"), self.tc.friendlyName)
+				continue
+			count += 1
+		globalVars.app.hMainView.addLog(_("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)

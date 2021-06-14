@@ -64,11 +64,7 @@ class Recorder(threading.Thread):
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
-		if os.path.exists(path):
-			if self.skipExisting:
-				self.log.debug("File %s already exists. This recording process will be canceled." % path)
-				globalVars.app.hMainView.addLog(_("録画スキップ"), _("ファイル\"%s\"は既に存在するため、録画処理をスキップします。") % path, self.source.friendlyName)
-				return ""
+		if os.path.exists(path) and not self.skipExisting:
 			count = 1
 			base = os.path.splitext(path)[0]
 			tmp = "%s (%i).%s" %(base, count, ext)
@@ -141,7 +137,7 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
-		if self.getOutputFile() == "":
+		if self.shouldSkip():
 			return
 		try:
 			cmd = self.getCommand()
@@ -190,6 +186,9 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
+
+	def shouldSkip(self):
+		return self.skipExisting and os.path.exists(self.getOutputFile())
 
 	def getTargetUser(self):
 		"""誰のライブを録画中かを返す
