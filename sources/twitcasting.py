@@ -480,7 +480,7 @@ class Twitcasting(SourceBase):
 				return
 			body = req.text
 		try:
-			start = re.search("https:\\\/\\\/dl\d\d\.twitcasting\.tv\\\/tc\.vod\\\/", body).start()
+			start = re.search("https:\\\/\\\/dl\d+\.twitcasting\.tv\\\/tc\.vod", body).start()
 		except:
 			self.showNotFoundError()
 			return
