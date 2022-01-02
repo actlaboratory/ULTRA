@@ -925,7 +925,7 @@ class ArchiveDownloader(threading.Thread):
 		count = 0
 		index = 1
 		for i in movies:
-			globalVars.app.hMainView.addLog(_("一括録画"), _("処理中（%i/%i）") % (index, len(movies)), self.tc.friendlyName)
+			globalVars.app.hMainView.addLog(_("一括録画"), _("処理中（%(index)i/%(total)i）") % {"index": index, "total": len(movies)}, self.tc.friendlyName)
 			result = self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
 			index += 1
 			time.sleep(5)
