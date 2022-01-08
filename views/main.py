@@ -276,16 +276,16 @@ class Events(BaseEvents):
 			d.Initialize()
 			r = d.Show()
 
-	def Exit(self, event):
+	def OnExit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
 			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
 				self.hide()
 			else:
-				super().Exit(event)
+				super().OnExit(event)
 				globalVars.app.tb.Destroy()
 		else:
-			super().Exit(event)
+			super().OnExit(event)
 			globalVars.app.tb.Destroy()
 
 	def hide(self):
@@ -365,5 +365,6 @@ class Events(BaseEvents):
 				newMap[identifier.upper()][menuData[name]]=key
 			else:
 				newMap[identifier.upper()][menuData[name]]=""
-		newMap.write()
+		if newMap.write() != errorCodes.OK:
+			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.KEYMAP_FILE_NAME))
 		return True

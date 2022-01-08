@@ -24,10 +24,11 @@ class BaseDialog(object):
 			globalVars.app.config.getstring("view","textWrapping","off",("on","off"))
 		)
 
-	def Initialize(self, parent,ttl,style=wx.DEFAULT_DIALOG_STYLE | wx.BORDER_DEFAULT):
+	def Initialize(self, parent,ttl,style=wx.CAPTION | wx.SYSTEM_MENU | wx.BORDER_DEFAULT):
 		"""タイトルを指定して、ウィンドウを初期化し、親の中央に配置するように設定。"""
 		self.wnd=wx.Dialog(parent,-1, ttl,style = style)
 		_winxptheme.SetWindowTheme(self.wnd.GetHandle(),"","")
+		self.wnd.SetEscapeId(wx.ID_NONE)
 		self.wnd.Bind(wx.EVT_CLOSE,self.OnClose)
 
 		self.panel = wx.Panel(self.wnd,wx.ID_ANY)
@@ -63,7 +64,7 @@ class BaseDialog(object):
 
 	#closeイベントで呼ばれる。Alt+F4対策
 	def OnClose(self,event):
-		if self.wnd.GetWindowStyleFlag() | wx.CLOSE_BOX==wx.CLOSE_BOX:
-			self.wnd.Destroy()
+		if self.wnd.GetWindowStyleFlag() & wx.CLOSE_BOX==wx.CLOSE_BOX:
+			event.Skip()
 		else:
 			event.Veto()

@@ -37,7 +37,7 @@ class BaseView(object):
 		_winxptheme.SetWindowTheme(self.hFrame.GetHandle(),"","")
 		self.hFrame.Bind(wx.EVT_MOVE_END,self.events.WindowMove)
 		self.hFrame.Bind(wx.EVT_SIZE,self.events.WindowResize)
-		self.hFrame.Bind(wx.EVT_CLOSE,self.events.Exit)
+		self.hFrame.Bind(wx.EVT_CLOSE,self.events.OnExit)
 		self.MakePanel(space)
 
 	def MakePanel(self,space=0):
@@ -298,7 +298,7 @@ class BaseEvents(object):
 		self.identifier=identifier
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX,self.identifier))
 
-	def Exit(self,event=None):
+	def OnExit(self,event):
 		event.Skip()
 
 	# wx.EVT_MOVE_END→wx.MoveEvent

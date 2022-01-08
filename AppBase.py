@@ -2,21 +2,24 @@
 #Application Initializer
 
 import accessible_output2.outputs
-import sys
-import gettext
-import logging
-import wx
-import locale
-import win32api
 import datetime
+import gettext
+import locale
+import logging
+import os
+import sys
+import traceback
+import win32api
+import wx
+
+from accessible_output2.outputs.base import OutputError
 from logging import getLogger, FileHandler, Formatter
 
 import constants
 import DefaultSettings
 import views.langDialog
 import simpleDialog
-import os
-import traceback
+
 
 class MaiｎBase(wx.App):
 	def __init__(self):
@@ -45,6 +48,16 @@ class MaiｎBase(wx.App):
 			simpleDialog.errorDialog(_("ログ機能の初期化に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.LOG_FILE_NAME))
 
 	def InitSpeech(self):
+		# 音声読み上げの準備
+		try:
+			self._InitSpeech()
+		except OutputError as e:
+			self.log.error("Failed to initialize speech output.")
+			self.log.error(traceback.format_exc())
+			simpleDialog.winDialog(_("音声エンジンエラー"), _("音声読み上げ機能の初期化に失敗したため、読み上げ機能を使用できません。出力先の変更をお試しください。"))
+			self.speech = accessible_output2.outputs.nospeech.NoSpeech()
+
+	def _InitSpeech(self):
 		# 音声読み上げの準備
 		reader=self.config["speech"]["reader"]
 		if(reader=="PCTK"):
@@ -91,7 +104,7 @@ class MaiｎBase(wx.App):
 			traceback.print_exc()
 		self.log=getLogger(constants.LOG_PREFIX+".Main")
 		r="executable" if self.frozen else "interpreter"
-		self.log.info("Starting"+constants.APP_NAME+" as %s!" % r)
+		self.log.info("Starting"+constants.APP_NAME+" "+constants.APP_VERSION+" as %s!" % r)
 
 	def LoadSettings(self):
 		"""設定ファイルを読み込む。なければデフォルト設定を適用し、設定ファイルを書く。"""
@@ -100,6 +113,8 @@ class MaiｎBase(wx.App):
 			#初回起動
 			self.config.read_dict(DefaultSettings.initialValues)
 			self.config.write()
+		if self.log.hasHandlers():
+			self.hLogHandler.setLevel(self.config.getint("general","log_level",20,0,50))
 
 	def InitTranslation(self):
 		"""翻訳を初期化する。"""

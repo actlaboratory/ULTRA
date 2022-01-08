@@ -18,6 +18,7 @@ from views.viewObjectBase import checkBoxBase
 from views.viewObjectBase import radioBoxBase
 from views.viewObjectBase import radioButtonBase
 from views.viewObjectBase import listBoxBase
+from views.viewObjectBase import treeCtrlBase
 from views.viewObjectBase import normalListCtrlBase
 from views.viewObjectBase import virtualListCtrlBase
 from views.viewObjectBase import notebookBase
@@ -57,6 +58,7 @@ class ViewCreatorBase():
 			"radioBox": radioBoxBase.radioBox,
 			"radioButton": radioButtonBase.radioButton,
 			"listBox": listBoxBase.listBox,
+			"treeCtrl": treeCtrlBase.treeCtrl,
 			"listCtrl": normalListCtrlBase.listCtrl,
 			"virtualListCtrl": virtualListCtrlBase.virtualListCtrl,
 			"notebook": notebookBase.notebook,
@@ -190,7 +192,28 @@ class ViewCreatorBase():
 		self._setFace(hButton,mode=BUTTON_COLOUR)
 		Add(self.sizer,hButton,proportion,sizerFlag,margin)
 		self.AddSpace()
+		self._setCloseable(hButton)
 		return hButton
+
+	def closebutton(self,text,event=None,style=wx.BORDER_RAISED,size=(-1,-1), sizerFlag=wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT | wx.ALL,proportion=1,margin=5):
+		hButton=self.winObject["button"](self.parent, wx.ID_OK,label=text, name=text,style=style, size=size)
+		hButton.Bind(wx.EVT_BUTTON,event)
+		self._setFace(hButton,mode=BUTTON_COLOUR)
+		Add(self.sizer,hButton,proportion,sizerFlag,margin)
+		hButton.SetDefault()
+		self.AddSpace()
+		self._setCloseable(hButton)
+		return hButton
+
+	def _setCloseable(self,btn):
+		gp = self.parent
+		while(gp != None):
+			gp = gp.GetParent()
+			if isinstance(gp, wx._core.Dialog):
+				gp.EnableCloseButton(True)
+				gp.SetWindowStyle(gp.GetWindowStyle()|wx.CLOSE_BOX)
+				gp.SetEscapeId(btn.GetId())
+				return
 
 	def staticText(self, text, style=0, x=-1, sizerFlag=wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5):
 		hStatic=self.winObject["staticText"](self.parent,wx.ID_ANY,label=text,name=text,size=(x,-1),style=style)
@@ -198,7 +221,7 @@ class ViewCreatorBase():
 		Add(self.sizer,hStatic,proportion,sizerFlag,margin)
 		return hStatic
 
-	def combobox(self,text, selection, event=None, state=-1, style=wx.CB_READONLY, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def combobox(self,text, selection, event=None, state=-1, style=wx.CB_READONLY, x=-1, sizerFlag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		v=""
@@ -376,7 +399,17 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hListBox,hStaticText
 
-	def listCtrl(self,text, event=None, style=0, size=(200,200), sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def treeCtrl(self,text, event=None, style=wx.TR_FULL_ROW_HIGHLIGHT|wx.TR_NO_BUTTONS, size=(200,200), sizerFlag=wx.ALL, proportion=0, margin=5, textLayout=wx.DEFAULT, enableTabFocus=True):
+		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
+
+		hTreeCtrl=self.winObject["treeCtrl"](parent,wx.ID_ANY,style=style | wx.BORDER_RAISED, size=size, enableTabFocus=enableTabFocus)
+		hTreeCtrl.Bind(wx.EVT_TREE_SEL_CHANGED,event)
+		self._setFace(hTreeCtrl)
+		Add(sizer,hTreeCtrl,proportion,sizerFlag,margin)
+		self.AddSpace()
+		return hTreeCtrl,hStaticText
+
+	def listCtrl(self,text, event=None, style=wx.LC_SINGLE_SEL|wx.LC_REPORT, size=(200,200), sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hListCtrl=self.winObject["listCtrl"](parent,wx.ID_ANY,style=style | wx.BORDER_RAISED, size=size, enableTabFocus=enableTabFocus)
@@ -391,7 +424,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hListCtrl,hStaticText
 
-	def virtualListCtrl(self,text, event=None, style=0, size=(200,200), sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def virtualListCtrl(self,text, event=None, style=wx.LC_SINGLE_SEL|wx.LC_REPORT, size=(200,200), sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hListCtrl=self.winObject["virtualListCtrl"](parent,wx.ID_ANY,style=style | wx.BORDER_RAISED, size=size, enableTabFocus=enableTabFocus)
@@ -438,7 +471,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hGauge,hStaticText
 
-	def spinCtrl(self,text, min=0, max=100, event=None, defaultValue=0, style=wx.SP_ARROW_KEYS, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def spinCtrl(self,text, min=0, max=100, event=None, defaultValue=0, style=wx.SP_ARROW_KEYS, x=-1, sizerFlag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hSpinCtrl = self.winObject["spinCtrl"](parent, wx.ID_ANY, min=min, max=max, initial=defaultValue, style=wx.BORDER_RAISED | style, size=(x,-1), enableTabFocus=enableTabFocus)
@@ -528,12 +561,12 @@ class ViewCreatorBase():
 			self._setFace(hStaticText)
 			sizer=self.BoxSizer(panel,orient=textLayout)
 			Add(sizer,hStaticText, 0, wx.ALIGN_CENTER_VERTICAL)
-			Add(self.sizer,panel, proportion, sizerFlag|wx.ALIGN_CENTER_VERTICAL,margin)
+			Add(self.sizer,panel, proportion, sizerFlag,margin)
 			return hStaticText,sizer,panel
 		elif isinstance(self.sizer,(wx.GridSizer,wx.FlexGridSizer,wx.GridBagSizer)) and textLayout==None:
 			hStaticText=wx.StaticText(self.parent,wx.ID_ANY,label=text,name=text,size=(0,0))
 			self._setFace(hStaticText)
-			sizer=self.BoxSizer(self.sizer,style=sizerFlag&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_BOTTOM|wx.EXPAND))
+			sizer=self.BoxSizer(self.sizer,style=sizerFlag&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_TOP|wx.ALIGN_BOTTOM|wx.EXPAND))
 			Add(sizer,hStaticText)
 			return hStaticText,sizer,self.parent
 		else:
@@ -542,7 +575,7 @@ class ViewCreatorBase():
 			else:
 				hStaticText=wx.StaticText(self.parent,wx.ID_ANY,label=text,name=text,size=(0,0))
 			self._setFace(hStaticText)
-			Add(self.sizer,hStaticText,0,(sizerFlag|wx.ALIGN_CENTER_VERTICAL)&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_BOTTOM|wx.EXPAND))
+			Add(self.sizer,hStaticText,0,sizerFlag&(wx.ALIGN_LEFT|wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_TOP|wx.ALIGN_BOTTOM|wx.EXPAND))
 			return hStaticText,self.sizer,self.parent
 
 	def _setFace(self,target,mode=NORMAL):
