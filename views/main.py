@@ -180,10 +180,14 @@ class Events(BaseEvents):
 			else:
 				globalVars.app.tc.exit()
 			globalVars.app.config["twitcasting"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# ツイキャス：コメント保存
 		if selected == menuItemsStore.getRef("TC_SAVE_COMMENTS"):
 			globalVars.app.config["twitcasting"]["savecomments"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# ツイキャス：ユーザ情報を更新
 		if selected == menuItemsStore.getRef("TC_UPDATE_USER"):
