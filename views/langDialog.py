@@ -21,7 +21,7 @@ class langDialog(BaseDialog):
 
 	def Initialize(self):
 		self.log.debug("created")
-		super().Initialize(None,"language settings",0)
+		super().Initialize(None,"language settings")
 		self.InstallControls()
 		return True
 

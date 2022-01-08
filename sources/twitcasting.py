@@ -7,6 +7,7 @@ import twitterService
 import views.SimpleInputDialog
 from copy import deepcopy
 import wx.adv
+import errorCodes
 import websocket
 import pickle
 import wx
@@ -419,7 +420,7 @@ class Twitcasting(SourceBase):
 			config["soundFile"] = globalVars.app.config["notification"]["soundFile"]
 		return config
 
-	def downloadArchive(self, url):
+	def downloadArchive(self, url, join=False, skipExisting=False):
 		"""過去ライブをダウンロード
 
 		:param url: 再生ページのURL
@@ -431,8 +432,12 @@ class Twitcasting(SourceBase):
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
 			return
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv")
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+		if r.shouldSkip():
+			return errorCodes.RECORD_SKIPPED
 		r.start()
+		if join:
+			r.join()
 
 	def getStreamFromUrl(self, url, protected=False):
 		"""再生ページのURLからストリーミングのURLを得る
@@ -475,7 +480,7 @@ class Twitcasting(SourceBase):
 				return
 			body = req.text
 		try:
-			start = re.search("https:\\\/\\\/dl\d\d\.twitcasting\.tv\\\/tc\.vod\\\/", body).start()
+			start = re.search("https:\\\/\\\/dl\d+\.twitcasting\.tv\\\/tc\.vod", body).start()
 		except:
 			self.showNotFoundError()
 			return
@@ -634,6 +639,17 @@ class Twitcasting(SourceBase):
 				return
 			r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
 			r.start()
+
+	def recordAll(self, user):
+		"""過去ライブの一括録画
+
+		:param user: ユーザ名
+		:type user: str
+		"""
+		target = self.getUserIdFromScreenId(user)
+		if target == constants.NOT_FOUND:
+			return
+		ArchiveDownloader(self, target).start()
 
 	def addUsersFromTwitter(self):
 		"""Twitterでフォローしているユーザを一括追加
@@ -859,3 +875,62 @@ class TwitterHelper(threading.Thread):
 			time.sleep(60)
 		self.showLog(_("処理が終了しました。"))
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", True)
+
+class ArchiveDownloader(threading.Thread):
+	def __init__(self, tc, user):
+		super().__init__(daemon=True)
+		self.tc = tc
+		self.user = user
+		self.hasError = 0
+
+	def getAllMovies(self):
+		all = []
+		tmp = self.getMovies()
+		if self.hasError == 1:
+			return []
+		while len(tmp) > 0:
+			all = all + tmp
+			tmp = self.getMovies(all[-1]["id"])
+			tmp.remove(all[-1])
+			if self.hasError == 1:
+				return []
+		return all
+
+	def getMovies(self, slice_id=""):
+		param = {
+			"limit": 50,
+			"slice_id": slice_id,
+		}
+		try:
+			result = requests.get("https://apiv2.twitcasting.tv/users/%s/movies" % self.user, param, headers=self.tc.header)
+		except requests.RequestException:
+			self.hasError = 1
+			return []
+		if result.status_code != 200:
+			if result.json()["error"]["code"] == 1000:
+				self.tc.showTokenError()
+			elif result.status_code == 404:
+				return []
+			else:
+				self.tc.showError(result.json()["error"]["code"])
+			return []
+		dict = result.json()
+		return dict["movies"]
+
+	def run(self):
+		globalVars.app.hMainView.addLog(_("一括録画"), _("ライブ一覧を取得しています。"), self.tc.friendlyName)
+		movies = [i for i in self.getAllMovies() if i["is_recorded"] and (not i["is_protected"])]
+		movies.reverse()
+		globalVars.app.hMainView.addLog(_("一括録画"), _("処理を開始します。対象ライブ数：%i") % len(movies), self.tc.friendlyName)
+		count = 0
+		index = 1
+		for i in movies:
+			globalVars.app.hMainView.addLog(_("一括録画"), _("処理中（%(index)i/%(total)i）") % {"index": index, "total": len(movies)}, self.tc.friendlyName)
+			result = self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
+			index += 1
+			time.sleep(5)
+			if result == errorCodes.RECORD_SKIPPED:
+				globalVars.app.hMainView.addLog(_("一括録画"), _("ファイルが既に存在するため、録画をスキップします。"), self.tc.friendlyName)
+				continue
+			count += 1
+		globalVars.app.hMainView.addLog(_("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)

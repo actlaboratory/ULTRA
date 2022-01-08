@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # settings dialog
 
+import os
 import wx
 
 import constants
+import errorCodes
 import simpleDialog
 import views.ViewCreator
 
@@ -168,6 +170,8 @@ class Dialog(BaseDialog):
 				conf[v[1]][v[2]] = list(v[3].keys())[obj.GetSelection()]
 			else:
 				conf[v[1]][v[2]] = obj.GetValue()
+		if conf.write() != errorCodes.OK:
+			simpleDialog.errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 	def browse(self, event):
 		target = self.soundfile

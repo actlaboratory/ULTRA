@@ -7,7 +7,7 @@ import configparser
 import logging
 from logging import getLogger
 
-
+import errorCodes
 
 class ConfigManager(configparser.ConfigParser):
 	def __init__(self):
@@ -31,7 +31,27 @@ class ConfigManager(configparser.ConfigParser):
 
 	def write(self):
 		self.log.info("write configFile:"+self.fileName)
-		with open(self.fileName,"w", encoding='UTF-8') as f: return super().write(f)
+		try:
+			with open(self.fileName,"w", encoding='UTF-8') as f: super().write(f)
+			return errorCodes.OK
+		except PermissionError as e:
+			self.log.warning("write failed." + str(e))
+			return errorCodes.ACCESS_DENIED
+		except FileNotFoundError as e:
+			self.log.warning("write failed." + str(e))
+			dirName = os.path.dirname(self.fileName)
+			self.log.info("try to create directory:"+dirName)
+			try:
+				os.makedirs(dirName, exist_ok=True)
+			except:
+				self.log.error("auto directory creation failed.")
+				return errorCodes.ACCESS_DENIED
+			try:
+				with open(self.fileName,"w", encoding='UTF-8') as f: super().write(f)
+				return errorCodes.OK
+			except:
+				self.log.error("save failed.")
+				return errorCodes.ACCESS_DENIED
 
 	def __getitem__(self,key):
 		try:
@@ -92,14 +112,14 @@ class ConfigManager(configparser.ConfigParser):
 				return ""
 			else:
 				self.log.debug("add default value.  at section "+section+", key "+key)
-				self[section][key]=default
-				ret=default
+				self[section][key]=str(default)
+				ret=str(default)
 				if selection==None:return ret
 
 		if selection!=None and ret not in selection:
-			self.log.debug("value "+ret+" not in selection.  at section "+section+", key "+key)
-			self[section][key]=default
-			ret=default
+			self.log.debug("value "+str(ret)+" not in selection.  at section "+section+", key "+key)
+			self[section][key]=str(default)
+			ret=str(default)
 		return ret
 
 	def add_section(self,name):

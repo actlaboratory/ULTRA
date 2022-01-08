@@ -1,11 +1,89 @@
 # -*- coding: utf-8 -*-
 #Version setter
 #Copyright (C) 2020 Yukio Nozawa <personal@nyanchangames.com>
+#Copyright (C) 2021 yamahubuki <itiro.ishino@gmail.com>
+#Copyright (C) 2021 Hiroki Fujii <hfujii@hisystron.com>
+
 import datetime
 import json
 import os
 import re
 import sys
+
+VERSION_FILE_NAME="version.json"
+
+# step1: input next version
+def getVersion():
+	current = getCurrentVersion()
+	print("Current version is %s." % current)
+	current=current.split(".")
+	next=["0","0","0"]
+	if len(sys.argv)==2:
+		for i,j in enumerate(["major", "minor", "patch"]):
+			if sys.argv[1] == j:
+				print("Auto-bumpup %s version." % j)
+				next[i]=str(int(current[i])+1)
+				return ".".join(next)
+			else:
+				next[i]=current[i]
+		print("Warning: Unrecognized bumpup option %s." % arg)
+
+	next = current
+	next[2]=str(int(next[2])+1)
+	next=".".join(next)
+	inp=input("Type next version (leave blank to use %s): " % next)
+	if inp=="": return next
+	if re.match(r"\d+\.\d+\.\d+",inp):
+		return inp
+	else:
+		print("Version must be major.minor.patch")
+		print("Aborting.")
+		sys.exit(1)
+	#end abort
+
+
+# step2: input release date
+def getReleaseDate():
+	today=str(datetime.date.today())
+	inp=input("type next release date (leave blank to use %s): " % today)
+	if inp=="": return today
+	try:
+		dc=datetime.date.fromisoformat(inp)
+		return inp
+	except:
+		print("Invalid date format.")
+		print("Aborting.")
+		sys.exit(1)
+#end abort
+
+
+# load existing version or default
+def getCurrentVersion():
+	if os.path.exists(VERSION_FILE_NAME):
+		print("Loading version.json...")
+		try:
+			with open(VERSION_FILE_NAME,"r") as f:
+				return json.load(f)["version"]
+		except:
+			print("Unable to parse %s, using default." % VERSION_FILE_NAME)
+			return "1.0.0"
+	else:
+		print("File not found %s, using default." % VERSION_FILE_NAME)
+		return "1.0.0"
+
+
+#step3: bumpup
+#build.pyからも呼び出しているので変更時は注意
+def bumpup(v, d):
+	v = {
+		"version": v,
+		"release_date": d,
+	}
+	with open(VERSION_FILE_NAME, "w") as f:
+		json.dump(v,f)
+	print("Saved %s." % VERSION_FILE_NAME)
+	patch("public/readme.txt",r'バージョン:　　ver\.', r'リリース:　　　', v)
+	patch("constants.py",r'APP_VERSION="', r'APP_LAST_RELEASE_DATE="', v)
 
 def patch(filename, version_regexp, release_date_regexp, version_object):
 	try:
@@ -22,70 +100,9 @@ def patch(filename, version_regexp, release_date_regexp, version_object):
 		print("Cannot patch %s (%s)" % (filename,str(err)))
 #end patch
 
-bump={"major": False, "minor": False, "patch": False}
-if len(sys.argv)==2:
-	arg=sys.argv[1]
-	if arg in bump:
-		print("Auto-bumpup %s version." % arg)
-		bump[arg]=True
-	else:
-		print("Warning: Unrecognized bumpup option %s." % arg)
-	#end auto bumpup option
-#end cmd
-
-VERSION_FILE_NAME="version.json"
-v={"version": "1.0.0", "release_date": "undefined"}
-
-#step 1: load existing version
-if os.path.exists(VERSION_FILE_NAME):
-	print("Loading version.json...")
-	try:
-		with open(VERSION_FILE_NAME,"r") as f:
-			v=json.load(f)
-	except:
-		print("Unable to parse %s, using default." % VERSION_FILE_NAME)
-
-#step 2: input
-print("Current version is %s." % v["version"])
-next=v["version"].split(".")
-if bump["major"]:
-	next[0]=str(int(next[0])+1)
-	inp=".".join(next)
-elif bump["minor"]:
-	next[1]=str(int(next[1])+1)
-	inp=".".join(next)
-elif bump["patch"]:
-	next[2]=str(int(next[2])+1)
-	inp=".".join(next)
-else:
-	next[2]=str(int(next[2])+1)
-	next=".".join(next)
-	inp=input("Type next version (leave blank to use %s): " % next)
-	if inp=="": inp=next
-	if not re.match(r"\d+\.\d+\.\d+",inp):
-		print("Version must be major.minor.patch")
-		print("Aborting.")
-		sys.exit(1)
-	#end abort
-print("Bumpup to: %s" % inp)
-v["version"]=inp
-
-#step 3: input release date
-today=str(datetime.date.today())
-inp=input("type next release date (leave blank to use %s): " % today)
-if inp=="": inp=today
-try:
-	dc=datetime.date.fromisoformat(inp)
-except:
-	print("Invalid date format.")
-	print("Aborting.")
-	sys.exit(1)
-#end abort
-
-v["release_date"]=inp
-with open(VERSION_FILE_NAME, "w") as f:
-	json.dump(v,f)
-
-print("Saved %s." % VERSION_FILE_NAME)
-patch("public/readme.txt",r'バージョン:　　ver\.', r'リリース:　　　', v)
-patch("constants.py",r'APP_VERSION="', r'APP_LAST_RELEASE_DATE="', v)
+# 直接実行時
+if __name__ == "__main__":
+	version = getVersion()
+	print("Bumpup to: %s" % version)
+	dt = getReleaseDate()
+	bumpup(version, dt)

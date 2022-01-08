@@ -116,6 +116,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
+			"TC_RECORD_ALL",
 			"TC_UPDATE_USER",
 			"TC_ADD_TW",
 			"TC_RECORD_USER",
@@ -179,10 +180,14 @@ class Events(BaseEvents):
 			else:
 				globalVars.app.tc.exit()
 			globalVars.app.config["twitcasting"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# ツイキャス：コメント保存
 		if selected == menuItemsStore.getRef("TC_SAVE_COMMENTS"):
 			globalVars.app.config["twitcasting"]["savecomments"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# ツイキャス：ユーザ情報を更新
 		if selected == menuItemsStore.getRef("TC_UPDATE_USER"):
@@ -198,6 +203,13 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.downloadArchive(d.GetData())
+
+		# ツイキャス：一括録画
+		if selected == menuItemsStore.getRef("TC_RECORD_ALL"):
+			d = SimpleInputDialog.Dialog(_("ユーザ名を入力"), _("ユーザ名"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.tc.recordAll(d.GetData())
 
 		# ツイキャス：ユーザ名を指定して録画
 		if selected == menuItemsStore.getRef("TC_RECORD_USER"):
@@ -268,16 +280,16 @@ class Events(BaseEvents):
 			d.Initialize()
 			r = d.Show()
 
-	def Exit(self, event):
+	def OnExit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
 			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
 				self.hide()
 			else:
-				super().Exit(event)
+				super().OnExit(event)
 				globalVars.app.tb.Destroy()
 		else:
-			super().Exit(event)
+			super().OnExit(event)
 			globalVars.app.tb.Destroy()
 
 	def hide(self):
@@ -285,6 +297,7 @@ class Events(BaseEvents):
 
 	def show(self):
 		self.parent.hFrame.Show()
+		self.parent.hFrame.SetFocus()
 
 	def exitWithConfirmation(self):
 		if getRecordingUsers() != []:
@@ -356,5 +369,6 @@ class Events(BaseEvents):
 				newMap[identifier.upper()][menuData[name]]=key
 			else:
 				newMap[identifier.upper()][menuData[name]]=""
-		newMap.write()
+		if newMap.write() != errorCodes.OK:
+			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.KEYMAP_FILE_NAME))
 		return True

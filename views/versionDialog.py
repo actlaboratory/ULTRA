@@ -46,5 +46,5 @@ class dialog(baseDialog.BaseDialog):
 
         # フッター
         footerCreator = ViewCreator.ViewCreator(self.viewMode, self.panel, self.sizer, style=wx.ALIGN_RIGHT | wx.ALL, margin=20)
-        self.closeBtn = footerCreator.cancelbutton(_("閉じる"))
+        self.closeBtn = footerCreator.closebutton(_("閉じる"))
         self.closeBtn.SetDefault()

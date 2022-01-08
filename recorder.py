@@ -12,9 +12,12 @@ import globalVars
 import os
 from logging import getLogger
 			
+# debug
+# 0:何もしない、1:ffmpegのログをカレントディレクトリに保存
+DEBUG = 0
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"):
+	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -31,6 +34,8 @@ class Recorder(threading.Thread):
 		:type headers: str
 		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
 		:type userAgent: str
+		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
+		:type skipExisting: bool
 		"""        
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
@@ -42,6 +47,7 @@ class Recorder(threading.Thread):
 		self.movie = movie
 		self.header=header
 		self.userAgent = userAgent
+		self.skipExisting = skipExisting
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" %self.stream)
 
@@ -58,7 +64,7 @@ class Recorder(threading.Thread):
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
-		if os.path.exists(path):
+		if os.path.exists(path) and not self.skipExisting:
 			count = 1
 			base = os.path.splitext(path)[0]
 			tmp = "%s (%i).%s" %(base, count, ext)
@@ -114,6 +120,8 @@ class Recorder(threading.Thread):
 			"-loglevel",
 			"error",
 		]
+		if DEBUG == 1:
+			cmd.append("-report")
 		if self.header != "":
 			cmd += [
 				"-headers",
@@ -129,6 +137,8 @@ class Recorder(threading.Thread):
 		return cmd
 
 	def run(self):
+		if self.shouldSkip():
+			return
 		try:
 			cmd = self.getCommand()
 		except IOError:
@@ -176,6 +186,9 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
+
+	def shouldSkip(self):
+		return self.skipExisting and os.path.exists(self.getOutputFile())
 
 	def getTargetUser(self):
 		"""誰のライブを録画中かを返す
