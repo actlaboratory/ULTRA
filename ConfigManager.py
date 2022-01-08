@@ -34,6 +34,9 @@ class ConfigManager(configparser.ConfigParser):
 		try:
 			with open(self.fileName,"w", encoding='UTF-8') as f: super().write(f)
 			return errorCodes.OK
+		except PermissionError as e:
+			self.log.warning("write failed." + str(e))
+			return errorCodes.ACCESS_DENIED
 		except FileNotFoundError as e:
 			self.log.warning("write failed." + str(e))
 			dirName = os.path.dirname(self.fileName)
