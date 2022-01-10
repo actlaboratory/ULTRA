@@ -32,8 +32,11 @@ class ConfigManager(configparser.ConfigParser):
 	def write(self):
 		self.log.info("write configFile:"+self.fileName)
 		try:
-			with open(self.fileName,"w", encoding='UTF-8') as f: return super().write(f)
+			with open(self.fileName,"w", encoding='UTF-8') as f: super().write(f)
 			return errorCodes.OK
+		except PermissionError as e:
+			self.log.warning("write failed." + str(e))
+			return errorCodes.ACCESS_DENIED
 		except FileNotFoundError as e:
 			self.log.warning("write failed." + str(e))
 			dirName = os.path.dirname(self.fileName)
@@ -44,7 +47,7 @@ class ConfigManager(configparser.ConfigParser):
 				self.log.error("auto directory creation failed.")
 				return errorCodes.ACCESS_DENIED
 			try:
-				with open(self.fileName,"w", encoding='UTF-8') as f: return super().write(f)
+				with open(self.fileName,"w", encoding='UTF-8') as f: super().write(f)
 				return errorCodes.OK
 			except:
 				self.log.error("save failed.")
