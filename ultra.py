@@ -22,7 +22,7 @@ def exchandler(type, exc, tb):
 		except:
 			pass
 	else:
-		simpleDialog.winDialog("error", "An error has occured. Contact to the developer for further assistance. Detail:" + "\n".join(msg[-2:]))
+		simpleDialog.winDialog("error", "An error has occurred. Contact to the developer for further assistance. Detail:" + "\n".join(msg[-2:]))
 	try:
 		f=open("errorLog.txt", "a")
 		f.writelines(msg)
