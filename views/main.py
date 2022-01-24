@@ -100,6 +100,7 @@ class Menu(BaseMenu):
 		self.hFileMenu=wx.Menu()
 		self.hServicesMenu = wx.Menu()
 		self.hTwitcastingMenu=wx.Menu()
+		self.hSpacesMenu=wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -111,6 +112,7 @@ class Menu(BaseMenu):
 
 		# サービスメニューの中身
 		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
+		self.RegisterMenuCommand(self.hServicesMenu, "SPACES_SUB", subMenu=self.hSpacesMenu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
@@ -123,6 +125,9 @@ class Menu(BaseMenu):
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
+		])
+		# スペースメニューの中身
+		self.RegisterMenuCommand(self.hSpacesMenu, [
 		])
 
 		# オプションメニュー
