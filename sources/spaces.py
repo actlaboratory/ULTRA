@@ -1,5 +1,6 @@
 # twitter spaces module for ULTRA
 
+import json
 import re
 import requests
 
@@ -7,6 +8,7 @@ from logging import getLogger
 
 import constants
 import errorCodes
+import recorder
 from sources.base import SourceBase
 
 class Spaces(SourceBase):
@@ -41,3 +43,64 @@ class Spaces(SourceBase):
 	def run(self):
 		if self.initialized == 0 and not self.initialize():
 			return
+
+	def recFromUrl(self, url):
+		spaceId = self.getSpaceIdFromUrl(url)
+		metadata = self.getMetadata(spaceId)
+		location = self.getMediaLocation(metadata.getMediaKey())
+		r = recorder.Recorder(self, location, metadata.getUserName(), metadata.getStartedTime(), metadata.getSpaceId())
+		r.start()
+
+	def getSpaceIdFromUrl(self, url):
+		ret = re.search(r"(?<=spaces/)\w*", url)
+		if not ret:
+			return None
+		return ret.group(0)
+
+	def getMetadata(self, spaceId):
+		params = {
+			"variables": json.dumps({
+				"id": spaceId,
+				"isMetatagsQuery": False,
+				"withSuperFollowsUserFields": True,
+				"withUserResults": True,
+				"withBirdwatchPivots": False,
+				"withReactionsMetadata": False,
+				"withReactionsPerspective": False,
+				"withSuperFollowsTweetFields": True,
+				"withReplays": True,
+				"withScheduledSpaces": True
+			})
+		}
+		headers = {
+			"authorization": constants.TWITTER_BEARER,
+			"x-guest-token": self.guestToken,
+		}
+		response = requests.get("https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById", params=params, headers=headers)
+		metadata = response.json()
+		return Metadata(metadata)
+
+	def getMediaLocation(self, mediaKey):
+		headers = {
+			"authorization": constants.TWITTER_BEARER,
+			"cookie": "auth_token="
+		}
+		response = requests.get("https://twitter.com/i/api/1.1/live_video_stream/status/" + mediaKey, headers=headers)
+		data = response.json()
+		return data["source"]["location"]
+
+class Metadata:
+	def __init__(self, metadata):
+		self._metadata = metadata
+
+	def getMediaKey(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["media_key"]
+
+	def getUserName(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["creator_results"]["result"]["legacy"]["screen_name"]
+
+	def getStartedTime(self):
+		return int(self._metadata["data"]["audioSpace"]["metadata"]["started_at"] / 1000)
+
+	def getSpaceId(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["rest_id"]

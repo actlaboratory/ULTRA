@@ -128,6 +128,7 @@ class Menu(BaseMenu):
 		])
 		# スペースメニューの中身
 		self.RegisterMenuCommand(self.hSpacesMenu, [
+			"SPACES_URL_REC",
 		])
 
 		# オプションメニュー
@@ -249,6 +250,13 @@ class Events(BaseEvents):
 				return
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
+
+		# スペース：URLを指定して録画
+		if selected == menuItemsStore.getRef("SPACES_URL_REC"):
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("スペースのURL"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.spaces.recFromUrl(d.GetData())
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
