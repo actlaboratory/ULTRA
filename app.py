@@ -53,6 +53,7 @@ class Main(AppBase.MainBase):
 			self.tc.start()
 		from sources import spaces
 		self.spaces = spaces.Spaces()
+		self.spaces.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
