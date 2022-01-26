@@ -256,7 +256,9 @@ class Events(BaseEvents):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("スペースのURL"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
-			globalVars.app.spaces.recFromUrl(d.GetData())
+			ret = globalVars.app.spaces.recFromUrl(d.GetData())
+			if ret == errorCodes.SPACE_ENDED:
+				errorDialog(_("このスペースは既に終了しています。"))
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):

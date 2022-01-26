@@ -47,6 +47,8 @@ class Spaces(SourceBase):
 	def recFromUrl(self, url):
 		spaceId = self.getSpaceIdFromUrl(url)
 		metadata = self.getMetadata(spaceId)
+		if metadata.isEnded:
+			return errorCodes.SPACE_ENDED
 		location = self.getMediaLocation(metadata.getMediaKey())
 		r = recorder.Recorder(self, location, metadata.getUserName(), metadata.getStartedTime(), metadata.getSpaceId())
 		r.start()
@@ -113,3 +115,6 @@ class Metadata:
 
 	def getSpaceId(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["rest_id"]
+
+	def isEnded(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["state"] == "Ended"
