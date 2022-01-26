@@ -90,8 +90,17 @@ class Spaces(SourceBase):
 		return data["source"]["location"]
 
 class Metadata:
+	# デバッグ用に、メタデータをファイルに書き出す
+	debug = False
 	def __init__(self, metadata):
 		self._metadata = metadata
+		if self.debug:
+			import datetime
+			import os
+			if not os.path.exists("spaces_metadata_dumps"):
+				os.mkdir("spaces_metadata_dumps")
+			with open(os.path.join("spaces_metadata_dumps", datetime.datetime.now().strftime("%Y%m%d_%H%M%S.txt")), "w", encoding="utf-8") as f:
+				json.dump(self._metadata, f, ensure_ascii=False, indent="\t")
 
 	def getMediaKey(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["media_key"]
