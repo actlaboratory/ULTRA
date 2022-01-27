@@ -3,12 +3,14 @@
 import json
 import re
 import requests
+import traceback
 
 from logging import getLogger
 
 import constants
 import errorCodes
 import recorder
+import simpleDialog
 from sources.base import SourceBase
 
 class Spaces(SourceBase):
@@ -24,7 +26,9 @@ class Spaces(SourceBase):
 		self.initialized = 0
 
 	def initialize(self):
-		if self.getGuestToken() != errorCodes.OK:
+		result = self.getGuestToken()
+		if result != errorCodes.OK:
+			self.showError(result)
 			return False
 		self.initialized = 1
 		return super().initialize()
@@ -33,9 +37,17 @@ class Spaces(SourceBase):
 		headers = {
 			"authorization": constants.TWITTER_BEARER
 		}
-		response = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers=headers)
-		response = response.json()
-		guestToken = response["guest_token"]
+		try:
+			response = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers=headers)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.CONNECTION_ERROR
+		try:
+			response = response.json()
+			guestToken = response["guest_token"]
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.INVALID_RECEIVED
 		self.log.debug("guest_token: " + guestToken)
 		self.guestToken = guestToken
 		return errorCodes.OK
@@ -46,10 +58,25 @@ class Spaces(SourceBase):
 
 	def recFromUrl(self, url):
 		spaceId = self.getSpaceIdFromUrl(url)
+		if spaceId is None:
+			self.log.error("Space ID not found: " + url)
+			return errorCodes.INVALID_URL
 		metadata = self.getMetadata(spaceId)
-		if metadata.isEnded:
+		if type(metadata) == int:
+			self.showError(metadata)
+			return
+		if metadata.isEnded():
+			self.log.debug("is ended: " + metadata)
 			return errorCodes.SPACE_ENDED
-		location = self.getMediaLocation(metadata.getMediaKey())
+		mediaKey = metadata.getMediaKey()
+		if mediaKey == errorCodes.INVALID_RECEIVED:
+			self.log.error("Media key not found: " + metadata)
+			self.showError(errorCodes.INVALID_RECEIVED)
+			return
+		location = self.getMediaLocation(mediaKey)
+		if type(location) == int:
+			self.showError(location)
+			return
 		r = recorder.Recorder(self, location, metadata.getUserName(), metadata.getStartedTime(), metadata.getSpaceId())
 		r.start()
 
@@ -78,8 +105,16 @@ class Spaces(SourceBase):
 			"authorization": constants.TWITTER_BEARER,
 			"x-guest-token": self.guestToken,
 		}
-		response = requests.get("https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById", params=params, headers=headers)
-		metadata = response.json()
+		try:
+			response = requests.get("https://twitter.com/i/api/graphql/jyQ0_DEMZHeoluCgHJ-U5Q/AudioSpaceById", params=params, headers=headers)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.CONNECTION_ERROR
+		try:
+			metadata = response.json()
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.INVALID_RECEIVED
 		return Metadata(metadata)
 
 	def getMediaLocation(self, mediaKey):
@@ -87,9 +122,23 @@ class Spaces(SourceBase):
 			"authorization": constants.TWITTER_BEARER,
 			"cookie": "auth_token="
 		}
-		response = requests.get("https://twitter.com/i/api/1.1/live_video_stream/status/" + mediaKey, headers=headers)
-		data = response.json()
-		return data["source"]["location"]
+		try:
+			response = requests.get("https://twitter.com/i/api/1.1/live_video_stream/status/" + mediaKey, headers=headers)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.CONNECTION_ERROR
+		try:
+			data = response.json()
+			return data["source"]["location"]
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return errorCodes.INVALID_RECEIVED
+
+	def showError(self, code):
+		if code == errorCodes.CONNECTION_ERROR:
+			simpleDialog.errorDialog(_("Twitterとの接続に失敗しました。インターネット接続に問題がない場合は、しばらくたってから再度お試しください。この問題が再度発生する場合は、開発者までお問い合わせください。"))
+		elif code == errorCodes.INVALID_RECEIVED:
+			simpleDialog.errorDialog(_("Twitterからの応答が不正です。開発者までご連絡ください。"))
 
 class Metadata:
 	# デバッグ用に、メタデータをファイルに書き出す
@@ -105,7 +154,10 @@ class Metadata:
 				json.dump(self._metadata, f, ensure_ascii=False, indent="\t")
 
 	def getMediaKey(self):
-		return self._metadata["data"]["audioSpace"]["metadata"]["media_key"]
+		try:
+			return self._metadata["data"]["audioSpace"]["metadata"]["media_key"]
+		except KeyError as e:
+			return errorCodes.INVALID_RECEIVED
 
 	def getUserName(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["creator_results"]["result"]["legacy"]["screen_name"]
@@ -118,3 +170,6 @@ class Metadata:
 
 	def isEnded(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["state"] == "Ended"
+
+	def __str__(self):
+		return json.dumps(self._metadata, ensure_ascii=False, indent=None)

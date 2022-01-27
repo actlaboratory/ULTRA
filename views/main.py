@@ -259,6 +259,8 @@ class Events(BaseEvents):
 			ret = globalVars.app.spaces.recFromUrl(d.GetData())
 			if ret == errorCodes.SPACE_ENDED:
 				errorDialog(_("このスペースは既に終了しています。"))
+			elif ret == errorCodes.INVALID_URL:
+				errorDialog(_("入力されたURLが正しくありません。"))
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
