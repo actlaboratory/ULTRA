@@ -9,6 +9,7 @@ from logging import getLogger
 
 import constants
 import errorCodes
+import globalVars
 import recorder
 import simpleDialog
 from sources.base import SourceBase
@@ -145,7 +146,7 @@ class Metadata:
 	debug = False
 	def __init__(self, metadata):
 		self._metadata = metadata
-		if self.debug:
+		if self.debug and not globalVars.app.GetFrozenStatus():
 			import datetime
 			import os
 			if not os.path.exists("spaces_metadata_dumps"):
