@@ -62,14 +62,14 @@ def getFollowList(token,target):
 	try:
 		user = twitterApi.get_user(screen_name=target)
 		friendsCount = user.friends_count
-		friends = tweepy.Cursor(twitterApi.get_friends,screen_name=target,include_user_entities=False,skip_status=True,count=200).items()
+		friends = tweepy.Cursor(twitterApi.friends,screen_name=target,include_user_entities=False,skip_status=True,count=200).items()
 		for friend in friends:
 			ret.append(friend.screen_name)
 		return ret
-	except tweepy.TooManyRequests:
+	except tweepy.error.RateLimitError:
 		log.error("rateLimitError")
 		return ret
-	except tweepy.TweepyException as e:
+	except tweepy.error.TweepError as e:
 		log.error(e)
 		log.error("%s" %(e.response))
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。指定したユーザが存在しないか、フォローしていない非公開アカウントである可能性があります。"))
