@@ -20,7 +20,7 @@ log = getLogger("%s.twitterService" % (constants.LOG_PREFIX))
 
 
 def getToken():
-	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET, constants.TWITTER_PORT)
+	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET, constants.TWITTER_PORT)
 	l="ja"
 	try:
 		l=globalVars.app.config["general"]["language"].split("_")[0].lower()
@@ -51,7 +51,7 @@ def getToken():
 	return manager.getToken()
 
 def getFollowList(token,target):
-	auth = tweepy.OAuthHandler(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET)
+	auth = tweepy.OAuthHandler(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET)
 	auth.set_access_token(*token)
 	try:
 		twitterApi = tweepy.API(auth,proxy=os.environ['HTTPS_PROXY'])
@@ -74,7 +74,7 @@ def getFollowList(token,target):
 		log.error("%s" %(e.response))
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。指定したユーザが存在しないか、フォローしていない非公開アカウントである可能性があります。"))
 		return None
-	except Exception:
+	except Exception as e:
 		log.error(e)
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。しばらくたってから再度お試しください。状況が改善しない場合には、開発者までお問い合わせください。"))
 		return None
