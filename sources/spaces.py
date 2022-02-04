@@ -169,7 +169,7 @@ class Spaces(sources.base.SourceBase):
 	def getUser(self, user, showNotFound=True):
 		try:
 			ret = self.client.get_user(username=user, user_auth=True)
-		except TypeError as e:
+		except (tweepy.TweepyException, tweepy.HTTPException) as e:
 			self.log.error(e)
 			if showNotFound:
 				simpleDialog.errorDialog(_("指定されたユーザ名が正しくありません。"))
