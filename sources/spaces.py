@@ -1,9 +1,11 @@
 # twitter spaces module for ULTRA
 
 import json
+import pickle
 import re
 import requests
 import traceback
+import tweepy
 
 from logging import getLogger
 
@@ -12,25 +14,36 @@ import errorCodes
 import globalVars
 import recorder
 import simpleDialog
+import twitterService
 from sources.base import SourceBase
 
 class Spaces(SourceBase):
-	name = "TwitterSpaces"
+	name = "Spaces"
 	friendlyName = _("Twitter スペース")
 	index = 1
 
 	def __init__(self):
 		super().__init__()
 		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.spaces"))
-		self.setStatus(_("準備完了"))
+		self.setStatus(_("未接続"))
 		self.guestToken: str
 		self.initialized = 0
+		self.tokenManager = TokenManager()
+		self.client: tweepy.Client
 
 	def initialize(self):
 		result = self.getGuestToken()
 		if result != errorCodes.OK:
 			self.showError(result)
 			return False
+		if not self.tokenManager.load():
+			simpleDialog.dialog(_("Twitterアカウント連携"), _("ブラウザを起動し、Twitterアカウントの連携を行います。"))
+			if not self.tokenManager.authorize():
+				return False
+			if not self.tokenManager.save():
+				simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
+				return False
+		self.client = tweepy.Client(consumer_key=constants.TWITTER_CONSUMER_KEY, consumer_secret=constants.TWITTER_CONSUMER_SECRET, access_token=self.tokenManager.getAccessToken(), access_token_secret=self.tokenManager.getAccessTokenSecret())
 		self.initialized = 1
 		return super().initialize()
 
@@ -56,6 +69,16 @@ class Spaces(SourceBase):
 	def run(self):
 		if self.initialized == 0 and not self.initialize():
 			return
+		globalVars.app.hMainView.addLog(_("接続完了"), _("スペースの監視を開始しました。"), self.friendlyName)
+		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", True)
+		globalVars.app.hMainView.menu.EnableMenu("HIDE")
+		self.setStatus(_("接続済み"))
+
+	def exit(self):
+		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
+		globalVars.app.hMainView.addLog(_("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
+		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", False)
+		self.setStatus(_("未接続"))
 
 	def recFromUrl(self, url):
 		spaceId = self.getSpaceIdFromUrl(url)
@@ -174,3 +197,41 @@ class Metadata:
 
 	def __str__(self):
 		return json.dumps(self._metadata, ensure_ascii=False, indent=None)
+
+class TokenManager:
+	def __init__(self):
+		self._file = constants.AC_SPACES
+		self._token = None
+		self._tokenSecret = None
+		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "spaces.tokenManager"))
+
+	def authorize(self):
+		result = twitterService.getToken()
+		if result is None:
+			return False
+		self._token, self._tokenSecret = result
+		return True
+
+	def load(self):
+		try:
+			with open(self._file, "rb") as f:
+				self._token, self._tokenSecret = pickle.load(f)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return False
+		return True
+
+	def save(self):
+		try:
+			with open(self._file, "wb") as f:
+				pickle.dump((self._token, self._tokenSecret), f)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return False
+		return True
+
+	def getAccessToken(self):
+		return self._token
+
+	def getAccessTokenSecret(self):
+		return self._tokenSecret

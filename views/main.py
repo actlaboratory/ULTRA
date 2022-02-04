@@ -127,6 +127,7 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		# スペースメニューの中身
+		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
 			"SPACES_URL_REC",
 		])
@@ -250,6 +251,19 @@ class Events(BaseEvents):
 				return
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
+
+		# ツイキャス連携の有効化
+		if selected == menuItemsStore.getRef("SPACES_ENABLE"):
+			if event.IsChecked():
+				if not globalVars.app.spaces.initialize():
+					self.parent.menu.CheckMenu("SPACES_ENABLE", False)
+					return
+				globalVars.app.spaces.start()
+			else:
+				globalVars.app.spaces.exit()
+			globalVars.app.config["spaces"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# スペース：URLを指定して録画
 		if selected == menuItemsStore.getRef("SPACES_URL_REC"):
