@@ -4,6 +4,7 @@ import json
 import pickle
 import re
 import requests
+import sys
 import traceback
 import tweepy
 
@@ -14,22 +15,23 @@ import errorCodes
 import globalVars
 import recorder
 import simpleDialog
+import sources.base
 import twitterService
-from sources.base import SourceBase
 
-class Spaces(SourceBase):
+class Spaces(sources.base.SourceBase):
 	name = "Spaces"
 	friendlyName = _("Twitter スペース")
 	index = 1
 
 	def __init__(self):
 		super().__init__()
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.spaces"))
+		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces"))
 		self.setStatus(_("未接続"))
 		self.guestToken: str
 		self.initialized = 0
 		self.tokenManager = TokenManager()
 		self.client: tweepy.Client
+		self.users = UserList()
 
 	def initialize(self):
 		result = self.getGuestToken()
@@ -43,7 +45,7 @@ class Spaces(SourceBase):
 			if not self.tokenManager.save():
 				simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 				return False
-		self.client = tweepy.Client(consumer_key=constants.TWITTER_CONSUMER_KEY, consumer_secret=constants.TWITTER_CONSUMER_SECRET, access_token=self.tokenManager.getAccessToken(), access_token_secret=self.tokenManager.getAccessTokenSecret())
+		self.client = tweepy.Client(consumer_key=constants.TWITTER_CONSUMER_KEY, consumer_secret=constants.TWITTER_CONSUMER_SECRET, access_token=self.tokenManager.getAccessToken(), access_token_secret=self.tokenManager.getAccessTokenSecret(), return_type=dict)
 		self.initialized = 1
 		return super().initialize()
 
@@ -164,6 +166,21 @@ class Spaces(SourceBase):
 		elif code == errorCodes.INVALID_RECEIVED:
 			simpleDialog.errorDialog(_("Twitterからの応答が不正です。開発者までご連絡ください。"))
 
+	def getUser(self, user, showNotFound=True):
+		try:
+			ret = self.client.get_user(username=user, user_auth=True)
+		except TypeError as e:
+			self.log.error(e)
+			if showNotFound:
+				simpleDialog.errorDialog(_("指定されたユーザ名が正しくありません。"))
+			return
+		if "error" in ret.keys():
+			self.log.error(ret)
+			if showNotFound:
+				simpleDialog.errorDialog(_("指定されたユーザが見つかりません。"))
+			return
+		return ret["data"]
+
 class Metadata:
 	# デバッグ用に、メタデータをファイルに書き出す
 	debug = False
@@ -235,3 +252,60 @@ class TokenManager:
 
 	def getAccessTokenSecret(self):
 		return self._tokenSecret
+
+
+
+class UserList:
+	def __init__(self):
+		self._file = constants.SPACES_USER_DATA
+		self._data = {}
+		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.userList"))
+		self.load()
+
+	def load(self):
+		try:
+			with open(self._file, "r", encoding="utf-8") as f:
+				self._data = json.load(f)
+				self.log.debug("loaded: " + self._file)
+		except Exception as e:
+			self.log.error(e)
+	
+	def save(self):
+		if hasattr(sys, "frozen"):
+			indent = None
+		else:
+			indent = "\t"
+		try:
+			with open(self._file, "w", encoding="utf-8") as f:
+				json.dump(self._data, f, ensure_ascii=False, indent=indent)
+				self.log.debug("saved: " + self._file)
+		except Exception as e:
+			self.log.error(e)
+			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
+
+	def hasSpecificSetting(self, user):
+		return self._data[user]["specific"]
+
+	def getConfig(self, user):
+		items = (
+			"baloon",
+			"record",
+			"openBrowser",
+			"sound",
+		)
+		config = {}
+		if self.hasSpecificSetting(user):
+			for i in items:
+				config[i] = self._data[user][i]
+			config["soundFile"] = self._data[user]["soundFile"]
+		else:
+			for i in items:
+				config[i] = globalVars.app.config.getboolean("notification", i, False)
+			config["soundFile"] = globalVars.app.config["notification"]["soundFile"]
+		return config
+
+	def getData(self):
+		return self._data
+
+	def setData(self, data):
+		self._data = data

@@ -23,6 +23,7 @@ from simpleDialog import *
 from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
+from views import spacesManageUser
 from views import settingsDialog
 from views import versionDialog
 
@@ -130,6 +131,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
 			"SPACES_URL_REC",
+			"SPACES_MANAGE_USER",
 		])
 
 		# オプションメニュー
@@ -275,6 +277,15 @@ class Events(BaseEvents):
 				errorDialog(_("このスペースは既に終了しています。"))
 			elif ret == errorCodes.INVALID_URL:
 				errorDialog(_("入力されたURLが正しくありません。"))
+
+		# スペース：ユーザの管理
+		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):
+			d = spacesManageUser.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.spaces.users.setData(d.GetValue())
+			globalVars.app.spaces.users.save()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
