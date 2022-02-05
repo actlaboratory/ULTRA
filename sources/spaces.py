@@ -5,8 +5,10 @@ import pickle
 import re
 import requests
 import sys
+import time
 import traceback
 import tweepy
+import wx
 
 from logging import getLogger
 
@@ -17,6 +19,8 @@ import recorder
 import simpleDialog
 import sources.base
 import twitterService
+
+interval = 15
 
 class Spaces(sources.base.SourceBase):
 	name = "Spaces"
@@ -32,6 +36,8 @@ class Spaces(sources.base.SourceBase):
 		self.tokenManager = TokenManager()
 		self.client: tweepy.Client
 		self.users = UserList()
+		self.shouldExit = False
+		self.notified = []
 
 	def initialize(self):
 		result = self.getGuestToken()
@@ -75,12 +81,27 @@ class Spaces(sources.base.SourceBase):
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
+		while not self.shouldExit:
+			self._process()
+			time.sleep(interval)
+			wx.YieldIfNeeded()
+
+	def _process(self):
+		pass
 
 	def exit(self):
+		self.shouldExit = True
 		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", False)
 		self.setStatus(_("未接続"))
+
+	def checkSpaceStatus(self, users):
+		try:
+			ret = self.client.get_spaces(user_ids=users)
+			print(ret)
+		except Exception as e:
+			self.log.error(e)
 
 	def recFromUrl(self, url):
 		spaceId = self.getSpaceIdFromUrl(url)
@@ -309,3 +330,6 @@ class UserList:
 
 	def setData(self, data):
 		self._data = data
+
+	def getUserIds(self):
+		return self._data.keys()
