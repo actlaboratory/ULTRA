@@ -38,8 +38,12 @@ class Spaces(sources.base.SourceBase):
 		self.users = UserList()
 		self.shouldExit = False
 		self.notified = []
+		self.enableMenu(False)
 
 	def initialize(self):
+		if self.initialized == 1:
+			self.initThread()
+			return True
 		result = self.getGuestToken()
 		if result != errorCodes.OK:
 			self.showError(result)
@@ -53,6 +57,7 @@ class Spaces(sources.base.SourceBase):
 				return False
 		self.client = tweepy.Client(consumer_key=constants.TWITTER_CONSUMER_KEY, consumer_secret=constants.TWITTER_CONSUMER_SECRET, access_token=self.tokenManager.getAccessToken(), access_token_secret=self.tokenManager.getAccessTokenSecret(), return_type=dict)
 		self.initialized = 1
+		self.enableMenu(True)
 		return super().initialize()
 
 	def getGuestToken(self):
@@ -81,6 +86,7 @@ class Spaces(sources.base.SourceBase):
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
+		self.enableMenu(True)
 		while not self.shouldExit:
 			self._process()
 			time.sleep(interval)
@@ -89,12 +95,22 @@ class Spaces(sources.base.SourceBase):
 	def _process(self):
 		pass
 
+	def enableMenu(self, mode):
+		spaces = (
+			"SPACES_URL_REC",
+			"SPACES_MANAGE_USER",
+		)
+		for i in spaces:
+			globalVars.app.hMainView.menu.EnableMenu(i, mode)
+
 	def exit(self):
 		self.shouldExit = True
-		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
+		if self.getActiveSourceCount() == 0:
+			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", False)
 		self.setStatus(_("未接続"))
+		self.enableMenu(False)
 
 	def checkSpaceStatus(self, users):
 		try:
