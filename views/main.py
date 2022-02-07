@@ -277,6 +277,8 @@ class Events(BaseEvents):
 				errorDialog(_("このスペースは既に終了しています。"))
 			elif ret == errorCodes.INVALID_URL:
 				errorDialog(_("入力されたURLが正しくありません。"))
+			elif ret == errorCodes.SPACE_NOT_STARTED:
+				errorDialog(_("このスペースはまだ開始されていません。"))
 
 		# スペース：ユーザの管理
 		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):

@@ -95,7 +95,7 @@ class Spaces(sources.base.SourceBase):
 			wx.YieldIfNeeded()
 
 	def _process(self):
-		pass
+		self.checkSpaceStatus(self.users.getUserIds())
 
 	def enableMenu(self, mode):
 		spaces = (
@@ -117,9 +117,22 @@ class Spaces(sources.base.SourceBase):
 	def checkSpaceStatus(self, users):
 		try:
 			ret = self.authorization.getClient().get_spaces(user_ids=users)
-			print(ret)
 		except Exception as e:
 			self.log.error(e)
+			return
+		data = ret.data
+		if data:
+			for i in data:
+				if i.id in self.notified:
+					continue
+				metadata = self.getMetadata(i.id)
+				if metadata.isRunning():
+					globalVars.app.notificationHandler.notify(self, metadata.getUserName(), "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(metadata.getUserId()), metadata.getSpaceId())
+					self.notified.append(i.id)
+
+	def onRecordError(self, movie):
+		metadata = self.getMetadata(movie)
+		return metadata.isRunning()
 
 	def recFromUrl(self, url):
 		spaceId = self.getSpaceIdFromUrl(url)
@@ -130,9 +143,13 @@ class Spaces(sources.base.SourceBase):
 		if type(metadata) == int:
 			self.showError(metadata)
 			return
-		if metadata.isEnded():
-			self.log.debug("is ended: " + metadata)
-			return errorCodes.SPACE_ENDED
+		if not metadata.isRunning():
+			if metadata.isEnded():
+				self.log.debug("is ended: " + metadata)
+				return errorCodes.SPACE_ENDED
+			if metadata.isNotStarted():
+				self.log.debug("is not started: " + metadata)
+				return errorCodes.SPACE_NOT_STARTED
 		mediaKey = metadata.getMediaKey()
 		if mediaKey == errorCodes.INVALID_RECEIVED:
 			self.log.error("Media key not found: " + metadata)
@@ -214,7 +231,7 @@ class Spaces(sources.base.SourceBase):
 			if showNotFound:
 				simpleDialog.errorDialog(_("Twitterとの通信に失敗しました。詳細：%s") % e)
 			return
-		if hasattr(ret, "errors"):
+		if ret.errors:
 			self.log.error(ret)
 			if showNotFound:
 				simpleDialog.errorDialog(_("ユーザ情報の取得に失敗しました。詳細：%s") % ret.errors[0]["detail"])
@@ -245,6 +262,9 @@ class Metadata:
 	def getUserName(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["creator_results"]["result"]["legacy"]["screen_name"]
 
+	def getUserId(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["creator_results"]["result"]["rest_id"]
+
 	def getStartedTime(self):
 		return int(self._metadata["data"]["audioSpace"]["metadata"]["started_at"] / 1000)
 
@@ -253,6 +273,12 @@ class Metadata:
 
 	def isEnded(self):
 		return self._metadata["data"]["audioSpace"]["metadata"]["state"] == "Ended"
+
+	def isRunning(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["state"] == "Running"
+
+	def isNotStarted(self):
+		return self._metadata["data"]["audioSpace"]["metadata"]["state"] == "NotStarted"
 
 	def __str__(self):
 		return json.dumps(self._metadata, ensure_ascii=False, indent=None)
@@ -376,4 +402,4 @@ class UserList:
 		self._data = data
 
 	def getUserIds(self):
-		return self._data.keys()
+		return ",".join(self._data.keys())
