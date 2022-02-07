@@ -122,8 +122,8 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 		user = globalVars.app.spaces.getUser(self.edits[1].GetValue())
 		if user == None:
 			return
-		self.edits[0].SetValue(user["id"])
-		self.edits[2].SetValue(user["name"])
+		self.edits[0].SetValue(str(user.id))
+		self.edits[2].SetValue(user.name)
 		event.Skip()
 
 	def InstallControls(self):

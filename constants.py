@@ -57,10 +57,18 @@ TC_CID = "1266762249164619776.2ba35a3fe972584b3ab34e30c0c88ab6b4516d6aaf951c8a02
 TC_URL = "https://apiv2.twitcasting.tv/oauth2/authorize"
 TC_PORT = 9339
 # Twitter関係
+TWITTER_CLIENT_ID = "bDVKekZERkMtNXNVMlFoWnNONWY6MTpjaQ"
 TWITTER_CONSUMER_KEY = "zAphCyhNj7ElkI5J1aXqH4Gcw"
 TWITTER_CONSUMER_SECRET = "Ioq2aSTDMThRopTD7LH7uA0eYzKYJgtwNe9j4vkDOOTNQoOWh4"
 TWITTER_PORT = 9339
 TWITTER_BEARER = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
+TWITTER_SCOPE = [
+    "tweet.read",
+    "users.read",
+    "follows.read",
+    "offline.access",
+    "space.read",
+]
 
 
 # その他

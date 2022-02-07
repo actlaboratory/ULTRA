@@ -8,6 +8,8 @@ import sys
 import time
 import traceback
 import tweepy
+import twitterAuthorization
+import webbrowser
 import wx
 
 from logging import getLogger
@@ -18,9 +20,10 @@ import globalVars
 import recorder
 import simpleDialog
 import sources.base
-import twitterService
+import views.auth
 
 interval = 15
+
 
 class Spaces(sources.base.SourceBase):
 	name = "Spaces"
@@ -33,12 +36,12 @@ class Spaces(sources.base.SourceBase):
 		self.setStatus(_("未接続"))
 		self.guestToken: str
 		self.initialized = 0
-		self.tokenManager = TokenManager()
-		self.client: tweepy.Client
 		self.users = UserList()
 		self.shouldExit = False
 		self.notified = []
 		self.enableMenu(False)
+		self.authorization = twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
+		self.tokenManager = TokenManager(self.authorization)
 
 	def initialize(self):
 		if self.initialized == 1:
@@ -55,7 +58,6 @@ class Spaces(sources.base.SourceBase):
 			if not self.tokenManager.save():
 				simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 				return False
-		self.client = tweepy.Client(consumer_key=constants.TWITTER_CONSUMER_KEY, consumer_secret=constants.TWITTER_CONSUMER_SECRET, access_token=self.tokenManager.getAccessToken(), access_token_secret=self.tokenManager.getAccessTokenSecret(), return_type=dict)
 		self.initialized = 1
 		self.enableMenu(True)
 		return super().initialize()
@@ -114,7 +116,7 @@ class Spaces(sources.base.SourceBase):
 
 	def checkSpaceStatus(self, users):
 		try:
-			ret = self.client.get_spaces(user_ids=users)
+			ret = self.authorization.getClient().get_spaces(user_ids=users)
 			print(ret)
 		except Exception as e:
 			self.log.error(e)
@@ -205,22 +207,25 @@ class Spaces(sources.base.SourceBase):
 
 	def getUser(self, user, showNotFound=True):
 		try:
-			ret = self.client.get_user(username=user, user_auth=True)
-		except (tweepy.TweepyException, tweepy.HTTPException) as e:
+			ret = self.authorization.getClient().get_user(username=user, user_auth=True)
+			self.log.debug(ret)
+		except tweepy.TweepyException as e:
 			self.log.error(e)
 			if showNotFound:
-				simpleDialog.errorDialog(_("指定されたユーザ名が正しくありません。"))
+				simpleDialog.errorDialog(_("Twitterとの通信に失敗しました。詳細：%s") % e)
 			return
-		if "error" in ret.keys():
+		if hasattr(ret, "errors"):
 			self.log.error(ret)
 			if showNotFound:
-				simpleDialog.errorDialog(_("指定されたユーザが見つかりません。"))
+				simpleDialog.errorDialog(_("ユーザ情報の取得に失敗しました。詳細：%s") % ret.errors[0]["detail"])
 			return
-		return ret["data"]
+		return ret.data
+
 
 class Metadata:
 	# デバッグ用に、メタデータをファイルに書き出す
 	debug = False
+
 	def __init__(self, metadata):
 		self._metadata = metadata
 		if self.debug and not globalVars.app.GetFrozenStatus():
@@ -252,44 +257,67 @@ class Metadata:
 	def __str__(self):
 		return json.dumps(self._metadata, ensure_ascii=False, indent=None)
 
+
 class TokenManager:
-	def __init__(self):
+	def __init__(self, twitterAuthorization):
+		self._twitterAuthorization = twitterAuthorization
 		self._file = constants.AC_SPACES
-		self._token = None
-		self._tokenSecret = None
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "spaces.tokenManager"))
 
 	def authorize(self):
-		result = twitterService.getToken()
+		result = self._getToken()
 		if result is None:
 			return False
-		self._token, self._tokenSecret = result
 		return True
 
 	def load(self):
 		try:
 			with open(self._file, "rb") as f:
-				self._token, self._tokenSecret = pickle.load(f)
+				self._twitterAuthorization.setData(pickle.load(f))
 		except Exception as e:
-			self.log.error(traceback.format_exc())
+			self.log.error(e)
 			return False
 		return True
 
 	def save(self):
 		try:
 			with open(self._file, "wb") as f:
-				pickle.dump((self._token, self._tokenSecret), f)
+				pickle.dump(self._twitterAuthorization.getData(), f)
 		except Exception as e:
-			self.log.error(traceback.format_exc())
+			self.log.error(e)
 			return False
 		return True
 
-	def getAccessToken(self):
-		return self._token
-
-	def getAccessTokenSecret(self):
-		return self._tokenSecret
-
+	def _getToken(self):
+		manager = self._twitterAuthorization
+		l = "ja"
+		try:
+			l = globalVars.app.config["general"]["language"].split("_")[0].lower()
+		except:
+			pass  # end うまく読めなかったら ja を採用
+		# end except
+		manager.setMessage(
+			lang=l,
+			success=_("認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってください。"),
+			failed=_("認証に失敗しました。もう一度お試しください。"),
+			transfer=_("しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。")
+		)
+		webbrowser.open(manager.getUrl())
+		d = views.auth.waitingDialog()
+		d.Initialize(_("Twitterアカウント認証"))
+		d.Show(False)
+		while True:
+			time.sleep(0.01)
+			wx.YieldIfNeeded()
+			if manager.getToken():
+				d.Destroy()
+				break
+			if d.canceled == 1 or manager.getToken() == "":
+				simpleDialog.dialog(_("処理結果"), _("キャンセルされました。"))
+				manager.shutdown()
+				d.Destroy()
+				return
+		return manager.getToken()
 
 
 class UserList:
@@ -306,7 +334,7 @@ class UserList:
 				self.log.debug("loaded: " + self._file)
 		except Exception as e:
 			self.log.error(e)
-	
+
 	def save(self):
 		if hasattr(sys, "frozen"):
 			indent = None
