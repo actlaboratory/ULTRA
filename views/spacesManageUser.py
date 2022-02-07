@@ -119,6 +119,8 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 		if self.edits[0].GetValue() != "":
 			event.Skip()
 			return
+		if self.edits[1].GetValue()[0] == "@":
+			self.edits[1].SetValue(self.edits[1].GetValue()[1:])
 		user = globalVars.app.spaces.getUser(self.edits[1].GetValue())
 		if user == None:
 			return
