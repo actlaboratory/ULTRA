@@ -42,8 +42,7 @@ class Spaces(sources.base.SourceBase):
 		self.shouldExit = False
 		self.notified = []
 		self.enableMenu(False)
-		self.authorization = twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
-		self.tokenManager = TokenManager(self.authorization)
+		self.tokenManager = TokenManager()
 
 	def initialize(self):
 		if self.initialized == 1:
@@ -136,15 +135,9 @@ class Spaces(sources.base.SourceBase):
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
 
-	def getClient(self):
-		client = self.authorization.getClient()
-		if client:
-			self.tokenManager.save()
-		return client
-
 	def checkSpaceStatus(self, users):
 		try:
-			ret = self.getClient().get_spaces(user_ids=",".join(users))
+			ret = self.tokenManager.getClient().get_spaces(user_ids=",".join(users))
 		except Exception as e:
 			self.log.error(e)
 			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
@@ -253,7 +246,7 @@ class Spaces(sources.base.SourceBase):
 
 	def getUser(self, user, showNotFound=True):
 		try:
-			ret = self.getClient().get_user(username=user, user_auth=True)
+			ret = self.tokenManager.getClient().get_user(username=user, user_auth=True)
 			self.log.debug(ret)
 		except tweepy.TweepyException as e:
 			self.log.error(e)
@@ -314,10 +307,13 @@ class Metadata:
 
 
 class TokenManager:
-	def __init__(self, twitterAuthorization):
-		self._twitterAuthorization = twitterAuthorization
+	def __init__(self):
 		self._file = constants.AC_SPACES
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "spaces.tokenManager"))
+		self._data = None
+		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
+
+	def _getManager(self):
+		return twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
 
 	def authorize(self):
 		result = self._getToken()
@@ -328,7 +324,7 @@ class TokenManager:
 	def load(self):
 		try:
 			with open(self._file, "rb") as f:
-				self._twitterAuthorization.setData(pickle.load(f))
+				self._data = pickle.load(f)
 		except Exception as e:
 			self.log.error(e)
 			return False
@@ -337,7 +333,7 @@ class TokenManager:
 	def save(self):
 		try:
 			with open(self._file, "wb") as f:
-				pickle.dump(self._twitterAuthorization.getData(), f)
+				pickle.dump(self._data, f)
 		except Exception as e:
 			self.log.error(e)
 			simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
@@ -345,7 +341,7 @@ class TokenManager:
 		return True
 
 	def _getToken(self):
-		manager = self._twitterAuthorization
+		manager = self._getManager()
 		l = "ja"
 		try:
 			l = globalVars.app.config["general"]["language"].split("_")[0].lower()
@@ -362,22 +358,36 @@ class TokenManager:
 		d = views.auth.waitingDialog()
 		d.Initialize(_("Twitterアカウント認証"))
 		d.Show(False)
+		self.log.debug("start authorization")
 		while True:
 			time.sleep(0.01)
 			wx.YieldIfNeeded()
 			if manager.getToken():
+				self.log.debug("accepted")
 				d.Destroy()
 				break
 			if d.canceled == 1 or manager.getToken() == "":
+				self.log.debug("canceled")
 				simpleDialog.dialog(_("処理結果"), _("キャンセルされました。"))
 				manager.shutdown()
 				d.Destroy()
 				return
+			self.log.debug("waiting for browser operation...")
+		self._data = manager.getData()
 		return manager.getToken()
+
+	def getClient(self):
+		manager = self._getManager()
+		manager.setData(self._data)
+		client = manager.getClient()
+		if client and (self._data != manager.getData()):
+			self._data = manager.getData()
+			self.save()
+		return client
 
 	def _checkToken(self):
 		self.log.debug("Checking for authenticated user...")
-		client = self._twitterAuthorization.getClient()
+		client = self.getClient()
 		if not client:
 			self.log.error("This token is not available")
 			return False
