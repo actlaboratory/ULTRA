@@ -131,6 +131,8 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
 			"SPACES_URL_REC",
+			"SPACES_REMOVE_TOKEN",
+			"SPACES_SET_TOKEN",
 			"SPACES_MANAGE_USER",
 		])
 
@@ -254,7 +256,7 @@ class Events(BaseEvents):
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
 
-		# ツイキャス連携の有効化
+		# スペース連携の有効化
 		if selected == menuItemsStore.getRef("SPACES_ENABLE"):
 			if event.IsChecked():
 				if not globalVars.app.spaces.initialize():
@@ -279,6 +281,25 @@ class Events(BaseEvents):
 				errorDialog(_("入力されたURLが正しくありません。"))
 			elif ret == errorCodes.SPACE_NOT_STARTED:
 				errorDialog(_("このスペースはまだ開始されていません。"))
+
+		# スペース：トークンを削除
+		if selected == menuItemsStore.getRef("SPACES_REMOVE_TOKEN"):
+			if not os.path.exists(constants.AC_SPACES):
+				errorDialog(_("すでに削除されています。"))
+				return
+			d = yesNoDialog(_("アクセストークンの削除"), _("Twitterとの連携機能を無効化し、アクセストークンを削除します。よろしいですか？"))
+			if d == wx.ID_NO:
+				return
+			if globalVars.app.spaces.running:
+				globalVars.app.spaces.exit()
+				self.parent.menu.CheckMenu("SPACES_ENABLE", False)
+			os.remove(constants.AC_SPACES)
+			dialog(_("完了"), _("アクセストークンを削除しました。"))
+
+		# スペース：トークンを再設定
+		if selected == menuItemsStore.getRef("SPACES_SET_TOKEN"):
+			if globalVars.app.spaces.tokenManager.authorize():
+				globalVars.app.spaces.tokenManager.save()
 
 		# スペース：ユーザの管理
 		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):

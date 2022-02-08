@@ -38,6 +38,7 @@ class Spaces(sources.base.SourceBase):
 		self.guestToken: str
 		self.initialized = 0
 		self.users = UserList()
+		self.running = False
 		self.shouldExit = False
 		self.notified = []
 		self.enableMenu(False)
@@ -47,7 +48,6 @@ class Spaces(sources.base.SourceBase):
 	def initialize(self):
 		if self.initialized == 1:
 			self.initThread()
-			return True
 		result = self.getGuestToken()
 		if result != errorCodes.OK:
 			self.showError(result)
@@ -86,6 +86,7 @@ class Spaces(sources.base.SourceBase):
 	def run(self):
 		if self.initialized == 0 and not self.initialize():
 			return
+		self.running = True
 		globalVars.app.hMainView.addLog(_("接続完了"), _("スペースの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
@@ -127,6 +128,7 @@ class Spaces(sources.base.SourceBase):
 
 	def exit(self):
 		self.shouldExit = True
+		self.running = False
 		if self.getActiveSourceCount() == 0:
 			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
@@ -384,7 +386,7 @@ class TokenManager:
 		except Exception as e:
 			self.log.error(e)
 			return False
-		if me.error:
+		if me.errors:
 			self.log.error(me.error)
 			return False
 		self.log.info("Authenticated user: %s" % me.data)
