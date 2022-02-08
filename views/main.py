@@ -132,7 +132,6 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hSpacesMenu, [
 			"SPACES_URL_REC",
 			"SPACES_REMOVE_TOKEN",
-			"SPACES_SET_TOKEN",
 			"SPACES_MANAGE_USER",
 		])
 
@@ -295,11 +294,6 @@ class Events(BaseEvents):
 				self.parent.menu.CheckMenu("SPACES_ENABLE", False)
 			os.remove(constants.AC_SPACES)
 			dialog(_("完了"), _("アクセストークンを削除しました。"))
-
-		# スペース：トークンを再設定
-		if selected == menuItemsStore.getRef("SPACES_SET_TOKEN"):
-			if globalVars.app.spaces.tokenManager.authorize():
-				globalVars.app.spaces.tokenManager.save()
 
 		# スペース：ユーザの管理
 		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):
