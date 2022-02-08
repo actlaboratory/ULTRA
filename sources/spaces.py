@@ -365,6 +365,7 @@ class TokenManager:
 			if manager.getToken():
 				self.log.debug("accepted")
 				d.Destroy()
+				manager.shutdown()
 				break
 			if d.canceled == 1 or manager.getToken() == "":
 				self.log.debug("canceled")
