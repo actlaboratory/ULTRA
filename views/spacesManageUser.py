@@ -3,7 +3,6 @@
 # Copyright (C) 2020 yamahubuki <itiro.ishino@gmail.com>
 # Note: All comments except these top lines will be written in Japanese. 
 
-from typing import Set
 import views.KeyValueSettingDialogBase
 import wx
 import constants
@@ -24,7 +23,8 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 			(_("録画"), 0, 100),
 			(_("ブラウザで開く"), 0, 100),
 			(_("サウンドを再生"), 0, 100),
-			(_("再生するサウンド"), 0, 200)
+			(_("再生するサウンド"), 0, 200),
+			(_("非公開アカウント"), 0, 200),
 		]
 		user = {}
 		name = {}
@@ -34,6 +34,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 		openBrowser = {}
 		sound = {}
 		soundFile = {}
+		protected = {}
 		for k, v in globalVars.app.spaces.users.getData().items():
 			user[k] = v["user"]
 			name[k] = v["name"]
@@ -50,7 +51,8 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 				openBrowser[k] = globalVars.app.config.getboolean("notification", "openBrowser", False)
 				sound[k] = globalVars.app.config.getboolean("notification", "sound", False)
 				soundFile[k] = globalVars.app.config["notification"]["soundFile"]
-		super().__init__("spacesManageUser", SettingDialog, columnInfo, user, name, specific, baloon, record, openBrowser, sound, soundFile)
+			protected[k] = v["protected"]
+		super().__init__("spacesManageUser", SettingDialog, columnInfo, user, name, specific, baloon, record, openBrowser, sound, soundFile, protected)
 		for i in range(len(columnInfo)):
 			self.SetCheckResultValueString(i, _("有効"), _("無効"))
 
@@ -72,13 +74,14 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 				"openBrowser": data[5][i],
 				"sound": data[6][i],
 				"soundFile": data[7][i],
+				"protected": data[8][i] == "True",
 			}
 		return ret
 
 class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 	"""設定内容を入力するダイアログ"""
 
-	def __init__(self, parent, key="", user="", name="", specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None):
+	def __init__(self, parent, key="", user="", name="", specific=False, baloon=None, record=None, openBrowser=None, sound=None, soundFile=None, protected=None):
 		if baloon == None:
 			baloon = globalVars.app.config.getboolean("notification", "baloon", True)
 		if record == None:
@@ -89,6 +92,8 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 			sound = globalVars.app.config.getboolean("notification", "sound", False)
 		if soundFile == None:
 			soundFile = globalVars.app.config["notification"]["soundFile"]
+		if protected is None:
+			protected = ""
 		super().__init__(
 			parent,
 			[
@@ -101,9 +106,10 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 				("", _("ブラウザで開く")),
 				("", _("サウンドを再生")),
 				(_("再生するサウンド"), True),
+				(_("保護されたユーザ"), None),
 			],
-			[None] * 8 + [(_("参照"), self.browse)],
-			key, user, name, specific, baloon, record, openBrowser, sound, soundFile
+			[None] * 8 + [(_("参照"), self.browse)] + [None],
+			key, user, name, specific, baloon, record, openBrowser, sound, soundFile, protected
 		)
 
 	def Initialize(self):
@@ -126,6 +132,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 			return
 		self.edits[0].SetValue(str(user.id))
 		self.edits[2].SetValue(user.name)
+		self.edits[9].SetValue(str(user.protected))
 		event.Skip()
 
 	def InstallControls(self):
