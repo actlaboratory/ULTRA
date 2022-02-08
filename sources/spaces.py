@@ -91,12 +91,14 @@ class Spaces(sources.base.SourceBase):
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
 		self.enableMenu(True)
+		self.log.debug("shouldExit: %s" % self.shouldExit)
 		while not self.shouldExit:
 			self._process()
 			time.sleep(interval)
 			wx.YieldIfNeeded()
 
 	def _process(self):
+		self.log.debug("shouldExit: %s" % self.shouldExit)
 		self.log.debug("Checking for space status...")
 		proc = []
 		count = 0
@@ -136,21 +138,33 @@ class Spaces(sources.base.SourceBase):
 		self.enableMenu(False)
 
 	def checkSpaceStatus(self, users):
+		self.log.debug("Checking spaces status...")
+		user_ids = ",".join(users)
+		expansions = [
+			"creator_id",
+		]
+		space_fields = [
+		]
+		user_fields = [
+			"username",
+			"protected",
+		]
 		try:
-			ret = self.tokenManager.getClient().get_spaces(user_ids=",".join(users))
+			ret = self.tokenManager.getClient().get_spaces(user_ids=user_ids, expansions=expansions, space_fields=space_fields, user_fields=user_fields)
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
 			return
+		self.log.debug(ret)
 		data = ret.data
 		if data:
-			for i in data:
-				if i.id in self.notified:
+			for d, u in zip(data, ret.includes["users"]):
+				if d.id in self.notified:
 					continue
-				metadata = self.getMetadata(i.id)
+				metadata = self.getMetadata(d.id)
 				if metadata.isRunning():
-					globalVars.app.notificationHandler.notify(self, metadata.getUserName(), "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(metadata.getUserId()), metadata.getSpaceId())
-					self.notified.append(i.id)
+					globalVars.app.notificationHandler.notify(self, u.username, "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
+					self.notified.append(d.id)
 
 	def onRecordError(self, movie):
 		metadata = self.getMetadata(movie)
@@ -249,7 +263,7 @@ class Spaces(sources.base.SourceBase):
 			ret = self.tokenManager.getClient().get_user(username=user, user_auth=True)
 			self.log.debug(ret)
 		except tweepy.TweepyException as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			if showNotFound:
 				simpleDialog.errorDialog(_("Twitterとの通信に失敗しました。詳細：%s") % e)
 			return
@@ -326,7 +340,7 @@ class TokenManager:
 			with open(self._file, "rb") as f:
 				self._data = pickle.load(f)
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			return False
 		return self._checkToken()
 
@@ -335,7 +349,7 @@ class TokenManager:
 			with open(self._file, "wb") as f:
 				pickle.dump(self._data, f)
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 			return False
 		return True
@@ -365,7 +379,6 @@ class TokenManager:
 			if manager.getToken():
 				self.log.debug("accepted")
 				d.Destroy()
-				manager.shutdown()
 				break
 			if d.canceled == 1 or manager.getToken() == "":
 				self.log.debug("canceled")
@@ -375,6 +388,7 @@ class TokenManager:
 				return
 			self.log.debug("waiting for browser operation...")
 		self._data = manager.getData()
+		manager.shutdown()
 		return manager.getToken()
 
 	def getClient(self):
@@ -384,6 +398,7 @@ class TokenManager:
 		if client and (self._data != manager.getData()):
 			self._data = manager.getData()
 			self.save()
+		manager.shutdown()
 		return client
 
 	def _checkToken(self):
@@ -395,7 +410,7 @@ class TokenManager:
 		try:
 			me = client.get_me()
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			return False
 		if me.errors:
 			self.log.error(me.error)
@@ -417,7 +432,7 @@ class UserList:
 				self._data = json.load(f)
 				self.log.debug("loaded: " + self._file)
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 
 	def save(self):
 		if hasattr(sys, "frozen"):
@@ -429,7 +444,7 @@ class UserList:
 				json.dump(self._data, f, ensure_ascii=False, indent=indent)
 				self.log.debug("saved: " + self._file)
 		except Exception as e:
-			self.log.error(e)
+			self.log.error(traceback.format_exc())
 			simpleDialog.errorDialog(_("ユーザ情報の保存に失敗しました。"))
 
 	def hasSpecificSetting(self, user):
