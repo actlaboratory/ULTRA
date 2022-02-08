@@ -22,6 +22,7 @@ import simpleDialog
 import sources.base
 import views.auth
 
+
 interval = 15
 
 
@@ -95,7 +96,25 @@ class Spaces(sources.base.SourceBase):
 			wx.YieldIfNeeded()
 
 	def _process(self):
-		self.checkSpaceStatus(self.users.getUserIds())
+		self.log.debug("Checking for space status...")
+		proc = []
+		count = 0
+		total = 0
+		users = self.users.getUserIds()
+		for i in users:
+			count += 1
+			total += 1
+			proc.append(i)
+			self.log.debug("count: %d, total: %d" % (count, total))
+			if count == 100:
+				self.log.debug("100 users")
+				self.checkSpaceStatus(proc)
+				count = 0
+				proc.clear()
+				continue
+			if total == len(users):
+				self.checkSpaceStatus(proc)
+		self.log.debug("End of user list")
 
 	def enableMenu(self, mode):
 		spaces = (
@@ -116,9 +135,10 @@ class Spaces(sources.base.SourceBase):
 
 	def checkSpaceStatus(self, users):
 		try:
-			ret = self.authorization.getClient().get_spaces(user_ids=users)
+			ret = self.authorization.getClient().get_spaces(user_ids=",".join(users))
 		except Exception as e:
 			self.log.error(e)
+			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
 			return
 		data = ret.data
 		if data:
@@ -402,4 +422,4 @@ class UserList:
 		self._data = data
 
 	def getUserIds(self):
-		return ",".join(self._data.keys())
+		return self._data.keys()
