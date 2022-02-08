@@ -1,6 +1,7 @@
 # twitter spaces module for ULTRA
 
 import json
+import os
 import pickle
 import re
 import requests
@@ -51,17 +52,29 @@ class Spaces(sources.base.SourceBase):
 		if result != errorCodes.OK:
 			self.showError(result)
 			return False
-		if not self.tokenManager.load():
-			d = simpleDialog.yesNoDialog(_("Twitterアカウント連携"), _("Twitterの認証情報が見つかりません。ブラウザを起動し、アカウントとの連携を行いますか？"))
+		if not os.path.exists(constants.AC_SPACES):
+			d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitterスペースを使用する前に、使用するTwitterアカウントを設定する必要があります。今すぐ設定画面を開きますか？"))
 			if d == wx.ID_NO:
 				return False
-			if not self.tokenManager.authorize():
+			if self.openTokenManager() == errorCodes.SHOULD_EXIT:
 				return False
-			if not self.tokenManager.save():
+		if not self.tokenManager.load() or not self.tokenManager.hasDefaultAccount():
+			d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitterアカウント情報の読み込みに失敗しました。再度アカウントの連携を行ってください。今すぐ設定画面を開きますか？"))
+			if d == wx.ID_NO:
+				return False
+			if self.openTokenManager() == errorCodes.SHOULD_EXIT:
 				return False
 		self.initialized = 1
 		self.enableMenu(True)
 		return super().initialize()
+
+	def openTokenManager(self):
+		from views import spacesTokenManager
+		d = spacesTokenManager.Dialog()
+		d.Initialize()
+		d.Show()
+		if d.shouldExit():
+			return errorCodes.SHOULD_EXIT
 
 	def getGuestToken(self):
 		headers = {
@@ -122,6 +135,7 @@ class Spaces(sources.base.SourceBase):
 	def enableMenu(self, mode):
 		spaces = (
 			"SPACES_URL_REC",
+			"SPACES_TOKEN_MANAGER",
 			"SPACES_MANAGE_USER",
 		)
 		for i in spaces:
@@ -323,16 +337,26 @@ class Metadata:
 class TokenManager:
 	def __init__(self):
 		self._file = constants.AC_SPACES
-		self._data = None
+		self._data = {}
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
 
 	def _getManager(self):
 		return twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
 
-	def authorize(self):
-		result = self._getToken()
-		if result is None:
+	def addUser(self):
+		token = self._getToken()
+		if token is None:
 			return False
+		self.save()
+		return True
+
+	def deleteUser(self, user):
+		try:
+			del self._data[user]
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return False
+		self.save()
 		return True
 
 	def load(self):
@@ -342,7 +366,7 @@ class TokenManager:
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return False
-		return self._checkToken()
+		return True
 
 	def save(self):
 		try:
@@ -387,36 +411,84 @@ class TokenManager:
 				d.Destroy()
 				return
 			self.log.debug("waiting for browser operation...")
-		self._data = manager.getData()
+		user = self._getUser(manager)
+		token = manager.getData()
+		self._data[user["id"]] = {
+			"user": user,
+			"token": token,
+			"default": False,
+		}
 		manager.shutdown()
 		return manager.getToken()
 
-	def getClient(self):
+	def getClient(self, user=None):
+		if user is None:
+			user = self.getDefaultAccount()
 		manager = self._getManager()
-		manager.setData(self._data)
+		manager.setData(self._data[user]["token"])
 		client = manager.getClient()
-		if client and (self._data != manager.getData()):
-			self._data = manager.getData()
+		if client and (self._data[user]["token"] != manager.getData()):
+			self._data[user]["token"] = manager.getData()
 			self.save()
 		manager.shutdown()
 		return client
 
-	def _checkToken(self):
+	def _getUser(self, manager):
 		self.log.debug("Checking for authenticated user...")
-		client = self.getClient()
+		client = manager.getClient()
 		if not client:
 			self.log.error("This token is not available")
-			return False
+			return
 		try:
 			me = client.get_me()
 		except Exception as e:
 			self.log.error(traceback.format_exc())
-			return False
+			return
 		if me.errors:
 			self.log.error(me.error)
-			return False
+			return
 		self.log.info("Authenticated user: %s" % me.data)
-		return True
+		ret = {
+			"id": me.data.id,
+			"username": me.data.username,
+			"name": me.data.name,
+		}
+		return ret
+
+	def setDefaultAccount(self, user):
+		for i in self._data:
+			if i == user:
+				self._data[i]["default"] = True
+			else:
+				self._data[i]["default"] = False
+		self.save()
+
+	def hasDefaultAccount(self):
+		for i in self._data:
+			if self._data[i]["default"]:
+				return True
+		return False
+
+	def isDefaultAccount(self, user):
+		return self._data[user]["default"]
+
+	def getDefaultAccount(self):
+		for i in self._data:
+			if self._data[i]["default"]:
+				return i
+
+	def getOtherAccount(self):
+		ret = []
+		for i in self._data:
+			if not self._data[i]["default"]:
+				ret.append(i)
+		return ret
+
+	def getData(self):
+		return self._data
+
+	def getAccountCount(self):
+		return len(self._data)
 
 
 class UserList:

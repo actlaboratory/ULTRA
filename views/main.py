@@ -131,7 +131,7 @@ class Menu(BaseMenu):
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
 			"SPACES_URL_REC",
-			"SPACES_REMOVE_TOKEN",
+			"SPACES_TOKEN_MANAGER",
 			"SPACES_MANAGE_USER",
 		])
 
@@ -281,19 +281,9 @@ class Events(BaseEvents):
 			elif ret == errorCodes.SPACE_NOT_STARTED:
 				errorDialog(_("このスペースはまだ開始されていません。"))
 
-		# スペース：トークンを削除
-		if selected == menuItemsStore.getRef("SPACES_REMOVE_TOKEN"):
-			if not os.path.exists(constants.AC_SPACES):
-				errorDialog(_("すでに削除されています。"))
-				return
-			d = yesNoDialog(_("アクセストークンの削除"), _("Twitterとの連携機能を無効化し、アクセストークンを削除します。よろしいですか？"))
-			if d == wx.ID_NO:
-				return
-			if globalVars.app.spaces.running:
-				globalVars.app.spaces.exit()
-				self.parent.menu.CheckMenu("SPACES_ENABLE", False)
-			os.remove(constants.AC_SPACES)
-			dialog(_("完了"), _("アクセストークンを削除しました。"))
+		# スペース：トークンの管理
+		if selected == menuItemsStore.getRef("SPACES_TOKEN_MANAGER"):
+			globalVars.app.spaces.openTokenManager()
 
 		# スペース：ユーザの管理
 		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):

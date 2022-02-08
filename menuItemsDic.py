@@ -29,7 +29,7 @@ dic={
 	"SPACES_SUB": _("Twitter スペース(&S)"),
 	"SPACES_ENABLE": _("Twitter スペースとの連携機能を有効化(&E)"),
 	"SPACES_URL_REC": _("スペースの&URLを指定して録画"),
-	"SPACES_REMOVE_TOKEN": _("アクセストークンを削除"),
+	"SPACES_TOKEN_MANAGER": _("連携アカウントの管理(&A)") + "...",
 	"SPACES_MANAGE_USER": _("通知対象ユーザの管理(&M)") + "...",
 	"OP_SETTINGS": _("設定(&S)") + "...",
 	"OP_SHORTCUT": _("キーボードショートカットの設定(&K)") + "...",
