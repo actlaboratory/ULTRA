@@ -53,11 +53,12 @@ class Spaces(sources.base.SourceBase):
 			self.showError(result)
 			return False
 		if not self.tokenManager.load():
-			simpleDialog.dialog(_("Twitterアカウント連携"), _("ブラウザを起動し、Twitterアカウントの連携を行います。"))
+			d = simpleDialog.yesNoDialog(_("Twitterアカウント連携"), _("Twitterの認証情報が見つかりません。ブラウザを起動し、アカウントとの連携を行いますか？"))
+			if d == wx.ID_NO:
+				return False
 			if not self.tokenManager.authorize():
 				return False
 			if not self.tokenManager.save():
-				simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 				return False
 		self.initialized = 1
 		self.enableMenu(True)
@@ -133,9 +134,15 @@ class Spaces(sources.base.SourceBase):
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
 
+	def getClient(self):
+		client = self.authorization.getClient()
+		if client:
+			self.tokenManager.save()
+		return client
+
 	def checkSpaceStatus(self, users):
 		try:
-			ret = self.authorization.getClient().get_spaces(user_ids=",".join(users))
+			ret = self.getClient().get_spaces(user_ids=",".join(users))
 		except Exception as e:
 			self.log.error(e)
 			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
@@ -244,7 +251,7 @@ class Spaces(sources.base.SourceBase):
 
 	def getUser(self, user, showNotFound=True):
 		try:
-			ret = self.authorization.getClient().get_user(username=user, user_auth=True)
+			ret = self.getClient().get_user(username=user, user_auth=True)
 			self.log.debug(ret)
 		except tweepy.TweepyException as e:
 			self.log.error(e)
@@ -323,7 +330,7 @@ class TokenManager:
 		except Exception as e:
 			self.log.error(e)
 			return False
-		return True
+		return self._checkToken()
 
 	def save(self):
 		try:
@@ -331,6 +338,7 @@ class TokenManager:
 				pickle.dump(self._twitterAuthorization.getData(), f)
 		except Exception as e:
 			self.log.error(e)
+			simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 			return False
 		return True
 
@@ -364,6 +372,23 @@ class TokenManager:
 				d.Destroy()
 				return
 		return manager.getToken()
+
+	def _checkToken(self):
+		self.log.debug("Checking for authenticated user...")
+		client = self._twitterAuthorization.getClient()
+		if not client:
+			self.log.error("This token is not available")
+			return False
+		try:
+			me = client.get_me()
+		except Exception as e:
+			self.log.error(e)
+			return False
+		if me.error:
+			self.log.error(me.error)
+			return False
+		self.log.info("Authenticated user: %s" % me.data)
+		return True
 
 
 class UserList:
