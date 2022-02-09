@@ -198,7 +198,7 @@ class Spaces(sources.base.SourceBase):
 					continue
 				metadata = self.getMetadata(d.id)
 				if metadata.isRunning():
-					globalVars.app.notificationHandler.notify(self, u.username, "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
+					globalVars.app.notificationHandler.notify(self, u.username, "https://twitter.com/i/spaces/%s" % d.id, self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
 					self.notified.append(d.id)
 		
 	def _updateUserInfo(self, u):
