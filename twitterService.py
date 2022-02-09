@@ -20,7 +20,7 @@ log = getLogger("%s.twitterService" % (constants.LOG_PREFIX))
 
 
 def getToken():
-	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET, constants.TWITTER_PORT)
+	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET, constants.TWITTER_PORT)
 	l="ja"
 	try:
 		l=globalVars.app.config["general"]["language"].split("_")[0].lower()
@@ -51,7 +51,7 @@ def getToken():
 	return manager.getToken()
 
 def getFollowList(token,target):
-	auth = tweepy.OAuthHandler(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET)
+	auth = tweepy.OAuth1UserHandler(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET)
 	auth.set_access_token(*token)
 	try:
 		twitterApi = tweepy.API(auth,proxy=os.environ['HTTPS_PROXY'])

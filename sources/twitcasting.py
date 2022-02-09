@@ -209,7 +209,8 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が切断された
 		"""
 		self.running = False
-		globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
+		if self.getActiveSourceCount() == 0:
+			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
 		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)

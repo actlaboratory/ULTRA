@@ -23,6 +23,7 @@ from simpleDialog import *
 from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
+from views import spacesManageUser
 from views import settingsDialog
 from views import versionDialog
 
@@ -127,8 +128,13 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		# スペースメニューの中身
+		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
+			"SPACES_ADD_FOLLOWING",
+			"SPACES_UPDATE_USER",
 			"SPACES_URL_REC",
+			"SPACES_TOKEN_MANAGER",
+			"SPACES_MANAGE_USER",
 		])
 
 		# オプションメニュー
@@ -251,6 +257,27 @@ class Events(BaseEvents):
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
 
+		# スペース連携の有効化
+		if selected == menuItemsStore.getRef("SPACES_ENABLE"):
+			if event.IsChecked():
+				if not globalVars.app.spaces.initialize():
+					self.parent.menu.CheckMenu("SPACES_ENABLE", False)
+					return
+				globalVars.app.spaces.start()
+			else:
+				globalVars.app.spaces.exit()
+			globalVars.app.config["spaces"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
+		# スペース：フォロー中のユーザを追加
+		if selected == menuItemsStore.getRef("SPACES_ADD_FOLLOWING"):
+			globalVars.app.spaces.addFollowingUsers()
+
+		# スペース：URLを指定して録画
+		if selected == menuItemsStore.getRef("SPACES_UPDATE_USER"):
+			globalVars.app.spaces.updateUser()
+
 		# スペース：URLを指定して録画
 		if selected == menuItemsStore.getRef("SPACES_URL_REC"):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("スペースのURL"))
@@ -261,6 +288,21 @@ class Events(BaseEvents):
 				errorDialog(_("このスペースは既に終了しています。"))
 			elif ret == errorCodes.INVALID_URL:
 				errorDialog(_("入力されたURLが正しくありません。"))
+			elif ret == errorCodes.SPACE_NOT_STARTED:
+				errorDialog(_("このスペースはまだ開始されていません。"))
+
+		# スペース：トークンの管理
+		if selected == menuItemsStore.getRef("SPACES_TOKEN_MANAGER"):
+			globalVars.app.spaces.openTokenManager()
+
+		# スペース：ユーザの管理
+		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):
+			d = spacesManageUser.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.spaces.users.setData(d.GetValue())
+			globalVars.app.spaces.users.save()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):

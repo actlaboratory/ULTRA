@@ -60,3 +60,14 @@ class SourceBase(threading.Thread):
 		:rtype: bool
 		"""
 		return False
+
+	def getActiveSourceCount(self, includeSelf=False):
+		count = 0
+		t = threading.enumerate()
+		for i in t:
+			if isinstance(i, SourceBase):
+				if i != self:
+					count += 1
+				elif includeSelf:
+					count += 1
+		return count
