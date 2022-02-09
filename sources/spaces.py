@@ -533,7 +533,7 @@ class TokenManager:
 		manager = self._getManager()
 		manager.setData(self._data[user]["token"])
 		client = manager.getClient()
-		if client and (self._data[user]["token"] != manager.getData()):
+		if client:
 			self._data[user]["token"] = manager.getData()
 			self.save()
 		manager.shutdown()
