@@ -77,6 +77,7 @@ class Spaces(sources.base.SourceBase):
 		d.Show()
 		self._tokenManagerShown = False
 		if d.shouldExit():
+			self.shouldExit = True
 			return errorCodes.SHOULD_EXIT
 
 	def getGuestToken(self):
@@ -321,12 +322,13 @@ class Spaces(sources.base.SourceBase):
 
 	def showTokenError(self):
 		self.log.error("unauthorized")
-		if not self._tokenManagerShown:
+		if self._tokenManagerShown:
 			return
 		d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitterアカウントの認証情報が正しくありません。再度アカウントの連携を行ってください。今すぐ設定画面を開きますか？"))
 		if d == wx.ID_NO:
 			return
-		if self.openTokenManager() == errorCodes.SHOULD_EXIT:
+		wx.CallAfter(self.openTokenManager)
+		if self.shouldExit:
 			self.exit()
 
 	def getUser(self, user, showNotFound=True):
