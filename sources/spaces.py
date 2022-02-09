@@ -24,7 +24,7 @@ import sources.base
 import views.auth
 
 
-interval = 15
+interval = 40
 
 
 class Spaces(sources.base.SourceBase):
