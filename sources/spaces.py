@@ -475,6 +475,7 @@ class TokenManager:
 		return True
 
 	def save(self):
+		self.log.debug("Saving token data")
 		try:
 			with open(self._file, "wb") as f:
 				pickle.dump(self._data, f)
@@ -482,6 +483,7 @@ class TokenManager:
 			self.log.error(traceback.format_exc())
 			simpleDialog.errorDialog(_("認証情報の保存に失敗しました。"))
 			return False
+		self.log.debug("saved: %s" % self._file)
 		return True
 
 	def _getToken(self):
