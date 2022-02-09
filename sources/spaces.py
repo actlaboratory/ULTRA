@@ -131,6 +131,16 @@ class Spaces(sources.base.SourceBase):
 			if total == len(users):
 				self.checkSpaceStatus(proc)
 		self.log.debug("End of user list")
+		protected = self.users.getProtectedUsers()
+		if not protected:
+			return
+		self.log.debug("Checking for protected accounts")
+		self.log.debug("protected users: %d" % len(protected))
+		accounts = self.tokenManager.getOtherAccount()
+		self.log.debug("Other accounts: %d" % len(accounts))
+		for i in accounts:
+			self.log.debug("Checking by account %s" % i)
+			self.checkSpaceStatus(protected, i)
 
 	def enableMenu(self, mode):
 		spaces = (
@@ -151,34 +161,46 @@ class Spaces(sources.base.SourceBase):
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
 
-	def checkSpaceStatus(self, users):
+	def checkSpaceStatus(self, users, account=None):
+		if account is None:
+			account = self.tokenManager.getDefaultAccount()
 		self.log.debug("Checking spaces status...")
 		user_ids = ",".join(users)
 		expansions = [
 			"creator_id",
 		]
 		space_fields = [
+			"creator_id",
 		]
 		user_fields = [
 			"username",
 			"protected",
+			"name",
 		]
 		try:
-			ret = self.tokenManager.getClient().get_spaces(user_ids=user_ids, expansions=expansions, space_fields=space_fields, user_fields=user_fields)
+			ret = self.tokenManager.getClient(account).get_spaces(user_ids=user_ids, expansions=expansions, space_fields=space_fields, user_fields=user_fields)
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
 			return
 		self.log.debug(ret)
-		data = ret.data
-		if data:
-			for d, u in zip(data, ret.includes["users"]):
+		if ret.data:
+			for d in ret.data:
+				u = [i for i in ret.includes["users"] if i.id == int(d.creator_id)][0]
+				prev = self.users.getUserData(str(u.id))
+				if u.username != prev["user"]:
+					self.users.setAttribute(str(u.id), "user", u.username)
+				if u.name != prev["name"]:
+					self.users.setAttribute(str(u.id), "name", u.name)
+				if u.protected != prev["protected"]:
+					self.users.setAttribute(str(u.id), "protected", u.protected)
 				if d.id in self.notified:
 					continue
 				metadata = self.getMetadata(d.id)
 				if metadata.isRunning():
 					globalVars.app.notificationHandler.notify(self, u.username, "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
 					self.notified.append(d.id)
+		
 
 	def onRecordError(self, movie):
 		metadata = self.getMetadata(movie)
@@ -274,7 +296,7 @@ class Spaces(sources.base.SourceBase):
 
 	def getUser(self, user, showNotFound=True):
 		try:
-			ret = self.tokenManager.getClient().get_user(username=user, user_auth=True)
+			ret = self.tokenManager.getClient().get_user(username=user, user_fields="protected", user_auth=True)
 			self.log.debug(ret)
 		except tweepy.TweepyException as e:
 			self.log.error(traceback.format_exc())
@@ -548,3 +570,27 @@ class UserList:
 
 	def getUserIds(self):
 		return self._data.keys()
+
+	def getProtectedUsers(self):
+		return [i for i in self._data.keys() if self._data[i]["protected"]]
+
+	def setAttribute(self, user, attribute, newValue):
+		assert type(user) == str
+		oldValue = self._data[user][attribute]
+		self.log.debug("%s changed: %s -> %s" % (attribute, oldValue, newValue))
+		self._data[user][attribute] = newValue
+		field = ""
+		if attribute == "name":
+			field = _("名前")
+		elif attribute == "user":
+			field = _("ユーザ名")
+		if field:
+			globalVars.app.hMainView.addLog(
+				_("%(field)s変更") % {"field": field},
+				_("「%(old)s」→「%(new)s」") %{"old": oldValue, "new": newValue},
+				Spaces.friendlyName
+			)
+		self.save()
+
+	def getUserData(self, user):
+		return self._data[user]
