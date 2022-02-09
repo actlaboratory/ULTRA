@@ -118,7 +118,7 @@ class Spaces(sources.base.SourceBase):
 			if response.data:
 				ret += response.data
 			meta = response.meta
-			if not "next_token" in meta.keys():
+			if "next_token" not in meta.keys():
 				break
 			pagination = meta["next_token"]
 		return ret
