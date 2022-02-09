@@ -609,17 +609,17 @@ class Twitcasting(SourceBase):
 		if userInfo == None:
 			return
 		if userInfo["user"]["id"] in self.users.keys():
-			if userInfo["user"]["screen_id"] not in recorder.getRecordingUsers() and userInfo["user"]["is_live"]:
+			if userInfo["user"]["is_live"]:
 				movie = self.getCurrentLive(userInfo["user"]["screen_id"])
 				if movie == None:
 					return
 				r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
+				if r.isRecordedByAnotherThread():
+					simpleDialog.errorDialog(_("このユーザのライブはすでに録画中です。"))
+					return
 				r.start()
 				return
 			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
-			return
-		if userInfo["user"]["screen_id"] in recorder.getRecordingUsers():
-			simpleDialog.errorDialog(_("このユーザのライブはすでに録画中です。"))
 			return
 		self.users[userInfo["user"]["id"]] = {
 			"user": userInfo["user"]["screen_id"],
