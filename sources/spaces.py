@@ -110,6 +110,25 @@ class Spaces(sources.base.SourceBase):
 			time.sleep(interval)
 			wx.YieldIfNeeded()
 
+	def updateUser(self):
+		self.log.debug("Updating user info...")
+		ids = self.users.getUserIds()
+		for i in self.splitIds(ids):
+			try:
+				result = self.tokenManager.getClient().get_users(ids=i, user_fields="protected")
+			except Exception as e:
+				self.log.error(traceback.format_exc())
+				simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % e)
+				return
+			if result.errors:
+				simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % result.errors)
+				return
+			data = result.data
+			if data:
+				for j in data:
+					self._updateUserInfo(j)
+		simpleDialog.dialog(_("完了"), _("ユーザ情報の更新が完了しました。"))
+
 	def _process(self):
 		self.log.debug("shouldExit: %s" % self.shouldExit)
 		self.log.debug("Checking for space status...")
@@ -131,6 +150,7 @@ class Spaces(sources.base.SourceBase):
 	def enableMenu(self, mode):
 		spaces = (
 			"SPACES_URL_REC",
+			"SPACES_UPDATE_USER",
 			"SPACES_TOKEN_MANAGER",
 			"SPACES_MANAGE_USER",
 		)
