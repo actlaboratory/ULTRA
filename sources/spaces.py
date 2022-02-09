@@ -113,24 +113,9 @@ class Spaces(sources.base.SourceBase):
 	def _process(self):
 		self.log.debug("shouldExit: %s" % self.shouldExit)
 		self.log.debug("Checking for space status...")
-		proc = []
-		count = 0
-		total = 0
 		users = self.users.getUserIds()
-		for i in users:
-			count += 1
-			total += 1
-			proc.append(i)
-			self.log.debug("count: %d, total: %d" % (count, total))
-			if count == 100:
-				self.log.debug("100 users")
-				self.checkSpaceStatus(proc)
-				count = 0
-				proc.clear()
-				continue
-			if total == len(users):
-				self.checkSpaceStatus(proc)
-		self.log.debug("End of user list")
+		for i in self.splitIds(users):
+			self.checkSpaceStatus(i)
 		protected = self.users.getProtectedUsers()
 		if not protected:
 			return
@@ -140,7 +125,8 @@ class Spaces(sources.base.SourceBase):
 		self.log.debug("Other accounts: %d" % len(accounts))
 		for i in accounts:
 			self.log.debug("Checking by account %s" % i)
-			self.checkSpaceStatus(protected, i)
+			for j in self.splitIds(protected):
+				self.checkSpaceStatus(j, i)
 
 	def enableMenu(self, mode):
 		spaces = (
@@ -187,13 +173,7 @@ class Spaces(sources.base.SourceBase):
 		if ret.data:
 			for d in ret.data:
 				u = [i for i in ret.includes["users"] if i.id == int(d.creator_id)][0]
-				prev = self.users.getUserData(str(u.id))
-				if u.username != prev["user"]:
-					self.users.setAttribute(str(u.id), "user", u.username)
-				if u.name != prev["name"]:
-					self.users.setAttribute(str(u.id), "name", u.name)
-				if u.protected != prev["protected"]:
-					self.users.setAttribute(str(u.id), "protected", u.protected)
+				self._updateUserInfo(u)
 				if d.id in self.notified:
 					continue
 				metadata = self.getMetadata(d.id)
@@ -201,6 +181,21 @@ class Spaces(sources.base.SourceBase):
 					globalVars.app.notificationHandler.notify(self, u.username, "", self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
 					self.notified.append(d.id)
 		
+	def _updateUserInfo(self, u):
+		prev = self.users.getUserData(str(u.id))
+		if u.username != prev["user"]:
+			self.users.setAttribute(str(u.id), "user", u.username)
+		if u.name != prev["name"]:
+			self.users.setAttribute(str(u.id), "name", u.name)
+		if u.protected != prev["protected"]:
+			self.users.setAttribute(str(u.id), "protected", u.protected)
+
+	def splitIds(self, ids, count=100):
+		ids = list(ids)
+		ret = []
+		for i in range(0, len(ids), count):
+			ret.append(ids[i:i+count])
+		return ret
 
 	def onRecordError(self, movie):
 		metadata = self.getMetadata(movie)
