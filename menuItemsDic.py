@@ -28,6 +28,7 @@ dic={
 	"TC_MANAGE_USER": _("通知対象ユーザの管理(&M)") + "...",
 	"SPACES_SUB": _("Twitter スペース(&S)"),
 	"SPACES_ENABLE": _("Twitter スペースとの連携機能を有効化(&E)"),
+	"SPACES_ADD_FOLLOWING": _("フォロー中のユーザをすべて追加(&F)") + "...",
 	"SPACES_UPDATE_USER": _("ユーザ情報の更新(&I)"),
 	"SPACES_URL_REC": _("スペースの&URLを指定して録画"),
 	"SPACES_TOKEN_MANAGER": _("連携アカウントの管理(&A)") + "...",

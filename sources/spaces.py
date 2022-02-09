@@ -80,6 +80,49 @@ class Spaces(sources.base.SourceBase):
 			self.shouldExit = True
 			return errorCodes.SHOULD_EXIT
 
+	def addFollowingUsers(self):
+		from views import chooseTwitterAccount
+		d = chooseTwitterAccount.Dialog(self.tokenManager)
+		d.Initialize()
+		if d.Show() == wx.ID_CANCEL:
+			return
+		user = d.GetData()
+		users = self.getFollowingUsers(user, user)
+		count = 0
+		for i in users:
+			if str(i.id) in self.users.getUserIds():
+				continue
+			count += 1
+			self.users.addUser(str(i.id), i.username, i.name, i.protected)
+		simpleDialog.dialog(_("完了"), _("フォロー中のユーザの追加が完了しました。追加件数：%d") % count)
+
+	def getFollowingUsers(self, user, account):
+		self.log.debug("Getting follow list...")
+		ret = []
+		pagination = ""
+		while True:
+			try:
+				client = self.tokenManager.getClient(account)
+				if pagination:
+					response = client.get_users_following(user, user_fields="protected", max_results=1000, pagination_token=pagination)
+				else:
+					response = client.get_users_following(user, user_fields="protected", max_results=1000)
+			except tweepy.Unauthorized as e:
+				self.showTokenError()
+				return []
+			except Exception as e:
+				self.log.error(traceback.format_exc())
+				simpleDialog.errorDialog(_("フォロー中のユーザの取得に失敗しました。詳細:%s") % e)
+				return []
+			self.log.debug(response)
+			if response.data:
+				ret += response.data
+			meta = response.meta
+			if not "next_token" in meta.keys():
+				break
+			pagination = meta["next_token"]
+		return ret
+
 	def getGuestToken(self):
 		headers = {
 			"authorization": constants.TWITTER_BEARER
@@ -156,6 +199,7 @@ class Spaces(sources.base.SourceBase):
 
 	def enableMenu(self, mode):
 		spaces = (
+			"SPACES_ADD_FOLLOWING",
 			"SPACES_URL_REC",
 			"SPACES_UPDATE_USER",
 			"SPACES_TOKEN_MANAGER",
@@ -634,3 +678,17 @@ class UserList:
 
 	def getUserData(self, user):
 		return self._data[user]
+
+	def addUser(self, id, user, name, protected):
+		self._data[id] = {
+			"user": user,
+			"name": name,
+			"specific": False,
+			"baloon": globalVars.app.config.getboolean("notification", "baloon", True),
+			"record": globalVars.app.config.getboolean("notification", "record", True),
+			"openBrowser": globalVars.app.config.getboolean("notification", "openBrowser", False),
+			"sound": globalVars.app.config.getboolean("notification", "sound", False),
+			"soundFile": globalVars.app.config["notification"]["soundFile"],
+			"protected": protected,
+		}
+		self.save()

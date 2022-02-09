@@ -130,6 +130,7 @@ class Menu(BaseMenu):
 		# スペースメニューの中身
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
+			"SPACES_ADD_FOLLOWING",
 			"SPACES_UPDATE_USER",
 			"SPACES_URL_REC",
 			"SPACES_TOKEN_MANAGER",
@@ -268,6 +269,10 @@ class Events(BaseEvents):
 			globalVars.app.config["spaces"]["enable"] = event.IsChecked()
 			if globalVars.app.config.write() != errorCodes.OK:
 				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
+		# スペース：フォロー中のユーザを追加
+		if selected == menuItemsStore.getRef("SPACES_ADD_FOLLOWING"):
+			globalVars.app.spaces.addFollowingUsers()
 
 		# スペース：URLを指定して録画
 		if selected == menuItemsStore.getRef("SPACES_UPDATE_USER"):
