@@ -44,6 +44,7 @@ class Spaces(sources.base.SourceBase):
 		self.notified = []
 		self.enableMenu(False)
 		self.tokenManager = TokenManager()
+		self._tokenManagerShown = False
 
 	def initialize(self):
 		if self.initialized == 1:
@@ -72,7 +73,9 @@ class Spaces(sources.base.SourceBase):
 		from views import spacesTokenManager
 		d = spacesTokenManager.Dialog()
 		d.Initialize()
+		self._tokenManagerShown = True
 		d.Show()
+		self._tokenManagerShown = False
 		if d.shouldExit():
 			return errorCodes.SHOULD_EXIT
 
@@ -116,6 +119,9 @@ class Spaces(sources.base.SourceBase):
 		for i in self.splitIds(ids):
 			try:
 				result = self.tokenManager.getClient().get_users(ids=i, user_fields="protected")
+			except tweepy.Unauthorized as e:
+				self.showTokenError()
+				return
 			except Exception as e:
 				self.log.error(traceback.format_exc())
 				simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % e)
@@ -185,9 +191,13 @@ class Spaces(sources.base.SourceBase):
 		]
 		try:
 			ret = self.tokenManager.getClient(account).get_spaces(user_ids=user_ids, expansions=expansions, space_fields=space_fields, user_fields=user_fields)
+		except tweepy.Unauthorized as e:
+			self.showTokenError()
+			return
 		except Exception as e:
 			self.log.error(traceback.format_exc())
-			globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
+			if not self._tokenManagerShown:
+				globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
 			return
 		self.log.debug(ret)
 		if ret.data:
@@ -309,11 +319,24 @@ class Spaces(sources.base.SourceBase):
 		elif code == errorCodes.INVALID_RECEIVED:
 			simpleDialog.errorDialog(_("Twitterからの応答が不正です。開発者までご連絡ください。"))
 
+	def showTokenError(self):
+		self.log.error("unauthorized")
+		if not self._tokenManagerShown:
+			return
+		d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitterアカウントの認証情報が正しくありません。再度アカウントの連携を行ってください。今すぐ設定画面を開きますか？"))
+		if d == wx.ID_NO:
+			return
+		if self.openTokenManager() == errorCodes.SHOULD_EXIT:
+			self.exit()
+
 	def getUser(self, user, showNotFound=True):
 		try:
 			ret = self.tokenManager.getClient().get_user(username=user, user_fields="protected", user_auth=True)
 			self.log.debug(ret)
-		except tweepy.TweepyException as e:
+		except tweepy.Unauthorized as e:
+			self.showTokenError()
+			return
+		except Exception as e:
 			self.log.error(traceback.format_exc())
 			if showNotFound:
 				simpleDialog.errorDialog(_("Twitterとの通信に失敗しました。詳細：%s") % e)
