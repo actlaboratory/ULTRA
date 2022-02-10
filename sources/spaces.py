@@ -159,6 +159,7 @@ class Spaces(sources.base.SourceBase):
 
 	def updateUser(self):
 		self.log.debug("Updating user info...")
+		notFound = []
 		ids = self.users.getUserIds()
 		for i in self.splitIds(ids):
 			try:
@@ -171,12 +172,21 @@ class Spaces(sources.base.SourceBase):
 				simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % e)
 				return
 			if result.errors:
-				simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % result.errors)
-				return
+				for err in result.errors:
+					if err["title"] == "Not Found Error":
+						notFound.append(err["value"])
+						continue
+					simpleDialog.errorDialog(_("ユーザ情報の更新に失敗しました。詳細:%s") % err["detail"])
+					return
 			data = result.data
 			if data:
 				for j in data:
 					self._updateUserInfo(j)
+		if notFound:
+			usernames = []
+			for i in notFound:
+				usernames.append(self.users.getData()[i]["user"])
+			simpleDialog.errorDialog(_("以下のユーザの情報を取得できませんでした。") + "\n" + "\n".join(usernames))
 		simpleDialog.dialog(_("完了"), _("ユーザ情報の更新が完了しました。"))
 
 	def _process(self):
