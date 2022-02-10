@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-10 15:28+0900\n"
+"POT-Creation-Date: 2022-02-11 00:30+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -173,7 +173,7 @@ msgstr ""
 
 #: notificationHandler.py:50
 #, python-format
-msgid "配信開始：%s"
+msgid "配信開始：%s、サービス：%s"
 msgstr ""
 
 #: recorder.py:146 recorder.py:148 recorder.py:159 recorder.py:175
@@ -311,7 +311,7 @@ msgid ""
 "ソフトウェア終了時に、自動でアップデートされます。"
 msgstr ""
 
-#: sources\spaces.py:32
+#: sources\spaces.py:32 views\main.py:409
 msgid "Twitter スペース"
 msgstr ""
 
@@ -452,7 +452,7 @@ msgstr ""
 msgid "「%(old)s」→「%(new)s」"
 msgstr ""
 
-#: sources\twitcasting.py:42
+#: sources\twitcasting.py:42 views\main.py:407
 msgid "ツイキャス"
 msgstr ""
 
@@ -763,7 +763,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:408 views\main.py:427
+#: views\main.py:415 views\main.py:434
 msgid "なし"
 msgstr ""
 
@@ -953,7 +953,7 @@ msgstr ""
 msgid "ヘルプ(&H)"
 msgstr ""
 
-#: views\main.py:196 views\main.py:202 views\main.py:271 views\main.py:432
+#: views\main.py:196 views\main.py:202 views\main.py:271 views\main.py:439
 #: views\settingsDialog.py:174
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"

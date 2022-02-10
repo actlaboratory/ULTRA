@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TCV\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-10 15:28+0900\n"
-"PO-Revision-Date: 2022-02-10 16:25+0900\n"
+"POT-Creation-Date: 2022-02-11 00:30+0900\n"
+"PO-Revision-Date: 2022-02-11 00:34+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -177,8 +177,8 @@ msgstr "&Version Info"
 
 #: notificationHandler.py:50
 #, python-format
-msgid "配信開始：%s"
-msgstr "Broadcasting Started: %s"
+msgid "配信開始：%s、サービス：%s"
+msgstr "Broadcasting Started: %s, service: %s"
 
 #: recorder.py:146 recorder.py:148 recorder.py:159 recorder.py:175
 msgid "録画エラー"
@@ -330,7 +330,7 @@ msgstr ""
 "Download has successfully finished.\n"
 "Update will be started when closing the application."
 
-#: sources\spaces.py:32
+#: sources\spaces.py:32 views\main.py:409
 msgid "Twitter スペース"
 msgstr "Twitter Spaces"
 
@@ -479,7 +479,7 @@ msgstr "%(field)s changed"
 msgid "「%(old)s」→「%(new)s」"
 msgstr "%(old)s -> %(new)s"
 
-#: sources\twitcasting.py:42
+#: sources\twitcasting.py:42 views\main.py:407
 msgid "ツイキャス"
 msgstr "TwitCasting"
 
@@ -816,7 +816,7 @@ msgstr "Shortcut Key Configuration"
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:408 views\main.py:427
+#: views\main.py:415 views\main.py:434
 msgid "なし"
 msgstr "None"
 
@@ -1017,7 +1017,7 @@ msgstr "&Options"
 msgid "ヘルプ(&H)"
 msgstr "&Help"
 
-#: views\main.py:196 views\main.py:202 views\main.py:271 views\main.py:432
+#: views\main.py:196 views\main.py:202 views\main.py:271 views\main.py:439
 #: views\settingsDialog.py:174
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
