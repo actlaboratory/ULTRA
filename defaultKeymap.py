@@ -10,6 +10,11 @@ defaultKeymap["MAINVIEW"]={
 	"TC_RECORD_ARCHIVE": "",
 	"TC_RECORD_USER": "",
 	"TC_MANAGE_USER": "",
+	"SPACES_ENABLE": "",
+	"SPACES_UPDATE_USER": "",
+	"SPACES_URL_REC": "",
+	"SPACES_TOKEN_MANAGER": "",
+	"SPACES_MANAGE_USER": "",
 	"OP_SETTINGS": "",
 	"HELP_UPDATE":"",
 	"HELP_VERSIONINFO":"",
@@ -19,5 +24,5 @@ defaultKeymap["HOTKEY"]={
 	"SHOW":"",
 	"EXIT": "",
 	"TC_ENABLE": "",
-	
+	"SPACES_ENABLE": "",
 }
