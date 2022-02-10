@@ -292,6 +292,8 @@ class Spaces(sources.base.SourceBase):
 			self.log.error("Space ID not found: " + url)
 			return errorCodes.INVALID_URL
 		metadata = self.getMetadata(spaceId)
+		if metadata == errorCodes.INVALID_URL:
+			return errorCodes.INVALID_URL
 		if type(metadata) == int:
 			self.showError(metadata)
 			return
@@ -349,6 +351,8 @@ class Spaces(sources.base.SourceBase):
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return errorCodes.INVALID_RECEIVED
+		if not metadata["data"]["audioSpace"]:
+			return errorCodes.INVALID_URL
 		return Metadata(metadata)
 
 	def getMediaLocation(self, mediaKey):
