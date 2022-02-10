@@ -50,7 +50,7 @@ class Dialog(BaseDialog):
 		self.setDefaultButton.Enable(False)
 
 		g2 = views.ViewCreator.ViewCreator(self.viewMode, self.panel, self.creator.GetSizer(), wx.VERTICAL, 0)
-		self.bClose = self.creator.closebutton(_("閉じる"), self.close)
+		self.bClose = self.creator.closebutton(_("閉じる"))
 		self.refreshList()
 
 	def refreshList(self):
@@ -111,7 +111,7 @@ class Dialog(BaseDialog):
 				self._shouldExit = True
 				self.wnd.Destroy()
 
-	def close(self, event):
+	def OnClose(self, event):
 		if self.hListCtrl.GetItemCount() == 0:
 			d = simpleDialog.yesNoDialog(_("確認"), _("Twitterアカウントの情報が設定されていません。Twitterとの連携を停止しますか？"))
 			if d == wx.ID_YES:
@@ -123,10 +123,6 @@ class Dialog(BaseDialog):
 		if not result and self.hListCtrl.GetItemCount() > 0:
 			simpleDialog.errorDialog(_("規定のアカウントが設定されていません。"))
 			return
-		self.wnd.Destroy()
-
-	def OnClose(self, event):
-		self.close(event)
 
 	def shouldExit(self):
 		return self._shouldExit
