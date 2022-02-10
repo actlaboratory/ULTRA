@@ -109,7 +109,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 				(_("保護されたユーザ"), None),
 			],
 			[None] * 8 + [(_("参照"), self.browse)] + [None],
-			key, user, name, specific, baloon, record, openBrowser, sound, soundFile, protected
+			key, user, name, specific, baloon, record, openBrowser, sound, soundFile, str(protected)
 		)
 
 	def Initialize(self):
