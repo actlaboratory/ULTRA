@@ -23,6 +23,7 @@ from simpleDialog import *
 from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
+from views import spacesManageUser
 from views import settingsDialog
 from views import versionDialog
 
@@ -100,6 +101,7 @@ class Menu(BaseMenu):
 		self.hFileMenu=wx.Menu()
 		self.hServicesMenu = wx.Menu()
 		self.hTwitcastingMenu=wx.Menu()
+		self.hSpacesMenu=wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -111,6 +113,7 @@ class Menu(BaseMenu):
 
 		# サービスメニューの中身
 		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
+		self.RegisterMenuCommand(self.hServicesMenu, "SPACES_SUB", subMenu=self.hSpacesMenu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
@@ -123,6 +126,15 @@ class Menu(BaseMenu):
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
+		])
+		# スペースメニューの中身
+		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
+		self.RegisterMenuCommand(self.hSpacesMenu, [
+			"SPACES_ADD_FOLLOWING",
+			"SPACES_UPDATE_USER",
+			"SPACES_URL_REC",
+			"SPACES_TOKEN_MANAGER",
+			"SPACES_MANAGE_USER",
 		])
 
 		# オプションメニュー
@@ -245,6 +257,53 @@ class Events(BaseEvents):
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
 
+		# スペース連携の有効化
+		if selected == menuItemsStore.getRef("SPACES_ENABLE"):
+			if event.IsChecked():
+				if not globalVars.app.spaces.initialize():
+					self.parent.menu.CheckMenu("SPACES_ENABLE", False)
+					return
+				globalVars.app.spaces.start()
+			else:
+				globalVars.app.spaces.exit()
+			globalVars.app.config["spaces"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
+		# スペース：フォロー中のユーザを追加
+		if selected == menuItemsStore.getRef("SPACES_ADD_FOLLOWING"):
+			globalVars.app.spaces.addFollowingUsers()
+
+		# スペース：URLを指定して録画
+		if selected == menuItemsStore.getRef("SPACES_UPDATE_USER"):
+			globalVars.app.spaces.updateUser()
+
+		# スペース：URLを指定して録画
+		if selected == menuItemsStore.getRef("SPACES_URL_REC"):
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("スペースのURL"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			ret = globalVars.app.spaces.recFromUrl(d.GetData())
+			if ret == errorCodes.SPACE_ENDED:
+				errorDialog(_("このスペースは既に終了しています。"))
+			elif ret == errorCodes.INVALID_URL:
+				errorDialog(_("入力されたURLが正しくありません。"))
+			elif ret == errorCodes.SPACE_NOT_STARTED:
+				errorDialog(_("このスペースはまだ開始されていません。"))
+
+		# スペース：トークンの管理
+		if selected == menuItemsStore.getRef("SPACES_TOKEN_MANAGER"):
+			globalVars.app.spaces.openTokenManager()
+
+		# スペース：ユーザの管理
+		if selected == menuItemsStore.getRef("SPACES_MANAGE_USER"):
+			d = spacesManageUser.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.spaces.users.setData(d.GetValue())
+			globalVars.app.spaces.users.save()
+
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
 			d = settingsDialog.Dialog()
@@ -283,7 +342,7 @@ class Events(BaseEvents):
 	def OnExit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
-			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
+			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and (globalVars.app.tc.running or globalVars.app.spaces.running):
 				self.hide()
 			else:
 				super().OnExit(event)
@@ -297,7 +356,7 @@ class Events(BaseEvents):
 
 	def show(self):
 		self.parent.hFrame.Show()
-		self.parent.hFrame.SetFocus()
+		self.parent.hPanel.SetFocus()
 
 	def exitWithConfirmation(self):
 		if getRecordingUsers() != []:
@@ -343,6 +402,13 @@ class Events(BaseEvents):
 		menuData={}
 		for refName in defaultKeymap.defaultKeymap[identifier.upper()].keys():
 			title=menuItemsDic.getValueString(refName)
+			prefix = ""
+			if refName.startswith("TC_"):
+				prefix = _("ツイキャス")
+			elif refName.startswith("SPACES_"):
+				prefix = _("Twitter スペース")
+			if prefix:
+				title = prefix + ":" + title
 			if refName in keys:
 				keyData[title]=keys[refName]
 			else:

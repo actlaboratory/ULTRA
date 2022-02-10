@@ -20,7 +20,7 @@ log = getLogger("%s.twitterService" % (constants.LOG_PREFIX))
 
 
 def getToken():
-	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET, constants.TWITTER_PORT)
+	manager = twitterAuthorization.TwitterAuthorization(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET, constants.TWITTER_PORT)
 	l="ja"
 	try:
 		l=globalVars.app.config["general"]["language"].split("_")[0].lower()
@@ -51,7 +51,7 @@ def getToken():
 	return manager.getToken()
 
 def getFollowList(token,target):
-	auth = tweepy.OAuthHandler(constants.TWITTER_V1_KEY, constants.TWITTER_V1_SECRET)
+	auth = tweepy.OAuth1UserHandler(constants.TWITTER_CONSUMER_KEY, constants.TWITTER_CONSUMER_SECRET)
 	auth.set_access_token(*token)
 	try:
 		twitterApi = tweepy.API(auth,proxy=os.environ['HTTPS_PROXY'])
@@ -62,14 +62,14 @@ def getFollowList(token,target):
 	try:
 		user = twitterApi.get_user(screen_name=target)
 		friendsCount = user.friends_count
-		friends = tweepy.Cursor(twitterApi.friends,screen_name=target,include_user_entities=False,skip_status=True,count=200).items()
+		friends = tweepy.Cursor(twitterApi.get_friends,screen_name=target,include_user_entities=False,skip_status=True,count=200).items()
 		for friend in friends:
 			ret.append(friend.screen_name)
 		return ret
-	except tweepy.error.RateLimitError:
+	except tweepy.TooManyRequests:
 		log.error("rateLimitError")
 		return ret
-	except tweepy.error.TweepError as e:
+	except tweepy.TweepyException as e:
 		log.error(e)
 		log.error("%s" %(e.response))
 		simpleDialog.errorDialog(_("Twitterからフォローリストを取得できませんでした。指定したユーザが存在しないか、フォローしていない非公開アカウントである可能性があります。"))

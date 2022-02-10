@@ -51,6 +51,10 @@ class Main(AppBase.MainBase):
 		# 「ツイキャスの監視を有効化」の設定値を確認
 		if self.config.getboolean("twitcasting", "enable", True) and self.tc.initialize():
 			self.tc.start()
+		from sources import spaces
+		self.spaces = spaces.Spaces()
+		if self.config.getboolean("spaces", "enable", False) and self.spaces.initialize():
+			self.spaces.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()

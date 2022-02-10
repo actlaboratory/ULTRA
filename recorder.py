@@ -11,13 +11,14 @@ import threading
 import globalVars
 import os
 from logging import getLogger
-			
+
 # debug
 # 0:何もしない、1:ffmpegのログをカレントディレクトリに保存
 DEBUG = 0
 
+
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="",*,header="",userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
+	def __init__(self, source, stream, userName, time, movie="", *, header="", userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -36,41 +37,41 @@ class Recorder(threading.Thread):
 		:type userAgent: str
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
-		"""        
+		"""
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
 		self.stream = stream
 		self.userName = userName
 		self.time = time
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "recorder"))
+		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
-		self.header=header
+		self.header = header
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
 		super().__init__(daemon=True)
-		self.log.info("stream URL: %s" %self.stream)
+		self.log.info("stream URL: %s" % self.stream)
 
 	def getOutputFile(self):
 		"""設定値を元に、出力ファイルのパスを取得
-		"""		
+		"""
 		lst = []
 		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["dir"]))
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
 		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["fileName"]))
 		ext = globalVars.app.config.getstring("record", "extension", "ts", constants.SUPPORTED_FILETYPE)
-		path = "%s.%s" %("\\".join(lst), ext)
+		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
 		if os.path.exists(path) and not self.skipExisting:
 			count = 1
 			base = os.path.splitext(path)[0]
-			tmp = "%s (%i).%s" %(base, count, ext)
+			tmp = "%s (%i).%s" % (base, count, ext)
 			while os.path.exists(tmp):
 				count += 1
-				tmp = "%s (%i).%s" %(base, count, ext)
+				tmp = "%s (%i).%s" % (base, count, ext)
 			path = tmp
 		self.path = path
 		return path
@@ -144,7 +145,7 @@ class Recorder(threading.Thread):
 		except IOError:
 			d = simpleDialog.yesNoDialog(_("録画エラー"), _("録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してください。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択してください。[はい]を選択して録画の保存先を変更することで、正しく録画を開始できる場合があります。"))
 			if d == wx.ID_NO:
-				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)
 				return
 			max = 30
 			for i in range(max):
@@ -152,17 +153,17 @@ class Recorder(threading.Thread):
 					cmd = self.getCommand()
 					break
 				except IOError:
-					self.log.info("#%i failed." %i)
+					self.log.info("#%i failed." % i)
 					sleep(30)
 			if i + 1 == max:
-				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") %self.userName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)
 				return
 		self.source.onRecord(self.path, self.movie)
-		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
+		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
 		self.log.debug("command: " + " ".join(cmd))
 		result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
-		self.log.info("saved: %s" %self.path)
+		self.log.info("saved: %s" % self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
 			if not self.source.onRecordError(self.movie):
@@ -171,19 +172,19 @@ class Recorder(threading.Thread):
 			if "404 Not Found" in result.stdout:
 				self.log.info("not found")
 				break
-			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") %self.userName) + (_("詳細：%s") %result.stdout), self.source.friendlyName)
+			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 			sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
 			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
-			self.log.info("saved: %s" %self.path)
+			self.log.info("saved: %s" % self.path)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
 				break
 			if "404 Not Found" in result.stdout:
 				self.log.info("not found")
 				break
-		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.source.friendlyName)
+		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
 
@@ -195,6 +196,11 @@ class Recorder(threading.Thread):
 		"""
 		return self.userName
 
+	def isRecordedByAnotherThread(self):
+		for i in getActiveObj(self):
+			if i.stream == self.stream:
+				return True
+		return False
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
@@ -204,6 +210,7 @@ def getRecordingUsers(self=None):
 		if type(i) == Recorder and i != self:
 			ret.append(i.getTargetUser())
 	return ret
+
 
 def getActiveObj(self=None):
 	"""現在動作中のレコーダーオブジェクトのリストを返す

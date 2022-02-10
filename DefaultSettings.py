@@ -36,6 +36,9 @@ class DefaultSettings:
 			"enable": False,
 			"saveComments": False,
 		}
+		config["spaces"] = {
+			"enable": False,
+		}
 		config["record"] = {
 			"dir": "output\\%source%",
 			"createSubDir": True,
