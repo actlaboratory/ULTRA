@@ -146,7 +146,7 @@ class Spaces(sources.base.SourceBase):
 		if self.initialized == 0 and not self.initialize():
 			return
 		self.running = True
-		globalVars.app.hMainView.addLog(_("接続完了"), _("スペースの監視を開始しました。"), self.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("スペースの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
@@ -213,7 +213,7 @@ class Spaces(sources.base.SourceBase):
 		self.running = False
 		if self.getActiveSourceCount() == 0:
 			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
-		globalVars.app.hMainView.addLog(_("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("Twitterとの接続を切断しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("SPACES_ENABLE", False)
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
@@ -242,7 +242,7 @@ class Spaces(sources.base.SourceBase):
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			if not self._tokenManagerShown:
-				globalVars.app.hMainView.addLog(_("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("Twitter エラー"), _("Twitterとの通信中にエラーが発生しました。詳細：%s") % e, self.friendlyName)
 			return
 		self.log.debug(ret)
 		if ret.data:
@@ -671,7 +671,8 @@ class UserList:
 		elif attribute == "user":
 			field = _("ユーザ名")
 		if field:
-			globalVars.app.hMainView.addLog(
+			wx.CallAfter(
+				globalVars.app.hMainView.addLog,
 				_("%(field)s変更") % {"field": field},
 				_("「%(old)s」→「%(new)s」") %{"old": oldValue, "new": newValue},
 				Spaces.friendlyName

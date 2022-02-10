@@ -136,14 +136,14 @@ class Twitcasting(SourceBase):
 				continue
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
-				globalVars.app.hMainView.addLog(_("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
 			if "remove" in self.users[i].keys() and (self.users[i]["remove"] - time.time()) < 0:
 				rm.append(i)
-				globalVars.app.hMainView.addLog(_("録画対象の削除"), _("%sのライブを、録画対象から削除しました。") %self.users[i]["user"])
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画対象の削除"), _("%sのライブを、録画対象から削除しました。") %self.users[i]["user"])
 				b = wx.adv.NotificationMessage(constants.APP_NAME, _("%sのライブを、録画対象から削除しました。") %self.users[i]["user"])
 				b.Show()
 				b.Close()
@@ -171,10 +171,10 @@ class Twitcasting(SourceBase):
 		with tlock:
 			self.loadUserList()
 			if user != self.users[id]["user"]:
-				globalVars.app.hMainView.addLog(_("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, self.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ名変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["user"], "new": user}, self.friendlyName)
 				self.users[id]["user"] = user
 			if name != self.users[id]["name"]:
-				globalVars.app.hMainView.addLog(_("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, self.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("名前変更"), _("「%(old)s」→「%(new)s」") %{"old": self.users[id]["name"], "new": name}, self.friendlyName)
 				self.users[id]["name"] = name
 			self.saveUserList()
 
@@ -190,7 +190,7 @@ class Twitcasting(SourceBase):
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
 			self.shouldExit = True
 			self.socket.close()
-			globalVars.app.hMainView.addLog(_("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
 			self.initSocket()
 			self.socket.run_forever()
@@ -199,7 +199,7 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が始まった
 		"""
 		self.running = True
-		globalVars.app.hMainView.addLog(_("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
@@ -211,12 +211,12 @@ class Twitcasting(SourceBase):
 		self.running = False
 		if self.getActiveSourceCount() == 0:
 			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
-		globalVars.app.hMainView.addLog(_("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
 		if not self.shouldExit:
-			globalVars.app.hMainView.addLog(_("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
 			self.initSocket()
 			self.socket.run_forever()
@@ -633,7 +633,7 @@ class Twitcasting(SourceBase):
 			"remove": (datetime.datetime.now() + datetime.timedelta(hours=10)).timestamp(),
 		}
 		self.saveUserList()
-		globalVars.app.hMainView.addLog(_("ユーザ名を指定して録画"), _("%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されます。") %userInfo["user"]["screen_id"])
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ名を指定して録画"), _("%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されます。") %userInfo["user"]["screen_id"])
 		if userInfo["user"]["is_live"]:
 			movie = self.getCurrentLive(userName)
 			if movie == None:
@@ -700,7 +700,7 @@ class CommentGetter(threading.Thread):
 			self.log.info("Failed to get movie info(ID:%s" %self.movie)
 			return
 		self.userName = movieInfo["broadcaster"]["screen_id"]
-		globalVars.app.hMainView.addLog(_("コメント保存開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("コメント保存開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
 		self.saveComment()
 		while self.isLive():
 			if self.hasError == 1:
@@ -712,7 +712,7 @@ class CommentGetter(threading.Thread):
 			if len(self.comments) > 0:
 				self.lastCommentId = self.comments[0]["id"]
 			self.saveComment()
-		globalVars.app.hMainView.addLog(_("コメント保存終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("コメント保存終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") %{"user": self.userName, "movie": self.movie}, self.tc.friendlyName)
 
 	def saveComment(self):
 		"""コメントをファイルに保存する
@@ -819,15 +819,15 @@ class UserChecker(threading.Thread):
 
 	def run(self):
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", False)
-		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ情報の更新"), _("ユーザ情報の更新を開始します。"), self.tc.friendlyName)
 		for i in self.users:
 			if i in self.tc.users:
-				globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("%sの情報を取得しています。") %self.tc.users[i]["user"], self.tc.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ情報の更新"), _("%sの情報を取得しています。") %self.tc.users[i]["user"], self.tc.friendlyName)
 				userInfo = self.tc.getUserInfo(i, False)
 				if userInfo:
 					self.tc.updateUserInfo(i, userInfo["user"]["screen_id"], userInfo["user"]["name"])
 			time.sleep(60)
-		globalVars.app.hMainView.addLog(_("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", True)
 
 class TwitterHelper(threading.Thread):
@@ -843,7 +843,7 @@ class TwitterHelper(threading.Thread):
 		:param message: メッセージ本文
 		:type message: str
 		"""
-		globalVars.app.hMainView.addLog(_("一括追加"), message, self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括追加"), message, self.tc.friendlyName)
 
 	def run(self):
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", False)
@@ -919,19 +919,19 @@ class ArchiveDownloader(threading.Thread):
 		return dict["movies"]
 
 	def run(self):
-		globalVars.app.hMainView.addLog(_("一括録画"), _("ライブ一覧を取得しています。"), self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("ライブ一覧を取得しています。"), self.tc.friendlyName)
 		movies = [i for i in self.getAllMovies() if i["is_recorded"] and (not i["is_protected"])]
 		movies.reverse()
-		globalVars.app.hMainView.addLog(_("一括録画"), _("処理を開始します。対象ライブ数：%i") % len(movies), self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("処理を開始します。対象ライブ数：%i") % len(movies), self.tc.friendlyName)
 		count = 0
 		index = 1
 		for i in movies:
-			globalVars.app.hMainView.addLog(_("一括録画"), _("処理中（%(index)i/%(total)i）") % {"index": index, "total": len(movies)}, self.tc.friendlyName)
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("処理中（%(index)i/%(total)i）") % {"index": index, "total": len(movies)}, self.tc.friendlyName)
 			result = self.tc.downloadArchive(i["link"], join=True, skipExisting=True)
 			index += 1
 			time.sleep(5)
 			if result == errorCodes.RECORD_SKIPPED:
-				globalVars.app.hMainView.addLog(_("一括録画"), _("ファイルが既に存在するため、録画をスキップします。"), self.tc.friendlyName)
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("ファイルが既に存在するため、録画をスキップします。"), self.tc.friendlyName)
 				continue
 			count += 1
-		globalVars.app.hMainView.addLog(_("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)
