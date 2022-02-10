@@ -108,9 +108,6 @@ class Dialog(BaseDialog):
 		if self.hListCtrl.GetItemCount() == 0:
 			d = simpleDialog.yesNoDialog(_("確認"), _("Twitterアカウントの情報が設定されていません。Twitterとの連携を停止しますか？"))
 			if d == wx.ID_YES:
-				globalVars.app.spaces.exit()
-				if os.path.exists(constants.AC_SPACES):
-					os.remove(constants.AC_SPACES)
 				self._shouldExit = True
 				self.wnd.Destroy()
 
@@ -118,9 +115,6 @@ class Dialog(BaseDialog):
 		if self.hListCtrl.GetItemCount() == 0:
 			d = simpleDialog.yesNoDialog(_("確認"), _("Twitterアカウントの情報が設定されていません。Twitterとの連携を停止しますか？"))
 			if d == wx.ID_YES:
-				globalVars.app.spaces.exit()
-				if os.path.exists(constants.AC_SPACES):
-					os.remove(constants.AC_SPACES)
 				self._shouldExit = True
 				event.Skip()
 			else:

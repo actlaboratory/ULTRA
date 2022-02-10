@@ -78,6 +78,8 @@ class Spaces(sources.base.SourceBase):
 		self._tokenManagerShown = False
 		if d.shouldExit():
 			self.shouldExit = True
+			if self.running:
+				self.exit()
 			return errorCodes.SHOULD_EXIT
 
 	def addFollowingUsers(self):
