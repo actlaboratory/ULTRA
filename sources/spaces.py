@@ -54,7 +54,7 @@ class Spaces(sources.base.SourceBase):
 			self.showError(result)
 			return False
 		if not os.path.exists(constants.AC_SPACES):
-			d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitterスペースを使用する前に、使用するTwitterアカウントを設定する必要があります。今すぐ設定画面を開きますか？"))
+			d = simpleDialog.yesNoDialog(_("Twitterアカウントの連携"), _("Twitter スペースを使用する前に、使用するTwitterアカウントを設定する必要があります。今すぐ設定画面を開きますか？"))
 			if d == wx.ID_NO:
 				return False
 			if self.openTokenManager() == errorCodes.SHOULD_EXIT:
