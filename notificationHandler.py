@@ -47,7 +47,7 @@ class NotificationHandler:
 		"""
 		self.loadSettings(config)
 		if self.baloon:
-			b = wx.adv.NotificationMessage(constants.APP_NAME, _("配信開始：%s") %(userName))
+			b = wx.adv.NotificationMessage(constants.APP_NAME, _("配信開始：%s、サービス：%s") %(userName, source.friendlyName))
 			b.Show()
 			b.Close()
 		if self.sound:
