@@ -299,10 +299,10 @@ class Spaces(sources.base.SourceBase):
 			return
 		if not metadata.isRunning():
 			if metadata.isEnded():
-				self.log.debug("is ended: " + metadata)
+				self.log.debug("is ended: %s" % metadata)
 				return errorCodes.SPACE_ENDED
 			if metadata.isNotStarted():
-				self.log.debug("is not started: " + metadata)
+				self.log.debug("is not started: %s" % metadata)
 				return errorCodes.SPACE_NOT_STARTED
 		mediaKey = metadata.getMediaKey()
 		if mediaKey == errorCodes.INVALID_RECEIVED:
