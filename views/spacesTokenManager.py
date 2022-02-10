@@ -34,7 +34,7 @@ class Dialog(BaseDialog):
 		self.hListCtrl.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.ItemSelected)
 		self.hListCtrl.AppendColumn(_("ユーザ名"), format=wx.LIST_FORMAT_LEFT, width=250)
 		self.hListCtrl.AppendColumn(_("名前"),format=wx.LIST_FORMAT_LEFT,width=250)
-		self.hListCtrl.AppendColumn(_("規定のアカウント"), format=wx.LIST_FORMAT_LEFT, width=110)
+		self.hListCtrl.AppendColumn(_("規定のアカウント"), format=wx.LIST_FORMAT_LEFT, width=250)
 		self.hListCtrl.AppendColumn(_("ID"), format=wx.LIST_FORMAT_LEFT, width=110)
 		self.hListCtrl.SetColumnsOrder([0, 1, 2])
 
