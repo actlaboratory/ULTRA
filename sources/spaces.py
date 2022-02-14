@@ -25,7 +25,6 @@ import views.auth
 
 
 interval = 45
-online = set()
 
 
 class Spaces(sources.base.SourceBase):
@@ -209,8 +208,6 @@ class Spaces(sources.base.SourceBase):
 			self.log.debug("Checking by account %s" % i)
 			for j in self.splitIds(protected):
 				self.checkSpaceStatus(j, i)
-		wx.CallAfter(globalVars.app.hMainView.addLog, _("スペースチェック"), _("登録%(all)d件、ライブ中%(online)d件") % {"all": len(users), "online": len(online)})
-		online.clear()
 
 	def enableMenu(self, mode):
 		spaces = (
@@ -263,8 +260,6 @@ class Spaces(sources.base.SourceBase):
 		if ret.data:
 			for d in ret.data:
 				u = [i for i in ret.includes["users"] if i.id == int(d.creator_id)][0]
-				if d.state == "live":
-					online.add(u.id)
 				self._updateUserInfo(u)
 				if d.id in self.notified:
 					continue
