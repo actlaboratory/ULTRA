@@ -267,7 +267,7 @@ class Spaces(sources.base.SourceBase):
 				if metadata.isRunning():
 					globalVars.app.notificationHandler.notify(self, u.username, "https://twitter.com/i/spaces/%s" % d.id, self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
 					self.notified.append(d.id)
-		
+
 	def _updateUserInfo(self, u):
 		prev = self.users.getUserData(str(u.id))
 		if u.username != prev["user"]:
@@ -325,6 +325,7 @@ class Spaces(sources.base.SourceBase):
 		return ret.group(0)
 
 	def getMetadata(self, spaceId):
+		self.log.debug("Getting metadata of %s" % spaceId)
 		params = {
 			"variables": json.dumps({
 				"id": spaceId,
@@ -348,6 +349,7 @@ class Spaces(sources.base.SourceBase):
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return errorCodes.CONNECTION_ERROR
+		self.log.debug("response: %s" % response.text)
 		try:
 			metadata = response.json()
 		except Exception as e:
