@@ -218,6 +218,7 @@ class Twitcasting(SourceBase):
 	def onClose(self):
 		"""ソケット通信が切断された
 		"""
+		time.sleep(3)
 		self.running = False
 		if self.getActiveSourceCount() == 0:
 			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
