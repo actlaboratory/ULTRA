@@ -202,7 +202,8 @@ class Twitcasting(SourceBase):
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
 			self.initSocket()
-			self.socket.run_forever()
+		proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
 
 	def onOpen(self):
 		"""ソケット通信が始まった
@@ -228,7 +229,8 @@ class Twitcasting(SourceBase):
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
 			self.initSocket()
-			self.socket.run_forever()
+			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
 		self.shouldExit = False
 
 	def loadToken(self):
