@@ -1,6 +1,7 @@
 # twitter spaces module for ULTRA
 
 import json
+import logging
 import os
 import pickle
 import re
@@ -12,8 +13,6 @@ import tweepy
 import twitterAuthorization
 import webbrowser
 import wx
-
-from logging import getLogger
 
 import constants
 import errorCodes
@@ -34,7 +33,7 @@ class Spaces(sources.base.SourceBase):
 
 	def __init__(self):
 		super().__init__()
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces"))
 		self.setStatus(_("未接続"))
 		self.guestToken: str
 		self.initialized = 0
@@ -45,6 +44,12 @@ class Spaces(sources.base.SourceBase):
 		self.enableMenu(False)
 		self.tokenManager = TokenManager()
 		self._tokenManagerShown = False
+		self.initializeLogger()
+
+	def initializeLogger(self):
+		l = logging.getLogger("tweepy450_twitterAuthorization")
+		l.setLevel(logging.DEBUG)
+		l.addHandler(globalVars.app.hLogHandler)
 
 	def initialize(self):
 		if self.initialized == 1:
@@ -462,7 +467,7 @@ class TokenManager:
 	def __init__(self):
 		self._file = constants.AC_SPACES
 		self._data = {}
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
 
 	def _getManager(self):
 		return twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
@@ -621,7 +626,7 @@ class UserList:
 	def __init__(self):
 		self._file = constants.SPACES_USER_DATA
 		self._data = {}
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.userList"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.userList"))
 		self.load()
 
 	def load(self):
