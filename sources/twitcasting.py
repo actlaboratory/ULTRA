@@ -125,9 +125,10 @@ class Twitcasting(SourceBase):
 		self.socket = websocket.WebSocketApp(constants.TC_WSS_URL, self.header, on_message=self.onMessage, on_error=self.onError, on_open=self.onOpen, on_close=self.onClose)
 		self.log.info("WSS module loaded.")
 
-	def onMessage(self, text):
+	def onMessage(self, ws, text):
 		"""通知受信時
 		"""
+		self.log.debug("wss message:%s" % text)
 		if self.debug:
 			with open(DEBUG_FILE, "a", encoding="utf-8") as f:
 				timestamp = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -191,7 +192,7 @@ class Twitcasting(SourceBase):
 		u = UserChecker(self)
 		u.start()
 
-	def onError(self, error):
+	def onError(self, ws, error):
 		"""ソケット通信中にエラーが起きた
 		"""
 		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
@@ -203,11 +204,12 @@ class Twitcasting(SourceBase):
 			self.setStatus(_("接続試行中"))
 			self.initSocket()
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
 
-	def onOpen(self):
+	def onOpen(self, ws):
 		"""ソケット通信が始まった
 		"""
+		self.log.debug("wss opened")
 		self.running = True
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
@@ -215,9 +217,10 @@ class Twitcasting(SourceBase):
 		self.setStatus(_("接続済み"))
 		self.enableMenu(True)
 
-	def onClose(self):
+	def onClose(self, ws, code, msg):
 		"""ソケット通信が切断された
 		"""
+		self.log.debug("wss error. code:%s, msg:%s" % (code, msg))
 		time.sleep(3)
 		self.running = False
 		if self.getActiveSourceCount() == 0:
@@ -231,7 +234,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("Connection does not closed by user.")
 			self.initSocket()
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
 		self.shouldExit = False
 
 	def loadToken(self):
@@ -341,7 +344,7 @@ class Twitcasting(SourceBase):
 		if self.initialized == 0 and not self.initialize():
 			return
 		proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
+		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
 
 	def getUserInfo(self, user, showNotFound=True):
 		"""ユーザ情報を取得

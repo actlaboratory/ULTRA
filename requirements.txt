@@ -4,7 +4,7 @@ winpaths
 https://github.com/actlaboratory/pyinstaller/archive/refs/tags/v4.8_original.zip
 pyperclip
 https://github.com/actlaboratory/proxyUtil/archive/0.2.4.zip
-websocket-client==0.57.0
+websocket-client==1.2.3
 requests
 https://github.com/actlaboratory/implicitGrantManager/archive/v1.3.0.zip
 https://github.com/actlaboratory/soundPlayer/archive/0.3.1.zip
