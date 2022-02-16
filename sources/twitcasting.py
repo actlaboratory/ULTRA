@@ -2,6 +2,7 @@
 
 import base64
 import json
+import logging
 import traceback
 import twitterService
 import views.SimpleInputDialog
@@ -23,7 +24,6 @@ import os
 import re
 import recorder
 from sources.base import SourceBase
-from logging import getLogger
 import threading
 import csv
 import datetime
@@ -44,17 +44,23 @@ class Twitcasting(SourceBase):
 
 	def __init__(self):
 		super().__init__()
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
 		self.running = False
 		self.shouldExit = False
-		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 		self.setStatus(_("未接続"))
 		self.debug = not(hasattr(sys, "frozen")) and DEBUG
 		if self.debug:
 			with open(DEBUG_FILE, "w"): pass
+		self.initializeLogger()
+
+	def initializeLogger(self):
+		websocket.enableTrace(True)
+		logger = logging.getLogger("websocket")
+		logger.setLevel(logging.DEBUG)
+		logger.addHandler(globalVars.app.hLogHandler)
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -699,7 +705,7 @@ class CommentGetter(threading.Thread):
 		self.movie = movie
 		self.tc = tc
 		self.hasError = 0
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.commentGetter"))
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.commentGetter"))
 
 	def run(self):
 		if not self.getAllComments():
@@ -843,7 +849,7 @@ class TwitterHelper(threading.Thread):
 	def __init__(self, tc, users):
 		super().__init__(daemon=True)
 		self.tc = tc
-		self.log = getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
+		self.log = logging.getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
 		self.users = users
 
 	def showLog(self, message):
