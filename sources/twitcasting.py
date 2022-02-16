@@ -220,7 +220,7 @@ class Twitcasting(SourceBase):
 	def onClose(self, ws, code, msg):
 		"""ソケット通信が切断された
 		"""
-		self.log.debug("wss error. code:%s, msg:%s" % (code, msg))
+		self.log.debug("wss closed. code:%s, msg:%s" % (code, msg))
 		time.sleep(3)
 		self.running = False
 		if self.getActiveSourceCount() == 0:
