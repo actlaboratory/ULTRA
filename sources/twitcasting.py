@@ -195,7 +195,7 @@ class Twitcasting(SourceBase):
 	def onError(self, ws, error):
 		"""ソケット通信中にエラーが起きた
 		"""
-		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
+		self.log.error("WSS Error:%s" % "".join(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
 			self.shouldExit = True
