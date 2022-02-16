@@ -198,13 +198,9 @@ class Twitcasting(SourceBase):
 		self.log.error("WSS Error:%s" % "".join(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
-			self.shouldExit = True
 			self.socket.close()
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
-			self.initSocket()
-			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
 
 	def onOpen(self, ws):
 		"""ソケット通信が始まった
@@ -232,10 +228,6 @@ class Twitcasting(SourceBase):
 		if not self.shouldExit:
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
-			self.initSocket()
-			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
-		self.shouldExit = False
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -343,8 +335,10 @@ class Twitcasting(SourceBase):
 		"""
 		if self.initialized == 0 and not self.initialize():
 			return
-		proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
+		while not self.shouldExit:
+			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
+			time.sleep(3)
 
 	def getUserInfo(self, user, showNotFound=True):
 		"""ユーザ情報を取得
