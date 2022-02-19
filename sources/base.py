@@ -3,6 +3,8 @@
 
 import threading
 import globalVars
+import wx
+
 
 class SourceBase(threading.Thread):
 	"""各サービスのライブ監視などを行う際のベースクラス
@@ -49,7 +51,7 @@ class SourceBase(threading.Thread):
 		:param status: 現在の状況
 		:type status: str
 		"""
-		globalVars.app.hMainView.statusList.SetItem(self.index, 1, status)
+		wx.CallAfter(globalVars.app.hMainView.statusList.SetItem, self.index, 1, status)
 
 	def onRecordError(self, movie):
 		"""[summary]
