@@ -15,7 +15,7 @@ import errorCodes
 import globalVars
 import hotkeyHandler
 import menuItemsStore
-
+import update
 from .base import *
 from recorder import getRecordingUsers
 from simpleDialog import *
@@ -331,8 +331,7 @@ class Events(BaseEvents):
 
 		# 更新の確認
 		if selected == menuItemsStore.getRef("HELP_UPDATE"):
-			globalVars.update.update()
-
+			update.checkUpdate()
 		# バージョン情報
 		if selected==menuItemsStore.getRef("HELP_VERSIONINFO"):
 			d = versionDialog.dialog()
