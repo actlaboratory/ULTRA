@@ -343,7 +343,7 @@ class Twitcasting(SourceBase):
 			return
 		while not self.shouldExit:
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http")
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http", ping_interval=3)
 			time.sleep(3)
 
 	def getUserInfo(self, user, showNotFound=True):
