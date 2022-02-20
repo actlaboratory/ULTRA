@@ -1,6 +1,7 @@
 # twitter spaces module for ULTRA
 
 import json
+import logging
 import os
 import pickle
 import re
@@ -12,8 +13,6 @@ import tweepy
 import twitterAuthorization
 import webbrowser
 import wx
-
-from logging import getLogger
 
 import constants
 import errorCodes
@@ -34,7 +33,7 @@ class Spaces(sources.base.SourceBase):
 
 	def __init__(self):
 		super().__init__()
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces"))
 		self.setStatus(_("未接続"))
 		self.guestToken: str
 		self.initialized = 0
@@ -45,6 +44,12 @@ class Spaces(sources.base.SourceBase):
 		self.enableMenu(False)
 		self.tokenManager = TokenManager()
 		self._tokenManagerShown = False
+		self.initializeLogger()
+
+	def initializeLogger(self):
+		l = logging.getLogger("tweepy450_twitterAuthorization")
+		l.setLevel(logging.DEBUG)
+		l.addHandler(globalVars.app.hLogHandler)
 
 	def initialize(self):
 		if self.initialized == 1:
@@ -264,10 +269,13 @@ class Spaces(sources.base.SourceBase):
 				if d.id in self.notified:
 					continue
 				metadata = self.getMetadata(d.id)
+				if type(metadata) != Metadata:
+					self.log.error("getMetadata() failed")
+					continue
 				if metadata.isRunning():
 					globalVars.app.notificationHandler.notify(self, u.username, "https://twitter.com/i/spaces/%s" % d.id, self.getMediaLocation(metadata.getMediaKey()), metadata.getStartedTime(), self.users.getConfig(str(u.id)), d.id)
 					self.notified.append(d.id)
-		
+
 	def _updateUserInfo(self, u):
 		prev = self.users.getUserData(str(u.id))
 		if u.username != prev["user"]:
@@ -325,6 +333,11 @@ class Spaces(sources.base.SourceBase):
 		return ret.group(0)
 
 	def getMetadata(self, spaceId):
+		result = self.getGuestToken()
+		if result != errorCodes.OK:
+			self.showError(result)
+			return result
+		self.log.debug("Getting metadata of %s" % spaceId)
 		params = {
 			"variables": json.dumps({
 				"id": spaceId,
@@ -348,6 +361,7 @@ class Spaces(sources.base.SourceBase):
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return errorCodes.CONNECTION_ERROR
+		self.log.debug("response: %s" % response.text)
 		try:
 			metadata = response.json()
 		except Exception as e:
@@ -460,7 +474,7 @@ class TokenManager:
 	def __init__(self):
 		self._file = constants.AC_SPACES
 		self._data = {}
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.tokenManager"))
 
 	def _getManager(self):
 		return twitterAuthorization.TwitterAuthorization2(constants.TWITTER_CLIENT_ID, constants.TWITTER_PORT, constants.TWITTER_SCOPE)
@@ -619,7 +633,7 @@ class UserList:
 	def __init__(self):
 		self._file = constants.SPACES_USER_DATA
 		self._data = {}
-		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.userList"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.spaces.userList"))
 		self.load()
 
 	def load(self):

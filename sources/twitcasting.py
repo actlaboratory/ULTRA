@@ -2,6 +2,7 @@
 
 import base64
 import json
+import logging
 import traceback
 import twitterService
 import views.SimpleInputDialog
@@ -23,7 +24,6 @@ import os
 import re
 import recorder
 from sources.base import SourceBase
-from logging import getLogger
 import threading
 import csv
 import datetime
@@ -44,17 +44,23 @@ class Twitcasting(SourceBase):
 
 	def __init__(self):
 		super().__init__()
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting"))
 		self.initialized = 0
 		self.running = False
 		self.shouldExit = False
-		websocket.enableTrace(not hasattr(sys, "frozen"))
 		self.enableMenu(False)
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 		self.setStatus(_("未接続"))
 		self.debug = not(hasattr(sys, "frozen")) and DEBUG
 		if self.debug:
 			with open(DEBUG_FILE, "w"): pass
+		self.initializeLogger()
+
+	def initializeLogger(self):
+		websocket.enableTrace(True)
+		logger = logging.getLogger("websocket")
+		logger.setLevel(logging.DEBUG)
+		logger.addHandler(globalVars.app.hLogHandler)
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -125,9 +131,10 @@ class Twitcasting(SourceBase):
 		self.socket = websocket.WebSocketApp(constants.TC_WSS_URL, self.header, on_message=self.onMessage, on_error=self.onError, on_open=self.onOpen, on_close=self.onClose)
 		self.log.info("WSS module loaded.")
 
-	def onMessage(self, text):
+	def onMessage(self, ws, text):
 		"""通知受信時
 		"""
+		self.log.debug("wss message:%s" % text)
 		if self.debug:
 			with open(DEBUG_FILE, "a", encoding="utf-8") as f:
 				timestamp = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -191,22 +198,20 @@ class Twitcasting(SourceBase):
 		u = UserChecker(self)
 		u.start()
 
-	def onError(self, error):
+	def onError(self, ws, error):
 		"""ソケット通信中にエラーが起きた
 		"""
-		self.log.error("WSS Error:%s" %list(traceback.TracebackException.from_exception(error).format()))
+		self.log.error("WSS Error:%s" % "".join(traceback.TracebackException.from_exception(error).format()))
 		time.sleep(3)
 		if type(error) in (ConnectionResetError, websocket._exceptions.WebSocketAddressException):
-			self.shouldExit = True
 			self.socket.close()
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("インターネット接続が切断されました。再試行します。"), self.friendlyName)
 			self.setStatus(_("接続試行中"))
-			self.initSocket()
-			self.socket.run_forever()
 
-	def onOpen(self):
+	def onOpen(self, ws):
 		"""ソケット通信が始まった
 		"""
+		self.log.debug("wss opened")
 		self.running = True
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
 		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
@@ -214,9 +219,11 @@ class Twitcasting(SourceBase):
 		self.setStatus(_("接続済み"))
 		self.enableMenu(True)
 
-	def onClose(self):
+	def onClose(self, ws, code, msg):
 		"""ソケット通信が切断された
 		"""
+		self.log.debug("wss closed. code:%s, msg:%s" % (code, msg))
+		time.sleep(3)
 		self.running = False
 		if self.getActiveSourceCount() == 0:
 			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
@@ -227,9 +234,6 @@ class Twitcasting(SourceBase):
 		if not self.shouldExit:
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
-			self.initSocket()
-			self.socket.run_forever()
-		self.shouldExit = False
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -337,8 +341,10 @@ class Twitcasting(SourceBase):
 		"""
 		if self.initialized == 0 and not self.initialize():
 			return
-		proxyUrl, proxyPort = globalVars.app.getProxyInfo()
-		self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort)
+		while not self.shouldExit:
+			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http", ping_interval=3)
+			time.sleep(3)
 
 	def getUserInfo(self, user, showNotFound=True):
 		"""ユーザ情報を取得
@@ -699,7 +705,7 @@ class CommentGetter(threading.Thread):
 		self.movie = movie
 		self.tc = tc
 		self.hasError = 0
-		self.log = getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.commentGetter"))
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.commentGetter"))
 
 	def run(self):
 		if not self.getAllComments():
@@ -843,7 +849,7 @@ class TwitterHelper(threading.Thread):
 	def __init__(self, tc, users):
 		super().__init__(daemon=True)
 		self.tc = tc
-		self.log = getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
+		self.log = logging.getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
 		self.users = users
 
 	def showLog(self, message):
