@@ -6,6 +6,7 @@ import datetime
 import gettext
 import locale
 import logging
+import logging.handlers
 import os
 import sys
 import traceback
@@ -13,7 +14,6 @@ import win32api
 import wx
 
 from accessible_output2.outputs.base import OutputError
-from logging import getLogger, FileHandler, Formatter
 
 import constants
 import DefaultSettings
@@ -93,16 +93,16 @@ class MaiｎBase(wx.App):
 	def InitLogger(self):
 		"""ログ機能を初期化して準備する。"""
 		try:
-			self.hLogHandler=FileHandler(constants.LOG_FILE_NAME, mode="w", encoding="UTF-8")
+			self.hLogHandler=logging.handlers.RotatingFileHandler(constants.LOG_FILE_NAME, mode="w", encoding="UTF-8", maxBytes=2**20*256, backupCount=5)
 			self.hLogHandler.setLevel(logging.DEBUG)
-			self.hLogFormatter=Formatter("%(name)s - %(levelname)s - %(message)s (%(asctime)s)")
+			self.hLogFormatter=logging.Formatter("%(name)s - %(levelname)s - %(message)s (%(asctime)s)")
 			self.hLogHandler.setFormatter(self.hLogFormatter)
-			logger=getLogger(constants.LOG_PREFIX)
+			logger=logging.getLogger(constants.LOG_PREFIX)
 			logger.setLevel(logging.DEBUG)
 			logger.addHandler(self.hLogHandler)
 		except Exception as e:
 			traceback.print_exc()
-		self.log=getLogger(constants.LOG_PREFIX+".Main")
+		self.log=logging.getLogger(constants.LOG_PREFIX+".Main")
 		r="executable" if self.frozen else "interpreter"
 		self.log.info("Starting"+constants.APP_NAME+" "+constants.APP_VERSION+" as %s!" % r)
 
