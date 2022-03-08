@@ -4,6 +4,7 @@
 import accessible_output2.outputs
 import datetime
 import gettext
+import glob
 import locale
 import logging
 import logging.handlers
@@ -93,6 +94,7 @@ class MaiｎBase(wx.App):
 	def InitLogger(self):
 		"""ログ機能を初期化して準備する。"""
 		try:
+			self.deleteAllLogs()
 			self.hLogHandler=logging.handlers.RotatingFileHandler(constants.LOG_FILE_NAME, mode="w", encoding="UTF-8", maxBytes=2**20*256, backupCount=5)
 			self.hLogHandler.setLevel(logging.DEBUG)
 			self.hLogFormatter=logging.Formatter("%(name)s - %(levelname)s - %(message)s (%(asctime)s)")
@@ -105,6 +107,10 @@ class MaiｎBase(wx.App):
 		self.log=logging.getLogger(constants.LOG_PREFIX+".Main")
 		r="executable" if self.frozen else "interpreter"
 		self.log.info("Starting"+constants.APP_NAME+" "+constants.APP_VERSION+" as %s!" % r)
+
+	def deleteAllLogs(self):
+		for i in glob.glob("%s*" % constants.LOG_FILE_NAME):
+			os.remove(i)
 
 	def LoadSettings(self):
 		"""設定ファイルを読み込む。なければデフォルト設定を適用し、設定ファイルを書く。"""
