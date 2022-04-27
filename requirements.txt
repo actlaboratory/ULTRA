@@ -1,7 +1,7 @@
 ﻿wxpython>=4.1
 pywin32
 winpaths
-https://github.com/actlaboratory/pyinstaller/archive/refs/tags/v4.8_original.zip
+pyinstaller>=4
 pyperclip
 https://github.com/actlaboratory/proxyUtil/archive/0.2.4.zip
 websocket-client==1.2.3
