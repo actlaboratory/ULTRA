@@ -343,6 +343,10 @@ class Twitcasting(SourceBase):
 			return
 		while not self.shouldExit:
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+			if proxyUrl and proxyUrl.startswith("http://"):
+				proxyUrl = proxyUrl.replace("http://", "")
+				self.log.debug("removed 'http://'")
+			self.log.debug("proxyUrl: %s" % proxyUrl)
 			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http", ping_interval=3)
 			time.sleep(3)
 
