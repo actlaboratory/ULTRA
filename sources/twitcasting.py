@@ -452,7 +452,7 @@ class Twitcasting(SourceBase):
 		:type url: str
 		"""
 		self.log.debug("archive URL: %s" % url)
-		movieInfo = self.getMovieInfoFromUrl(url)
+		movieInfo = self.getMovieInfoFromUrl(url, False)
 		self.log.debug("movie info: %s" % movieInfo)
 		if movieInfo == None:
 			if not self.validateArchiveUrl(url):
@@ -488,9 +488,9 @@ class Twitcasting(SourceBase):
 					errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
 					errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
 				}
-				simpleDialog.errorDialog(messages[result])
+				simpleDialog.errorDialog(messages[session])
 				return
-			stream = self.getStreamFromUrl(url, False, session)
+			stream = self.getStreamFromUrl(url, session=session)
 			if stream is None:
 				return
 			date = self.getArchiveCreationDate(url)
