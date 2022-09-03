@@ -29,6 +29,7 @@ import csv
 import datetime
 import sys
 import winsound
+from bs4 import BeautifulSoup
 
 # DEBUG
 # 0:何もしない、1:ツイキャスのリアルタイムAPIが返した内容をreceived.txtに保存する
@@ -490,7 +491,22 @@ class Twitcasting(SourceBase):
 				simpleDialog.errorDialog(messages[result])
 				return
 			stream = self.getStreamFromUrl(url, False, session)
-			simpleDialog.dialog("result", str(stream))
+			if stream is None:
+				return
+			date = self.getArchiveCreationDate(url)
+			if date is None:
+				return
+			lst = url.split("/")
+			movieId = lst[-1]
+			self.log.debug("movie ID: %s" % movieId)
+			user = lst[-3]
+			self.log.debug("user: %s" % user)
+			r = recorder.Recorder(self, stream, user, date, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+			if r.shouldSkip():
+				return errorCodes.RECORD_SKIPPED
+			r.start()
+			if join:
+				r.join()
 			return
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
@@ -502,8 +518,34 @@ class Twitcasting(SourceBase):
 		if join:
 			r.join()
 
+	def getArchiveCreationDate(self, url, session=None):
+		if session is None:
+			session = requests.session()
+		try:
+			req = session.get(url,headers={
+				"Origin": "https://twitcasting.tv",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+			})
+		except:
+			self.showNotFoundError()
+			return
+		if req.status_code == 404:
+			self.showNotFoundError()
+			return
+		try:
+			soup = BeautifulSoup(req.text, "lxml")
+			tmp = soup.find("dev", {"class": "tw-player-meta__status"})
+			tmp = tmp.text.strip()
+			self.log.debug("date text: %s" % tmp)
+			dt = datetime.datetime.strptime(tmp, "%Y/%m/%d %H:%M")
+			self.log.debug("date: %s" % dt)
+			return dt.timestamp()
+		except:
+			self.showNotFoundError()
+			return
+
 	def validateArchiveUrl(self, url):
-		if not re.match(r"https?://twitcasting\.tv/.+/movie/\d+", url):
+		if not re.match(r"https?://twitcasting\.tv/.+/movie/\d+$", url):
 			return False
 		return True
 
@@ -556,9 +598,10 @@ class Twitcasting(SourceBase):
 		end = body.find("\"", start)
 		stream = body[start:end]
 		stream = stream.replace("\\/", "/")
+		self.log.debug("stream URL: %s" % stream)
 		return stream
 
-	def getMovieInfoFromUrl(self, url):
+	def getMovieInfoFromUrl(self, url, showNotFound=True):
 		"""ライブページのURLからムービー情報を取得
 
 		:param url: 再生ページのURL
@@ -574,7 +617,8 @@ class Twitcasting(SourceBase):
 			return
 		if req.status_code != 200:
 			if req.status_code == 404:
-				self.showNotFoundError()
+				if showNotFound:
+					self.showNotFoundError()
 				return
 			elif req.json()["error"]["code"] == 1000:
 				self.showTokenError()
