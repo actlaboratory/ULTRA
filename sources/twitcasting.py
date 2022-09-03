@@ -493,15 +493,12 @@ class Twitcasting(SourceBase):
 			stream = self.getStreamFromUrl(url, session=session)
 			if stream is None:
 				return
-			date = self.getArchiveCreationDate(url, session)
-			if date is None:
-				return
 			lst = url.split("/")
 			movieId = lst[-1]
 			self.log.debug("movie ID: %s" % movieId)
 			user = lst[-3]
 			self.log.debug("user: %s" % user)
-			r = recorder.Recorder(self, stream, user, date, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+			r = recorder.Recorder(self, stream, user, None, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
 			if r.shouldSkip():
 				return errorCodes.RECORD_SKIPPED
 			r.start()
@@ -517,46 +514,6 @@ class Twitcasting(SourceBase):
 		r.start()
 		if join:
 			r.join()
-
-	def getArchiveCreationDate(self, url, session=None):
-		if session is None:
-			session = requests.session()
-		self.log.debug("getting creation date...")
-		try:
-			req = session.get(url,headers={
-				"Origin": "https://twitcasting.tv",
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
-			})
-		except Exception as e:
-			self.log.error(traceback.format_exc())
-			self.showNotFoundError()
-			return
-		if req.status_code == 404:
-			self.log.error(req.status_code)
-			self.showNotFoundError()
-			return
-		try:
-			soup = BeautifulSoup(req.text, "lxml")
-			tmp = soup.find("div", {"class": "tw-player-meta__status"})
-			tmp = tmp.find("time")
-			tmp = tmp.text.strip()
-			self.log.debug("date text: %s" % tmp)
-			# parse date and time by hand
-			lst = tmp.split(" ")
-			lst2 = lst[0].split("/")
-			year = int(lst2[0])
-			month = int(lst2[1])
-			day = int(lst2[2])
-			lst2 = lst[1].split(":")
-			hour = int(lst2[0])
-			minute = int(lst2[1])
-			dt = datetime.datetime(year, month, day, hour, minute)
-			self.log.debug("date: %s" % dt)
-			return dt.timestamp()
-		except Exception as e:
-			self.log.error(traceback.format_exc())
-			self.showNotFoundError()
-			return
 
 	def validateArchiveUrl(self, url):
 		if not re.match(r"https?://twitcasting\.tv/.+/movie/\d+$", url):

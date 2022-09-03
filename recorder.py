@@ -38,8 +38,12 @@ class Recorder(threading.Thread):
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
 		"""
+		self.addMovieId = False
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
+		elif time is None:
+			time = datetime.datetime.now()
+			self.addMovieId = True
 		self.stream = stream
 		self.userName = userName
 		self.time = time
@@ -59,7 +63,10 @@ class Recorder(threading.Thread):
 		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["dir"]))
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
-		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["fileName"]))
+		fname = self.replaceUnusableChar(globalVars.app.config["record"]["fileName"])
+		if self.addMovieId:
+			fname += "(%s)" % self.movie
+		lst.append(fname)
 		ext = globalVars.app.config.getstring("record", "extension", "ts", constants.SUPPORTED_FILETYPE)
 		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
