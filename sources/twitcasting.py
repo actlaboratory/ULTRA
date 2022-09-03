@@ -537,6 +537,8 @@ class Twitcasting(SourceBase):
 			return
 		try:
 			soup = BeautifulSoup(req.text, "lxml")
+			with open("tmp.txt", "w", encoding="utf-8") as f:
+				f.write(soup.prettify())
 			tmp = soup.find("div", {"class": "tw-player-meta__status"})
 			tmp = tmp.find("time")
 			tmp = tmp.text.strip()
