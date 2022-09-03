@@ -521,15 +521,18 @@ class Twitcasting(SourceBase):
 	def getArchiveCreationDate(self, url, session=None):
 		if session is None:
 			session = requests.session()
+		self.log.debug("getting creation date...")
 		try:
 			req = session.get(url,headers={
 				"Origin": "https://twitcasting.tv",
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
 			})
-		except:
+		except Exception as e:
+			self.log.error(traceback.format_exc())
 			self.showNotFoundError()
 			return
 		if req.status_code == 404:
+			self.log.error(req.status_code)
 			self.showNotFoundError()
 			return
 		try:
@@ -540,7 +543,8 @@ class Twitcasting(SourceBase):
 			dt = datetime.datetime.strptime(tmp, "%Y/%m/%d %H:%M")
 			self.log.debug("date: %s" % dt)
 			return dt.timestamp()
-		except:
+		except Exception as e:
+			self.log.error(traceback.format_exc())
 			self.showNotFoundError()
 			return
 
