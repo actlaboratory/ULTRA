@@ -537,7 +537,8 @@ class Twitcasting(SourceBase):
 			return
 		try:
 			soup = BeautifulSoup(req.text, "lxml")
-			tmp = soup.find("dev", {"class": "tw-player-meta__status"})
+			tmp = soup.find("div", {"class": "tw-player-meta__status"})
+			tmp = tmp.find("time")
 			tmp = tmp.text.strip()
 			self.log.debug("date text: %s" % tmp)
 			dt = datetime.datetime.strptime(tmp, "%Y/%m/%d %H:%M")
