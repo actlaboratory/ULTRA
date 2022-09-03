@@ -493,7 +493,7 @@ class Twitcasting(SourceBase):
 			stream = self.getStreamFromUrl(url, session=session)
 			if stream is None:
 				return
-			date = self.getArchiveCreationDate(url)
+			date = self.getArchiveCreationDate(url, session)
 			if date is None:
 				return
 			lst = url.split("/")
