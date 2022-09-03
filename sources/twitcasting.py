@@ -541,7 +541,16 @@ class Twitcasting(SourceBase):
 			tmp = tmp.find("time")
 			tmp = tmp.text.strip()
 			self.log.debug("date text: %s" % tmp)
-			dt = datetime.datetime.strptime(tmp, "%Y/%m/%d %H:%M")
+			# parse date and time by hand
+			lst = tmp.split(" ")
+			lst2 = lst[0].split("/")
+			year = int(lst2[0])
+			month = int(lst2[1])
+			day = int(lst2[2])
+			lst2 = lst[1].split(":")
+			hour = int(lst2[0])
+			minute = int(lst2[1])
+			dt = datetime.datetime(year, month, day, hour, minute)
 			self.log.debug("date: %s" % dt)
 			return dt.timestamp()
 		except Exception as e:
