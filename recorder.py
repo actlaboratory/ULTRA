@@ -175,9 +175,11 @@ class Recorder(threading.Thread):
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 				break
 			if "404 Not Found" in result.stdout:
 				self.log.info("not found")
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 			sleep(15)
