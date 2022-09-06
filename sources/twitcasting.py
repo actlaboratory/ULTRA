@@ -459,7 +459,7 @@ class Twitcasting(SourceBase):
 				simpleDialog.errorDialog(_("入力されたURLの形式が不正です。内容をご確認の上、再度お試しください。"))
 				return
 			self.verifyCredentials(False)
-			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントのパスワードを入力してログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
+			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
 			if d == wx.ID_NO:
 				return
 			# load session data
