@@ -549,7 +549,7 @@ class Twitcasting(SourceBase):
 			self.log.error(traceback.format_exc())
 
 	def validateArchiveUrl(self, url):
-		if not re.match(r"https?://twitcasting\.tv/.+/movie/\d+$", url):
+		if not re.match(r"https?://.*twitcasting\.tv/.+/movie/\d+$", url):
 			return False
 		return True
 
