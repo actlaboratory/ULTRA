@@ -486,7 +486,7 @@ class Twitcasting(SourceBase):
 				if type(session) == int:
 					messages = {
 						errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
-						errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("設定されたユーザ名またはパスワードが不正です。設定を確認してください。"),
+						errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("ユーザ名またはパスワードが不正です。"),
 						errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
 						errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
 						errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
