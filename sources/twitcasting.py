@@ -462,34 +462,43 @@ class Twitcasting(SourceBase):
 			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントのパスワードを入力してログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
 			if d == wx.ID_NO:
 				return
+			# load session data
+			data = self.loadSession()
 			account = self.account
-			if ":" not in account:
-				from loginutil.twitterLogin import login
-				service = _("Twitter")
-			elif "c:" in account:
-				from loginutil.twitcastingLogin import login
-				service = _("ツイキャス")
+			if account not in data.keys():
+				# login is needed
+				if ":" not in account:
+					from loginutil.twitterLogin import login
+					service = _("Twitter")
+				elif "c:" in account:
+					from loginutil.twitcastingLogin import login
+					service = _("ツイキャス")
+				else:
+					simpleDialog.errorDialog(_("ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他のサービスでのログインはできません。"))
+					return
+				msg = _("%(service)sアカウント「%(account)s」のパスワードを入力") % {"service": service, "account": account}
+				d = views.SimpleInputDialog.Dialog(_("パスワードの入力"), msg, style=wx.TE_PASSWORD)
+				d.Initialize()
+				if d.Show() == wx.ID_CANCEL:
+					return
+				password = d.GetData()
+				session = login(account, password)
+				if type(session) == int:
+					messages = {
+						errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
+						errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("設定されたユーザ名またはパスワードが不正です。設定を確認してください。"),
+						errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
+						errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
+						errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
+						errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
+					}
+					simpleDialog.errorDialog(messages[session])
+					return
 			else:
-				simpleDialog.errorDialog(_("ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他のサービスでのログインはできません。"))
-				return
-			msg = _("%(service)sアカウント「%(account)s」のパスワードを入力") % {"service": service, "account": account}
-			d = views.SimpleInputDialog.Dialog(_("パスワードの入力"), msg, style=wx.TE_PASSWORD)
-			d.Initialize()
-			if d.Show() == wx.ID_CANCEL:
-				return
-			password = d.GetData()
-			session = login(account, password)
-			if type(session) == int:
-				messages = {
-					errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
-					errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("設定されたユーザ名またはパスワードが不正です。設定を確認してください。"),
-					errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
-					errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
-					errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
-					errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
-				}
-				simpleDialog.errorDialog(messages[session])
-				return
+				# load session from file
+				session = data[account]
+			self.saveSession(account, session)
+			# get stream data
 			stream = self.getStreamFromUrl(url, session=session)
 			if stream is None:
 				return
@@ -514,6 +523,30 @@ class Twitcasting(SourceBase):
 		r.start()
 		if join:
 			r.join()
+
+	def loadSession(self):
+		self.log.debug("loading session...")
+		try:
+			with open(constants.TC_SESSION_DATA, "rb") as f:
+				data = pickle.load(f)
+			# check if data is valid format
+			assert type(data) == dict
+			assert len(data) == 1
+			assert type(tuple(data.keys())[0]) == str
+			assert type(tuple(data.values())[0]) == requests.Session
+			return data
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return {"": None}
+
+	def saveSession(self, account, session):
+		self.log.debug("saving session...")
+		data = {account: session}
+		try:
+			with open(constants.TC_SESSION_DATA, "wb") as f:
+				pickle.dump(data, f)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
 
 	def validateArchiveUrl(self, url):
 		if not re.match(r"https?://twitcasting\.tv/.+/movie/\d+$", url):
