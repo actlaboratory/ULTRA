@@ -140,6 +140,8 @@ class Recorder(threading.Thread):
 			'"%s"' % self.userAgent,
 			"-i",
 			'"%s"' % self.stream,
+			"-max_muxing_queue_size",
+			"1024",
 			'"%s"' % self.getOutputFile(),
 		]
 		return cmd
