@@ -15,6 +15,14 @@ class SourceBase(threading.Thread):
 	friendlyName = ""
 	# 動作状況リストで使うインデックス
 	index = 0
+	# 録画可能な形式
+	# {"拡張子": _("メニューに表示する名前"),...}の形式
+	filetypes = {}
+	# 規定の録画形式
+	# filetypes.keys()に存在するものでなければならない
+	defaultFiletype = ""
+	if len(filetypes) > 0:
+		assert defaultFiletype in filetypes.keys()
 
 	def __init__(self):
 		"""コンストラクタ。このメソッドをオーバーライドして、スレッドを使う必要がある場合には、必ずsuper().__init__()を呼ぶこと。
@@ -73,3 +81,16 @@ class SourceBase(threading.Thread):
 				elif includeSelf:
 					count += 1
 		return count
+
+	def getFiletype(self):
+		ext = globalVars.app.config.getstring(self.name, "filetype")
+		if ext == "":
+			ext = self.defaultFiletype
+			self.setFiletype(ext)
+		return ext
+
+	def setFiletype(self, filetype):
+		globalVars.app.config[self.name]["filetype"] = filetype
+
+	def getAvailableFiletypes(self):
+		return self.filetypes
