@@ -84,7 +84,7 @@ class SourceBase(threading.Thread):
 
 	def getFiletype(self):
 		ext = globalVars.app.config.getstring(self.name, "filetype")
-		if ext == "":
+		if ext not in self.filetypes.keys():
 			ext = self.defaultFiletype
 			self.setFiletype(ext)
 		return ext
