@@ -42,6 +42,12 @@ class Twitcasting(SourceBase):
 	name = "TwitCasting"
 	friendlyName = _("ツイキャス")
 	index = 0
+	filetypes = {
+		"mp4": _("動画（MP4）"),
+		"ts": _("動画（TS）"),
+		"mp3": _("音声のみ（MP3）"),
+	}
+	defaultFiletype = "mp4"
 
 	def __init__(self):
 		super().__init__()
