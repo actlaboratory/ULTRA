@@ -67,7 +67,7 @@ class Recorder(threading.Thread):
 		if self.addMovieId:
 			fname += "(%s)" % self.movie
 		lst.append(fname)
-		ext = globalVars.app.config.getstring("record", "extension", "ts", constants.SUPPORTED_FILETYPE)
+		ext = self.source.getFiletype()
 		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -130,6 +130,11 @@ class Recorder(threading.Thread):
 		]
 		if DEBUG == 1:
 			cmd.append("-report")
+		if not self.needEncode(self.source.getFiletype()):
+			cmd += [
+				"-c",
+				"copy",
+			]
 		if self.header != "":
 			cmd += [
 				"-headers",
@@ -212,6 +217,12 @@ class Recorder(threading.Thread):
 			if i.stream == self.stream:
 				return True
 		return False
+
+	def needEncode(self, ext):
+		from sources.twitcasting import Twitcasting
+		if isinstance(self.source, Twitcasting) and ext == "mp4":
+			return False
+		return True
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
