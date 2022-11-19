@@ -41,7 +41,7 @@ class MainView(BaseView):
 			self.app.config.getint(self.identifier,"positionX",50,0),
 			self.app.config.getint(self.identifier,"positionY",50,0)
 		)
-		self.InstallMenuEvent(Menu(self.identifier),self.events.OnMenuSelect)
+		self.InstallMenuEvent(Menu(self.identifier, self.events),self.events.OnMenuSelect)
 		self.applyHotKey()
 
 		# 履歴表示用リストを作成
@@ -91,6 +91,10 @@ class MainView(BaseView):
 			self.hotkey.Set("HOTKEY",self.hFrame)
 
 class Menu(BaseMenu):
+	def __init__(self, identifier, event, *, keyFilter=None):
+		self.event = event
+		super().__init__(identifier, keyFilter=keyFilter)
+
 	def Apply(self,target):
 		"""指定されたウィンドウに、メニューを適用する。"""
 
@@ -100,8 +104,11 @@ class Menu(BaseMenu):
 		#メニューの大項目を作る
 		self.hFileMenu=wx.Menu()
 		self.hServicesMenu = wx.Menu()
+		self.hServicesMenu.Bind(wx.EVT_MENU_OPEN, self.event.OnMenuOpen)
 		self.hTwitcastingMenu=wx.Menu()
+		self.hTwitcastingFiletypesMenu = wx.Menu()
 		self.hSpacesMenu=wx.Menu()
+		self.hSpacesFiletypesMenu = wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -127,6 +134,7 @@ class Menu(BaseMenu):
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
 		])
+		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
 		# スペースメニューの中身
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
@@ -136,6 +144,7 @@ class Menu(BaseMenu):
 			"SPACES_TOKEN_MANAGER",
 			"SPACES_MANAGE_USER",
 		])
+		self.RegisterMenuCommand(self.hSpacesMenu, "SPACES_FILETYPES", subMenu=self.hSpacesFiletypesMenu)
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
@@ -161,6 +170,13 @@ class Menu(BaseMenu):
 		self.EnableMenu("HIDE", False)
 
 class Events(BaseEvents):
+	def OnMenuOpen(self, event):
+		menu = event.GetMenu()
+		if menu == self.parent.menu.hTwitcastingFiletypesMenu:
+			globalVars.app.tc.getFiletypesMenu(menu)
+		elif menu == self.parent.menu.hSpacesFiletypesMenu:
+			globalVars.app.spaces.getFiletypesMenu(menu)
+
 	def OnMenuSelect(self,event):
 		"""メニュー項目が選択されたときのイベントハンドら。"""
 		#ショートカットキーが無効状態のときは何もしない

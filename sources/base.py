@@ -4,6 +4,8 @@
 import threading
 import globalVars
 import wx
+from views.base import BaseMenu
+import constants
 
 
 class SourceBase(threading.Thread):
@@ -94,3 +96,21 @@ class SourceBase(threading.Thread):
 
 	def getAvailableFiletypes(self):
 		return self.filetypes
+
+	def getFiletypesMenu(self, menu: wx.Menu):
+		menu.Bind(wx.EVT_MENU, self.onFiletypeSelected)
+		ext_default = self.getFiletype()
+		count = 0
+		for ext, name in self.getAvailableFiletypes().items():
+			id = constants.FILETYPES_MENU_INDEX + self.index * 100 + count
+			menu.AppendRadioItem(id, name)
+			if ext == ext_default:
+				menu.Check(id, True)
+			count += 1
+
+	def onFiletypeSelected(self, event):
+		id = event.GetId()
+		index = id - constants.FILETYPES_MENU_INDEX - self.index * 100
+		ext = tuple(self.getAvailableFiletypes().keys())[index]
+		self.setFiletype(ext)
+		event.Skip()
