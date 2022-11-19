@@ -130,11 +130,6 @@ class Recorder(threading.Thread):
 		]
 		if DEBUG == 1:
 			cmd.append("-report")
-		if not self.needEncode(self.source.getFiletype()):
-			cmd += [
-				"-c",
-				"copy",
-			]
 		if self.header != "":
 			cmd += [
 				"-headers",
@@ -147,8 +142,13 @@ class Recorder(threading.Thread):
 			'"%s"' % self.stream,
 			"-max_muxing_queue_size",
 			"1024",
-			'"%s"' % self.getOutputFile(),
 		]
+		if not self.needEncode(self.source.getFiletype()):
+			cmd += [
+				"-c",
+				"copy",
+			]
+		cmd.append('"%s"' % self.getOutputFile())
 		return cmd
 
 	def run(self):
