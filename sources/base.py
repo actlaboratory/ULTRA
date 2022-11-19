@@ -83,14 +83,14 @@ class SourceBase(threading.Thread):
 		return count
 
 	def getFiletype(self):
-		ext = globalVars.app.config.getstring(self.name, "filetype")
+		ext = globalVars.app.config.getstring(self.name.lower(), "filetype")
 		if ext not in self.filetypes.keys():
 			ext = self.defaultFiletype
 			self.setFiletype(ext)
 		return ext
 
 	def setFiletype(self, filetype):
-		globalVars.app.config[self.name]["filetype"] = filetype
+		globalVars.app.config[self.name.lower()]["filetype"] = filetype
 
 	def getAvailableFiletypes(self):
 		return self.filetypes
