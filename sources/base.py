@@ -99,6 +99,8 @@ class SourceBase(threading.Thread):
 
 	def getFiletypesMenu(self, menu: wx.Menu):
 		menu.Bind(wx.EVT_MENU, self.onFiletypeSelected)
+		for i in range(menu.GetMenuItemCount()):
+			menu.DestroyItem(menu.FindItemByPosition(0))
 		ext_default = self.getFiletype()
 		count = 0
 		for ext, name in self.getAvailableFiletypes().items():
