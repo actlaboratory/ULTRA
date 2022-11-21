@@ -26,11 +26,6 @@ class Dialog(BaseDialog):
 		"dark": _("ダーク")
 	}
 	languageSelection = constants.SUPPORTING_LANGUAGE
-	extensionSelection = {
-		"ts": _("動画（TS）"),
-		"mp4": _("動画（MP4）"),
-		"mp3": _("音声のみ（MP3）"),
-	}
 
 	def __init__(self):
 		super().__init__("settingsDialog")
@@ -82,7 +77,6 @@ class Dialog(BaseDialog):
 		self.createsubdir = creator.checkbox(_("ユーザごとにサブフォルダを作成(&S)"))
 		self.filename, static = creator.inputbox(_("保存ファイル名(&N)"),sizerFlag=wx.EXPAND)
 		self.filename.hideScrollBar(wx.HORIZONTAL)
-		self.extension, static = creator.combobox(_("ファイル形式(&T)"), list(self.extensionSelection.values()))
 
 		# network
 		creator=views.ViewCreator.ViewCreator(self.viewMode,self.tab,None,wx.VERTICAL,space=20,label=_("ネットワーク"),style=wx.ALL,margin=20)
@@ -117,7 +111,6 @@ class Dialog(BaseDialog):
 		self._setValue(self.dir, "record", "dir", configType.STRING, "output")
 		self._setValue(self.createsubdir, "record", "createSubDir", configType.BOOL, True)
 		self._setValue(self.filename, "record", "filename", configType.STRING, "%user%_%year%%month%%day%_%hour%%minute%%second%")
-		self._setValue(self.extension, "record", "extension", configType.DIC, self.extensionSelection)
 
 		# network
 		self._setValue(self.update, "general", "update", configType.BOOL)

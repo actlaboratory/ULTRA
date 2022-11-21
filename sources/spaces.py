@@ -30,6 +30,10 @@ class Spaces(sources.base.SourceBase):
 	name = "Spaces"
 	friendlyName = _("Twitter スペース")
 	index = 1
+	filetypes = {
+		"mp3": _("MP3形式"),
+	}
+	defaultFiletype = "mp3"
 
 	def __init__(self):
 		super().__init__()

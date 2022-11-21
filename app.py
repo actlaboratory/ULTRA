@@ -46,6 +46,20 @@ class Main(AppBase.MainBase):
 		from views import main
 		self.hMainView=main.MainView()
 		self.notificationHandler = notificationHandler.NotificationHandler()
+		if self.config.getint("general", "fileVersion", 100) == 100:
+			# 録画形式設定
+			from sources import twitcasting
+			from sources import spaces
+			ext = self.config.getstring("record", "extension", "ts")
+			for source in (twitcasting.Twitcasting, spaces.Spaces):
+				if ext in source.getAvailableFiletypes():
+					source.setFiletype(ext)
+				else:
+					source.setFiletype(source.getDefaultFiletype())
+					import simpleDialog
+					simpleDialog.dialog(_("録画形式の設定"), _("前バージョンからの設定の引き継ぎに失敗したため、規定の設定が読み込まれました。[サービス]→[%s]→[録画形式の設定]から、設定をご確認ください。") % source.friendlyName)
+			self.config.remove_option("record", "extension")
+			self.config["general"]["fileVersion"] = 101
 		from sources import twitcasting
 		self.tc = twitcasting.Twitcasting()
 		# 「ツイキャスの監視を有効化」の設定値を確認
