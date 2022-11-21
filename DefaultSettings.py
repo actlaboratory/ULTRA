@@ -9,7 +9,7 @@ class DefaultSettings:
 		config = ConfigManager()
 		config["general"]={
 			"language": "ja-JP",
-			"fileVersion": "100",
+			"fileVersion": "101",
 			"locale": "ja-JP",
 			"autoHide": False,
 			"minimizeOnExit": True,
@@ -35,16 +35,17 @@ class DefaultSettings:
 		config["twitcasting"] = {
 			"enable": False,
 			"saveComments": False,
+			"filetype": "mp4",
 		}
 		config["spaces"] = {
 			"enable": False,
+			"filetype": "mp3",
 		}
 		config["record"] = {
 			"dir": "output\\%source%",
 			"createSubDir": True,
 			"subDirName": "%user%",
 			"fileName": "%user%_%year%%month%%day%_%hour%%minute%%second%",
-			"extension": "ts",
 		}
 		config["proxy"] = {
 			"useManualSetting": False,
