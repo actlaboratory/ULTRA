@@ -503,9 +503,9 @@ class Twitcasting(SourceBase):
 			else:
 				# load session from file
 				session = data[account]
-			self.saveSession(account, session)
 			# get stream data
 			stream = self.getStreamFromUrl(url, session=session)
+			self.saveSession(account, session)
 			if stream is None:
 				return
 			lst = url.split("/")
