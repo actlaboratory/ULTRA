@@ -84,35 +84,44 @@ class SourceBase(threading.Thread):
 					count += 1
 		return count
 
-	def getFiletype(self):
-		ext = globalVars.app.config.getstring(self.name.lower(), "filetype")
-		if ext not in self.filetypes.keys():
-			ext = self.defaultFiletype
-			self.setFiletype(ext)
+	@classmethod
+	def getFiletype(cls):
+		ext = globalVars.app.config.getstring(cls.name.lower(), "filetype")
+		if ext not in cls.filetypes.keys():
+			ext = cls.getDefaultFiletype()
+			cls.setFiletype(ext)
 		return ext
 
-	def setFiletype(self, filetype):
-		globalVars.app.config[self.name.lower()]["filetype"] = filetype
+	@classmethod
+	def getDefaultFiletype(cls):
+		return cls.defaultFiletype
 
-	def getAvailableFiletypes(self):
-		return self.filetypes
+	@classmethod
+	def setFiletype(cls, filetype):
+		globalVars.app.config[cls.name.lower()]["filetype"] = filetype
 
-	def getFiletypesMenu(self, menu: wx.Menu):
-		menu.Bind(wx.EVT_MENU, self.onFiletypeSelected)
+	@classmethod
+	def getAvailableFiletypes(cls):
+		return cls.filetypes
+
+	@classmethod
+	def getFiletypesMenu(cls, menu: wx.Menu):
+		menu.Bind(wx.EVT_MENU, cls.onFiletypeSelected)
 		for i in range(menu.GetMenuItemCount()):
 			menu.DestroyItem(menu.FindItemByPosition(0))
-		ext_default = self.getFiletype()
+		ext_default = cls.getFiletype()
 		count = 0
-		for ext, name in self.getAvailableFiletypes().items():
-			id = constants.FILETYPES_MENU_INDEX + self.index * 100 + count
+		for ext, name in cls.getAvailableFiletypes().items():
+			id = constants.FILETYPES_MENU_INDEX + cls.index * 100 + count
 			menu.AppendRadioItem(id, name)
 			if ext == ext_default:
 				menu.Check(id, True)
 			count += 1
 
-	def onFiletypeSelected(self, event):
+	@classmethod
+	def onFiletypeSelected(cls, event):
 		id = event.GetId()
-		index = id - constants.FILETYPES_MENU_INDEX - self.index * 100
-		ext = tuple(self.getAvailableFiletypes().keys())[index]
-		self.setFiletype(ext)
+		index = id - constants.FILETYPES_MENU_INDEX - cls.index * 100
+		ext = tuple(cls.getAvailableFiletypes().keys())[index]
+		cls.setFiletype(ext)
 		event.Skip()
