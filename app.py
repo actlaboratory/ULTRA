@@ -57,7 +57,7 @@ class Main(AppBase.MainBase):
 				else:
 					source.setFiletype(source.getDefaultFiletype())
 					import simpleDialog
-					simpleDialog.dialog(_("録画形式の設定"), _("前バージョンからの設定の引き継ぎに失敗したため、規定の設定が読み込まれました。[サービス]→[%s]→[録画形式の設定]から、設定をご確認ください。") % source.friendlyName)
+					simpleDialog.dialog(_("録画形式の設定"), _("%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値の%(ext_default)s形式に変更します。") % {"source": source.friendlyName, "ext": ext.upper(), "ext_default": source.getDefaultFiletype().upper()})
 			self.config.remove_option("record", "extension")
 			self.config["general"]["fileVersion"] = 101
 		from sources import twitcasting
