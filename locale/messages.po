@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-21 14:30+0900\n"
+"POT-Creation-Date: 2022-11-23 12:18+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,8 +24,8 @@ msgstr ""
 #: app.py:60
 #, python-format
 msgid ""
-"前バージョンからの設定の引き継ぎに失敗したため、規定の設定が読み込まれまし"
-"た。[サービス]→[%s]→[録画形式の設定]から、設定をご確認ください。"
+"%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値"
+"の%(ext_default)s形式に変更します。"
 msgstr ""
 
 #: AppBase.py:49
