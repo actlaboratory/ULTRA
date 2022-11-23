@@ -29,6 +29,7 @@ import csv
 import datetime
 import sys
 import winsound
+from bs4 import BeautifulSoup
 
 # DEBUG
 # 0:何もしない、1:ツイキャスのリアルタイムAPIが返した内容をreceived.txtに保存する
@@ -41,6 +42,12 @@ class Twitcasting(SourceBase):
 	name = "TwitCasting"
 	friendlyName = _("ツイキャス")
 	index = 0
+	filetypes = {
+		"mp4": _("動画（MP4）"),
+		"ts": _("動画（TS）"),
+		"mp3": _("音声のみ（MP3）"),
+	}
+	defaultFiletype = "mp4"
 
 	def __init__(self):
 		super().__init__()
@@ -55,6 +62,7 @@ class Twitcasting(SourceBase):
 		if self.debug:
 			with open(DEBUG_FILE, "w"): pass
 		self.initializeLogger()
+		self.account = ""
 
 	def initializeLogger(self):
 		websocket.enableTrace(True)
@@ -259,7 +267,10 @@ class Twitcasting(SourceBase):
 				simpleDialog.errorDialog(_("インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できません。"))
 				self.netflag = 1
 			return False
-		return result.status_code == 200
+		if result.status_code != 200:
+			return False
+		self.account = result.json()["user"]["screen_id"]
+		return True
 
 	def setToken(self):
 		"""新しいトークンをセットする
@@ -343,6 +354,10 @@ class Twitcasting(SourceBase):
 			return
 		while not self.shouldExit:
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
+			if proxyUrl and proxyUrl.startswith("http://"):
+				proxyUrl = proxyUrl.replace("http://", "")
+				self.log.debug("removed 'http://'")
+			self.log.debug("proxyUrl: %s" % proxyUrl)
 			self.socket.run_forever(http_proxy_host=proxyUrl, http_proxy_port=proxyPort, proxy_type="http", ping_interval=3)
 			time.sleep(3)
 
@@ -442,8 +457,68 @@ class Twitcasting(SourceBase):
 		:param url: 再生ページのURL
 		:type url: str
 		"""
-		movieInfo = self.getMovieInfoFromUrl(url)
+		self.log.debug("archive URL: %s" % url)
+		movieInfo = self.getMovieInfoFromUrl(url, False)
+		self.log.debug("movie info: %s" % movieInfo)
 		if movieInfo == None:
+			if not self.validateArchiveUrl(url):
+				simpleDialog.errorDialog(_("入力されたURLの形式が不正です。内容をご確認の上、再度お試しください。"))
+				return
+			self.verifyCredentials(False)
+			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
+			if d == wx.ID_NO:
+				return
+			# load session data
+			data = self.loadSession()
+			account = self.account
+			if account not in data.keys():
+				# login is needed
+				if ":" not in account:
+					from loginutil.twitterLogin import login
+					service = _("Twitter")
+				elif "c:" in account:
+					from loginutil.twitcastingLogin import login
+					service = _("ツイキャス")
+				else:
+					simpleDialog.errorDialog(_("ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他のサービスでのログインはできません。"))
+					return
+				msg = _("%(service)sアカウント「%(account)s」のパスワードを入力") % {"service": service, "account": account}
+				d = views.SimpleInputDialog.Dialog(_("パスワードの入力"), msg, style=wx.TE_PASSWORD)
+				d.Initialize()
+				if d.Show() == wx.ID_CANCEL:
+					return
+				password = d.GetData()
+				session = login(account, password)
+				if type(session) == int:
+					messages = {
+						errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
+						errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("ユーザ名またはパスワードが不正です。"),
+						errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
+						errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
+						errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
+						errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
+					}
+					simpleDialog.errorDialog(messages[session])
+					return
+			else:
+				# load session from file
+				session = data[account]
+			# get stream data
+			stream = self.getStreamFromUrl(url, session=session)
+			self.saveSession(account, session)
+			if stream is None:
+				return
+			lst = url.split("/")
+			movieId = lst[-1]
+			self.log.debug("movie ID: %s" % movieId)
+			user = lst[-3]
+			self.log.debug("user: %s" % user)
+			r = recorder.Recorder(self, stream, user, None, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+			if r.shouldSkip():
+				return errorCodes.RECORD_SKIPPED
+			r.start()
+			if join:
+				r.join()
 			return
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
@@ -455,7 +530,36 @@ class Twitcasting(SourceBase):
 		if join:
 			r.join()
 
-	def getStreamFromUrl(self, url, protected=False):
+	def loadSession(self):
+		self.log.debug("loading session...")
+		try:
+			with open(constants.TC_SESSION_DATA, "rb") as f:
+				data = pickle.load(f)
+			# check if data is valid format
+			assert type(data) == dict
+			assert len(data) == 1
+			assert type(tuple(data.keys())[0]) == str
+			assert type(tuple(data.values())[0]) == requests.Session
+			return data
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return {"": None}
+
+	def saveSession(self, account, session):
+		self.log.debug("saving session...")
+		data = {account: session}
+		try:
+			with open(constants.TC_SESSION_DATA, "wb") as f:
+				pickle.dump(data, f)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+
+	def validateArchiveUrl(self, url):
+		if not re.match(r"https?://.*twitcasting\.tv/.+/movie/\d+$", url):
+			return False
+		return True
+
+	def getStreamFromUrl(self, url, protected=False, session=None):
 		"""再生ページのURLからストリーミングのURLを得る
 
 		:param url: 再生ページのURL
@@ -463,7 +567,8 @@ class Twitcasting(SourceBase):
 		:param protected: 合い言葉が必要かどうか
 		:type protected: bool
 		"""
-		session = requests.session()
+		if session is None:
+			session = requests.session()
 		try:
 			req = session.get(url,headers={
 				"Origin": "https://twitcasting.tv",
@@ -503,9 +608,10 @@ class Twitcasting(SourceBase):
 		end = body.find("\"", start)
 		stream = body[start:end]
 		stream = stream.replace("\\/", "/")
+		self.log.debug("stream URL: %s" % stream)
 		return stream
 
-	def getMovieInfoFromUrl(self, url):
+	def getMovieInfoFromUrl(self, url, showNotFound=True):
 		"""ライブページのURLからムービー情報を取得
 
 		:param url: 再生ページのURL
@@ -521,7 +627,8 @@ class Twitcasting(SourceBase):
 			return
 		if req.status_code != 200:
 			if req.status_code == 404:
-				self.showNotFoundError()
+				if showNotFound:
+					self.showNotFoundError()
 				return
 			elif req.json()["error"]["code"] == 1000:
 				self.showTokenError()

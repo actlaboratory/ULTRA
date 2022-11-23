@@ -46,6 +46,20 @@ class Main(AppBase.MainBase):
 		from views import main
 		self.hMainView=main.MainView()
 		self.notificationHandler = notificationHandler.NotificationHandler()
+		if self.config.getint("general", "fileVersion", 100) == 100:
+			# 録画形式設定
+			from sources import twitcasting
+			from sources import spaces
+			ext = self.config.getstring("record", "extension", "ts")
+			for source in (twitcasting.Twitcasting, spaces.Spaces):
+				if ext in source.getAvailableFiletypes():
+					source.setFiletype(ext)
+				else:
+					source.setFiletype(source.getDefaultFiletype())
+					import simpleDialog
+					simpleDialog.dialog(_("録画形式の設定"), _("%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値の%(ext_default)s形式に変更します。") % {"source": source.friendlyName, "ext": ext.upper(), "ext_default": source.getDefaultFiletype().upper()})
+			self.config.remove_option("record", "extension")
+			self.config["general"]["fileVersion"] = 101
 		from sources import twitcasting
 		self.tc = twitcasting.Twitcasting()
 		# 「ツイキャスの監視を有効化」の設定値を確認

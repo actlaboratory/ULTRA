@@ -4,6 +4,8 @@
 import threading
 import globalVars
 import wx
+from views.base import BaseMenu
+import constants
 
 
 class SourceBase(threading.Thread):
@@ -15,6 +17,14 @@ class SourceBase(threading.Thread):
 	friendlyName = ""
 	# 動作状況リストで使うインデックス
 	index = 0
+	# 録画可能な形式
+	# {"拡張子": _("メニューに表示する名前"),...}の形式
+	filetypes = {}
+	# 規定の録画形式
+	# filetypes.keys()に存在するものでなければならない
+	defaultFiletype = ""
+	if len(filetypes) > 0:
+		assert defaultFiletype in filetypes.keys()
 
 	def __init__(self):
 		"""コンストラクタ。このメソッドをオーバーライドして、スレッドを使う必要がある場合には、必ずsuper().__init__()を呼ぶこと。
@@ -73,3 +83,45 @@ class SourceBase(threading.Thread):
 				elif includeSelf:
 					count += 1
 		return count
+
+	@classmethod
+	def getFiletype(cls):
+		ext = globalVars.app.config.getstring(cls.name.lower(), "filetype")
+		if ext not in cls.filetypes.keys():
+			ext = cls.getDefaultFiletype()
+			cls.setFiletype(ext)
+		return ext
+
+	@classmethod
+	def getDefaultFiletype(cls):
+		return cls.defaultFiletype
+
+	@classmethod
+	def setFiletype(cls, filetype):
+		globalVars.app.config[cls.name.lower()]["filetype"] = filetype
+
+	@classmethod
+	def getAvailableFiletypes(cls):
+		return cls.filetypes
+
+	@classmethod
+	def getFiletypesMenu(cls, menu: wx.Menu):
+		menu.Bind(wx.EVT_MENU, cls.onFiletypeSelected)
+		for i in range(menu.GetMenuItemCount()):
+			menu.DestroyItem(menu.FindItemByPosition(0))
+		ext_default = cls.getFiletype()
+		count = 0
+		for ext, name in cls.getAvailableFiletypes().items():
+			id = constants.FILETYPES_MENU_INDEX + cls.index * 100 + count
+			menu.AppendRadioItem(id, name)
+			if ext == ext_default:
+				menu.Check(id, True)
+			count += 1
+
+	@classmethod
+	def onFiletypeSelected(cls, event):
+		id = event.GetId()
+		index = id - constants.FILETYPES_MENU_INDEX - cls.index * 100
+		ext = tuple(cls.getAvailableFiletypes().keys())[index]
+		cls.setFiletype(ext)
+		event.Skip()

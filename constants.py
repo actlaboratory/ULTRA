@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.3.1"
-APP_LAST_RELEASE_DATE="2022-02-20"
+APP_VERSION="1.4.0"
+APP_LAST_RELEASE_DATE="2022-11-23"
 APP_COPYRIGHT_YEAR="2021"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -26,6 +26,7 @@ LOG_FILE_NAME="ultra.log"
 SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
+TC_SESSION_DATA = os.path.abspath("data\\twitcasting\\session.dat")
 SPACES_USER_DATA = os.path.abspath("data\\spaces\\users.dat")
 FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
@@ -74,6 +75,6 @@ TWITTER_SCOPE = [
 # その他
 NOT_FOUND = -1
 TC_WSS_URL = "wss://realtime.twitcasting.tv/lives"
-SUPPORTED_FILETYPE = ("ts", "mp4", "mp3",)
 TOKEN_EXPIRE_MAX = 604800
 PIPE_NAME = "ACTLAB_ULTRA"
+FILETYPES_MENU_INDEX = 10000

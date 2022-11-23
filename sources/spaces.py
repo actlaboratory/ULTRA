@@ -30,6 +30,10 @@ class Spaces(sources.base.SourceBase):
 	name = "Spaces"
 	friendlyName = _("Twitter スペース")
 	index = 1
+	filetypes = {
+		"mp3": _("MP3形式"),
+	}
+	defaultFiletype = "mp3"
 
 	def __init__(self):
 		super().__init__()
@@ -264,6 +268,8 @@ class Spaces(sources.base.SourceBase):
 		self.log.debug(ret)
 		if ret.data:
 			for d in ret.data:
+				if d.state == "scheduled":
+					continue
 				u = [i for i in ret.includes["users"] if i.id == int(d.creator_id)][0]
 				self._updateUserInfo(u)
 				if d.id in self.notified:

@@ -38,8 +38,12 @@ class Recorder(threading.Thread):
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
 		"""
+		self.addMovieId = False
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
+		elif time is None:
+			time = datetime.datetime.now()
+			self.addMovieId = True
 		self.stream = stream
 		self.userName = userName
 		self.time = time
@@ -59,8 +63,11 @@ class Recorder(threading.Thread):
 		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["dir"]))
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
-		lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["fileName"]))
-		ext = globalVars.app.config.getstring("record", "extension", "ts", constants.SUPPORTED_FILETYPE)
+		fname = self.replaceUnusableChar(globalVars.app.config["record"]["fileName"])
+		if self.addMovieId:
+			fname += "(%s)" % self.movie
+		lst.append(fname)
+		ext = self.source.getFiletype()
 		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -126,15 +133,22 @@ class Recorder(threading.Thread):
 		if self.header != "":
 			cmd += [
 				"-headers",
-				self.header
+				'"%s"' % self.header,
 			]
 		cmd += [
 			"-user-agent",
-			self.userAgent,
+			'"%s"' % self.userAgent,
 			"-i",
-			self.stream,
-			self.getOutputFile(),
+			'"%s"' % self.stream,
+			"-max_muxing_queue_size",
+			"1024",
 		]
+		if not self.needEncode(self.source.getFiletype()):
+			cmd += [
+				"-c",
+				"copy",
+			]
+		cmd.append('"%s"' % self.getOutputFile())
 		return cmd
 
 	def run(self):
@@ -162,15 +176,17 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
 		self.log.debug("command: " + " ".join(cmd))
-		result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
+		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
 		self.log.info("saved: %s" % self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 				break
 			if "404 Not Found" in result.stdout:
 				self.log.info("not found")
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 			sleep(15)
@@ -201,6 +217,12 @@ class Recorder(threading.Thread):
 			if i.stream == self.stream:
 				return True
 		return False
+
+	def needEncode(self, ext):
+		from sources.twitcasting import Twitcasting
+		if isinstance(self.source, Twitcasting) and ext == "mp4":
+			return False
+		return True
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
