@@ -65,10 +65,7 @@ class Twitcasting(SourceBase):
 		self.account = ""
 
 	def initializeLogger(self):
-		websocket.enableTrace(True)
-		logger = logging.getLogger("websocket")
-		logger.setLevel(logging.DEBUG)
-		logger.addHandler(globalVars.app.hLogHandler)
+		websocket.enableTrace(True, globalVars.app.hLogHandler)
 
 	def initialize(self):
 		"""アクセストークンの読み込み
