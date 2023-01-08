@@ -510,7 +510,10 @@ class Twitcasting(SourceBase):
 			self.log.debug("movie ID: %s" % movieId)
 			user = lst[-3]
 			self.log.debug("user: %s" % user)
-			r = recorder.Recorder(self, stream, user, None, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+			header = {
+				"Origin": "https://twitcasting.tv",
+			}
+			r = recorder.Recorder(self, stream, user, None, movieId, header=header, skipExisting=skipExisting)
 			if r.shouldSkip():
 				return errorCodes.RECORD_SKIPPED
 			r.start()
@@ -520,7 +523,10 @@ class Twitcasting(SourceBase):
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
 			return
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+		header = {
+			"Origin": "https://twitcasting.tv",
+		}
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=header, skipExisting=skipExisting)
 		if r.shouldSkip():
 			return errorCodes.RECORD_SKIPPED
 		r.start()

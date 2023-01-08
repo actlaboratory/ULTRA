@@ -18,7 +18,7 @@ DEBUG = 0
 
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="", *, header="", userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
+	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -32,7 +32,7 @@ class Recorder(threading.Thread):
 		:param movie: 録画対象の動画を識別できる文字列
 		:type movie: str
 		:param header: ストリーミングのダウンロード時に追加で指定するHTTPヘッダ
-		:type headers: str
+		:type header: dict
 		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
 		:type userAgent: str
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
@@ -50,11 +50,20 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
-		self.header = header
+		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" % self.stream)
+
+	def processHeader(self, header):
+		# key: valueの形式でリストに格納
+		tmplst = []
+		for item_tuple in header.items():
+			item_str = ": ".join(item_tuple)
+			tmplst.append(item_str)
+		# 改行区切りの文字列としてインスタンス変数に格納
+		self.header = "\n".join(tmplst)
 
 	def getOutputFile(self):
 		"""設定値を元に、出力ファイルのパスを取得
