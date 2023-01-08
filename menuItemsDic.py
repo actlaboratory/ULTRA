@@ -27,6 +27,7 @@ dic={
 	"TC_SET_TOKEN": _("アクセストークンを設定(&T)"),
 	"TC_MANAGE_USER": _("通知対象ユーザの管理(&M)") + "...",
 	"TC_FILETYPES": _("録画形式の設定"),
+	"TC_LOGIN_TOGGLE": _("ログイン状態で録画"),
 	"SPACES_SUB": _("Twitter スペース(&S)"),
 	"SPACES_ENABLE": _("Twitter スペースとの連携機能を有効化(&E)"),
 	"SPACES_ADD_FOLLOWING": _("フォロー中のユーザをすべて追加(&F)") + "...",

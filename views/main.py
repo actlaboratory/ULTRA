@@ -135,6 +135,7 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
+		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_LOGIN_TOGGLE")
 		# スペースメニューの中身
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
@@ -245,6 +246,10 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.record(d.GetData())
+
+		# ツイキャス：ログインの切り替え
+		if selected == menuItemsStore.getRef("TC_LOGIN_TOGGLE"):
+			globalVars.app.tc.toggleLogin()
 
 		# ツイキャス：トークンを削除
 		if selected == menuItemsStore.getRef("TC_REMOVE_TOKEN"):

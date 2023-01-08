@@ -85,6 +85,7 @@ class Twitcasting(SourceBase):
 		self.checkTokenExpires(True)
 		self.initialized = 1
 		self.enableMenu(True)
+		self.toggleLogin(globalVars.app.config.getboolean("twitcasting", "login", False))
 		return True
 
 	def checkTokenExpires(self, startup=False):
@@ -125,7 +126,8 @@ class Twitcasting(SourceBase):
 			"TC_RECORD_ALL",
 			"TC_RECORD_USER",
 			"TC_SET_TOKEN",
-			"TC_MANAGE_USER"
+			"TC_MANAGE_USER",
+			"TC_LOGIN_TOGGLE",
 		)
 		for i in tc:
 			globalVars.app.hMainView.menu.EnableMenu(i, mode)
@@ -405,6 +407,23 @@ class Twitcasting(SourceBase):
 				self.showError(req.json()["error"]["code"])
 				return
 		return req.json()
+
+	def toggleLogin(self, enable=None):
+		if enable is None:
+			# 現在の設定値と逆の状態にする
+			enable = not globalVars.app.config.getboolean("twitcasting", "login", False)
+		if enable:
+			# 有効化
+			self.sessionManager = SessionManager(self)
+			result = self.sessionManager.login()
+		else:
+			# 無効化
+			if hasattr(self, "tokenManager"):
+				del self.sessionManager
+			result = False
+		# 結果の保存
+		globalVars.app.hMainView.menu.CheckMenu("TC_LOGIN_TOGGLE", result)
+		globalVars.app.config["twitcasting"]["login"] = result
 
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
