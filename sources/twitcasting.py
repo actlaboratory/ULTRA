@@ -85,7 +85,6 @@ class Twitcasting(SourceBase):
 		self.checkTokenExpires(True)
 		self.initialized = 1
 		self.enableMenu(True)
-		self.toggleLogin(globalVars.app.config.getboolean("twitcasting", "login", False))
 		return True
 
 	def checkTokenExpires(self, startup=False):
@@ -160,7 +159,7 @@ class Twitcasting(SourceBase):
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
-				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
+				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
@@ -269,6 +268,7 @@ class Twitcasting(SourceBase):
 		if result.status_code != 200:
 			return False
 		self.account = result.json()["user"]["screen_id"]
+		self.toggleLogin(globalVars.app.config.getboolean("twitcasting", "login", False))
 		return True
 
 	def setToken(self):
@@ -418,12 +418,24 @@ class Twitcasting(SourceBase):
 			result = self.sessionManager.login()
 		else:
 			# 無効化
-			if hasattr(self, "tokenManager"):
+			if hasattr(self, "sessionManager"):
 				del self.sessionManager
 			result = False
 		# 結果の保存
 		globalVars.app.hMainView.menu.CheckMenu("TC_LOGIN_TOGGLE", result)
 		globalVars.app.config["twitcasting"]["login"] = result
+
+	def getRecordHeader(self):
+		header = {}
+		header["Origin"] = "https://twitcasting.tv"
+		header["Referer"] = "https://twitcasting.tv/"
+		if hasattr(self, "sessionManager"):
+			# ログイン情報
+			session = self.sessionManager.getSession()
+			cookies = session.cookies
+			header["cookie"] = "tc_id=%s;tc_ss=%s" % (cookies["tc_id"], cookies["tc_ss"])
+		self.log.debug("record header: %s" % (header))
+		return header
 
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
@@ -497,10 +509,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("movie ID: %s" % movieId)
 			user = lst[-3]
 			self.log.debug("user: %s" % user)
-			header = {
-				"Origin": "https://twitcasting.tv",
-			}
-			r = recorder.Recorder(self, stream, user, None, movieId, header=header, skipExisting=skipExisting)
+			r = recorder.Recorder(self, stream, user, None, movieId, header=self.getRecordHeader(), skipExisting=skipExisting)
 			if r.shouldSkip():
 				return errorCodes.RECORD_SKIPPED
 			r.start()
@@ -510,10 +519,7 @@ class Twitcasting(SourceBase):
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
 			return
-		header = {
-			"Origin": "https://twitcasting.tv",
-		}
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=header, skipExisting=skipExisting)
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=self.getRecordHeader(), skipExisting=skipExisting)
 		if r.shouldSkip():
 			return errorCodes.RECORD_SKIPPED
 		r.start()
@@ -1025,9 +1031,8 @@ class ArchiveDownloader(threading.Thread):
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)
 
 
-class SessionManager(threading.Thread):
+class SessionManager:
 	def __init__(self, tc):
-		super().__init__(daemon=True)
 		self.tc = tc
 		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.sessionManager"))
 
