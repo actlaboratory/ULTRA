@@ -124,6 +124,7 @@ class Menu(BaseMenu):
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
+		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_LOGIN_TOGGLE")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
 			"TC_RECORD_ALL",
@@ -135,7 +136,6 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
-		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_LOGIN_TOGGLE")
 		# スペースメニューの中身
 		self.RegisterCheckMenuCommand(self.hSpacesMenu, "SPACES_ENABLE")
 		self.RegisterMenuCommand(self.hSpacesMenu, [
