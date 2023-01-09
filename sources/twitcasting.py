@@ -441,8 +441,10 @@ class Twitcasting(SourceBase):
 			enable = not globalVars.app.config.getboolean("twitcasting", "login", False)
 		if enable:
 			# 有効化
-			self.sessionManager = SessionManager(self)
-			result = self.sessionManager.login()
+			sessionManager = SessionManager(self)
+			result = sessionManager.login()
+			if result:
+				self.sessionManager = sessionManager
 		else:
 			# 無効化
 			if hasattr(self, "sessionManager"):
