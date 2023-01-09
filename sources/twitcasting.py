@@ -63,6 +63,7 @@ class Twitcasting(SourceBase):
 			with open(DEBUG_FILE, "w"): pass
 		self.initializeLogger()
 		self.account = ""
+		self.nextSessionCheckTime = 0
 
 	def initializeLogger(self):
 		websocket.enableTrace(True, globalVars.app.hLogHandler)
@@ -115,6 +116,29 @@ class Twitcasting(SourceBase):
 				d["next"] = time.time() + 3600
 			with open(constants.AC_TWITCASTING, "wb") as f:
 				pickle.dump(d, f)
+
+	def checkSessionStatus(self):
+		if time.time() < self.nextSessionCheckTime:
+			self.log.debug("skipped session check")
+			return
+		sessionManager = SessionManager(self)
+		if not sessionManager.isActive():
+			self.log.debug("session is not active")
+			self.removeSession()
+			b = wx.adv.NotificationMessage(constants.APP_NAME, _("ログインセッションが不正なため、ログイン状態での録画機能を無効にしました。再度この機能を使用するには、メニューの[ログイン状態で録画]を選択し、パスワードを入力する必要があります。"))
+			b.Show()
+			b.Close()
+		self.nextSessionCheckTime = time.time() + 60 * 60
+
+	def removeSession(self):
+		if hasattr(self, "sessionManager"):
+			wx.CallAfter(self.toggleLogin)
+			self.log.debug("session manager disabled")
+		try:
+			os.remove(constants.TC_SESSION_DATA)
+			self.log.debug("session deleted")
+		except Exception as e:
+			self.log.error(traceback.format_exc())
 
 	def enableMenu(self, mode):
 		tc = (
@@ -172,6 +196,7 @@ class Twitcasting(SourceBase):
 		rm.reverse()
 		self.removeUsers(rm)
 		self.checkTokenExpires()
+		self.checkSessionStatus()
 
 	def removeUsers(self, rm):
 		with tlock:
@@ -1112,3 +1137,27 @@ class SessionManager:
 
 	def getSession(self):
 		return self.session
+
+	def isActive(self):
+		# 保存されたセッションが利用可能かどうかを返す
+		self.log.debug("check started")
+		data = self.loadSession()
+		if "" in data.keys():
+			# セッション自体が存在しない。警告を出す必要がないためTrueを返す
+			self.log.debug("session does not exist")
+			return True
+		account = self.tc.account
+		if account not in data.keys():
+			# アカウントが違う
+			self.log.debug("different account")
+			return False
+		session = data[account]
+		try:
+			url = "https://twitcasting.tv/%s/account" % account
+			r = session.get(url)
+			self.log.debug("request url: %s, response url: %s" % (url, r.url))
+			return r.url == url
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return False
+

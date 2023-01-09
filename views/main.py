@@ -131,6 +131,7 @@ class Menu(BaseMenu):
 			"TC_UPDATE_USER",
 			"TC_ADD_TW",
 			"TC_RECORD_USER",
+			"TC_REMOVE_SESSION",
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
@@ -250,6 +251,10 @@ class Events(BaseEvents):
 		# ツイキャス：ログインの切り替え
 		if selected == menuItemsStore.getRef("TC_LOGIN_TOGGLE"):
 			globalVars.app.tc.toggleLogin()
+
+		# ツイキャス：セッションを削除
+		if selected == menuItemsStore.getRef("TC_REMOVE_SESSION"):
+			globalVars.app.tc.removeSession()
 
 		# ツイキャス：トークンを削除
 		if selected == menuItemsStore.getRef("TC_REMOVE_TOKEN"):
