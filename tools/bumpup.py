@@ -84,6 +84,7 @@ def bumpup(v, d):
 	print("Saved %s." % VERSION_FILE_NAME)
 	patch("public/readme.txt",r'バージョン:　　ver\.', r'リリース:　　　', v)
 	patch("constants.py",r'APP_VERSION="', r'APP_LAST_RELEASE_DATE="', v)
+	updateCopyrightYear(v["release_date"])
 
 def patch(filename, version_regexp, release_date_regexp, version_object):
 	try:
@@ -99,6 +100,37 @@ def patch(filename, version_regexp, release_date_regexp, version_object):
 	except Exception as err:
 		print("Cannot patch %s (%s)" % (filename,str(err)))
 #end patch
+
+def updateCopyrightYear(releaseDate):
+	# constants.APP_COPYRIGHT_YEARを書き換え
+	releaseYear = releaseDate[:releaseDate.find("-")]
+	try:
+		with open("constants.py", "r", encoding="utf-8") as f:
+			text = f.read()
+	except Exception as e:
+		print("Failed to load constants.py")
+		print(e)
+		return
+	exp = re.compile(r'(APP_COPYRIGHT_YEAR\s?=\s?")(.*)(")')
+	match = re.search(exp, text)
+	data = match.group(2)
+	l = data.split("-")
+	if len(l) == 1:
+		if l[0] != releaseYear:
+			l.append(releaseYear)
+	else:
+		if l[1] != releaseYear:
+			l[1] = releaseYear
+	data = "-".join(l)
+	text = re.sub(exp, "\\g<1>" + data + "\\g<3>", text)
+	try:
+		with open("constants.py", "w", encoding="utf-8") as f:
+			f.write(text)
+	except Exception as e:
+		print("Failed to save constants.py")
+		print(e)
+		return
+	print("updated copyright year.")
 
 # 直接実行時
 if __name__ == "__main__":
