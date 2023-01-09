@@ -185,7 +185,7 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
 		self.log.debug("command: " + " ".join(cmd))
-		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8")
+		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
 		self.log.info("saved: %s" % self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
@@ -201,7 +201,7 @@ class Recorder(threading.Thread):
 			sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
-			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8")
+			result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
 			self.log.info("saved: %s" % self.path)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
