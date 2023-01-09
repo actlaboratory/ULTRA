@@ -63,12 +63,10 @@ class Twitcasting(SourceBase):
 			with open(DEBUG_FILE, "w"): pass
 		self.initializeLogger()
 		self.account = ""
+		self.nextSessionCheckTime = 0
 
 	def initializeLogger(self):
-		websocket.enableTrace(True)
-		logger = logging.getLogger("websocket")
-		logger.setLevel(logging.DEBUG)
-		logger.addHandler(globalVars.app.hLogHandler)
+		websocket.enableTrace(True, globalVars.app.hLogHandler)
 
 	def initialize(self):
 		"""アクセストークンの読み込み
@@ -119,6 +117,29 @@ class Twitcasting(SourceBase):
 			with open(constants.AC_TWITCASTING, "wb") as f:
 				pickle.dump(d, f)
 
+	def checkSessionStatus(self):
+		if time.time() < self.nextSessionCheckTime:
+			self.log.debug("skipped session check")
+			return
+		sessionManager = SessionManager(self)
+		if not sessionManager.isActive():
+			self.log.debug("session is not active")
+			self.removeSession()
+			b = wx.adv.NotificationMessage(constants.APP_NAME, _("ログインセッションが不正なため、ログイン状態での録画機能を無効にしました。再度この機能を使用するには、メニューの[ログイン状態で録画]を選択し、パスワードを入力する必要があります。"))
+			b.Show()
+			b.Close()
+		self.nextSessionCheckTime = time.time() + 60 * 60
+
+	def removeSession(self):
+		if hasattr(self, "sessionManager"):
+			wx.CallAfter(self.toggleLogin)
+			self.log.debug("session manager disabled")
+		try:
+			os.remove(constants.TC_SESSION_DATA)
+			self.log.debug("session deleted")
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+
 	def enableMenu(self, mode):
 		tc = (
 			"TC_SAVE_COMMENTS",
@@ -128,7 +149,8 @@ class Twitcasting(SourceBase):
 			"TC_RECORD_ALL",
 			"TC_RECORD_USER",
 			"TC_SET_TOKEN",
-			"TC_MANAGE_USER"
+			"TC_MANAGE_USER",
+			"TC_LOGIN_TOGGLE",
 		)
 		for i in tc:
 			globalVars.app.hMainView.menu.EnableMenu(i, mode)
@@ -161,7 +183,7 @@ class Twitcasting(SourceBase):
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
-				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"])
+				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
@@ -174,6 +196,7 @@ class Twitcasting(SourceBase):
 		rm.reverse()
 		self.removeUsers(rm)
 		self.checkTokenExpires()
+		self.checkSessionStatus()
 
 	def removeUsers(self, rm):
 		with tlock:
@@ -270,6 +293,7 @@ class Twitcasting(SourceBase):
 		if result.status_code != 200:
 			return False
 		self.account = result.json()["user"]["screen_id"]
+		self.toggleLogin(globalVars.app.config.getboolean("twitcasting", "login", False))
 		return True
 
 	def setToken(self):
@@ -409,6 +433,35 @@ class Twitcasting(SourceBase):
 				return
 		return req.json()
 
+	def toggleLogin(self, enable=None):
+		if enable is None:
+			# 現在の設定値と逆の状態にする
+			enable = not globalVars.app.config.getboolean("twitcasting", "login", False)
+		if enable:
+			# 有効化
+			self.sessionManager = SessionManager(self)
+			result = self.sessionManager.login()
+		else:
+			# 無効化
+			if hasattr(self, "sessionManager"):
+				del self.sessionManager
+			result = False
+		# 結果の保存
+		globalVars.app.hMainView.menu.CheckMenu("TC_LOGIN_TOGGLE", result)
+		globalVars.app.config["twitcasting"]["login"] = result
+
+	def getRecordHeader(self):
+		header = {}
+		header["Origin"] = "https://twitcasting.tv"
+		header["Referer"] = "https://twitcasting.tv/"
+		if hasattr(self, "sessionManager"):
+			# ログイン情報
+			session = self.sessionManager.getSession()
+			cookies = session.cookies
+			header["cookie"] = "tc_id=%s;tc_ss=%s" % (cookies["tc_id"], cookies["tc_ss"])
+		self.log.debug("record header: %s" % (header))
+		return header
+
 	def getUserIdFromScreenId(self, screenId):
 		"""ユーザ名から数値のIDを取得
 
@@ -468,44 +521,12 @@ class Twitcasting(SourceBase):
 			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
 			if d == wx.ID_NO:
 				return
-			# load session data
-			data = self.loadSession()
-			account = self.account
-			if account not in data.keys():
-				# login is needed
-				if ":" not in account:
-					from loginutil.twitterLogin import login
-					service = _("Twitter")
-				elif "c:" in account:
-					from loginutil.twitcastingLogin import login
-					service = _("ツイキャス")
-				else:
-					simpleDialog.errorDialog(_("ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他のサービスでのログインはできません。"))
-					return
-				msg = _("%(service)sアカウント「%(account)s」のパスワードを入力") % {"service": service, "account": account}
-				d = views.SimpleInputDialog.Dialog(_("パスワードの入力"), msg, style=wx.TE_PASSWORD)
-				d.Initialize()
-				if d.Show() == wx.ID_CANCEL:
-					return
-				password = d.GetData()
-				session = login(account, password)
-				if type(session) == int:
-					messages = {
-						errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
-						errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("ユーザ名またはパスワードが不正です。"),
-						errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
-						errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
-						errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
-						errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
-					}
-					simpleDialog.errorDialog(messages[session])
-					return
-			else:
-				# load session from file
-				session = data[account]
+			sessionManager = SessionManager(self)
+			if not sessionManager.login():
+				return
+			session = sessionManager.getSession()
 			# get stream data
 			stream = self.getStreamFromUrl(url, session=session)
-			self.saveSession(account, session)
 			if stream is None:
 				return
 			lst = url.split("/")
@@ -513,7 +534,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("movie ID: %s" % movieId)
 			user = lst[-3]
 			self.log.debug("user: %s" % user)
-			r = recorder.Recorder(self, stream, user, None, movieId, header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+			r = recorder.Recorder(self, stream, user, None, movieId, header=self.getRecordHeader(), skipExisting=skipExisting)
 			if r.shouldSkip():
 				return errorCodes.RECORD_SKIPPED
 			r.start()
@@ -523,36 +544,12 @@ class Twitcasting(SourceBase):
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
 		if stream == None:
 			return
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"],header="Origin: https://twitcasting.tv", skipExisting=skipExisting)
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=self.getRecordHeader(), skipExisting=skipExisting)
 		if r.shouldSkip():
 			return errorCodes.RECORD_SKIPPED
 		r.start()
 		if join:
 			r.join()
-
-	def loadSession(self):
-		self.log.debug("loading session...")
-		try:
-			with open(constants.TC_SESSION_DATA, "rb") as f:
-				data = pickle.load(f)
-			# check if data is valid format
-			assert type(data) == dict
-			assert len(data) == 1
-			assert type(tuple(data.keys())[0]) == str
-			assert type(tuple(data.values())[0]) == requests.Session
-			return data
-		except Exception as e:
-			self.log.error(traceback.format_exc())
-			return {"": None}
-
-	def saveSession(self, account, session):
-		self.log.debug("saving session...")
-		data = {account: session}
-		try:
-			with open(constants.TC_SESSION_DATA, "wb") as f:
-				pickle.dump(data, f)
-		except Exception as e:
-			self.log.error(traceback.format_exc())
 
 	def validateArchiveUrl(self, url):
 		if not re.match(r"https?://.*twitcasting\.tv/.+/movie/\d+$", url):
@@ -1057,3 +1054,110 @@ class ArchiveDownloader(threading.Thread):
 				continue
 			count += 1
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("完了。%i件録画しました。") % count, self.tc.friendlyName)
+
+
+class SessionManager:
+	def __init__(self, tc):
+		self.tc = tc
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.sessionManager"))
+
+	def loadSession(self):
+		self.log.debug("loading session...")
+		try:
+			with open(constants.TC_SESSION_DATA, "rb") as f:
+				data = pickle.load(f)
+			# check if data is valid format
+			assert type(data) == dict
+			assert len(data) == 1
+			assert type(tuple(data.keys())[0]) == str
+			assert type(tuple(data.values())[0]) == requests.Session
+			return data
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return {"": None}
+
+	def saveSession(self, account, session):
+		self.log.debug("saving session...")
+		data = {account: session}
+		try:
+			with open(constants.TC_SESSION_DATA, "wb") as f:
+				pickle.dump(data, f)
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+
+	def _login(self):
+		# load session data
+		data = self.loadSession()
+		account = self.tc.account
+		if account not in data.keys():
+			# login is needed
+			if ":" not in account:
+				from loginutil.twitterLogin import login
+				service = _("Twitter")
+			elif "c:" in account:
+				from loginutil.twitcastingLogin import login
+				service = _("ツイキャス")
+			else:
+				simpleDialog.errorDialog(_("ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他のサービスでのログインはできません。"))
+				# キャンセルとして扱う（これ以上の操作は不要）
+				return errorCodes.CANCELED
+			msg = _("%(service)sアカウント「%(account)s」のパスワードを入力") % {"service": service, "account": account}
+			d = views.SimpleInputDialog.Dialog(_("パスワードの入力"), msg, style=wx.TE_PASSWORD)
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return errorCodes.CANCELED
+			password = d.GetValue()
+			session = login(account, password)
+			if type(session) == int:
+				# 何らかのエラーコード
+				code = session
+				messages = {
+					errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
+					errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("ユーザ名またはパスワードが不正です。"),
+					errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
+					errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
+					errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
+					errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
+				}
+				simpleDialog.errorDialog(messages[code])
+				return code
+		else:
+			# load session from file
+			session = data[account]
+		self.session = session
+		self.saveSession(account, session)
+		return errorCodes.OK
+
+	def login(self):
+		while True:
+			result = self._login()
+			if result in (errorCodes.OK, errorCodes.CANCELED):
+				break
+		return result == errorCodes.OK
+
+	def getSession(self):
+		return self.session
+
+	def isActive(self):
+		# 保存されたセッションが利用可能かどうかを返す
+		self.log.debug("check started")
+		data = self.loadSession()
+		if "" in data.keys():
+			# セッション自体が存在しない。警告を出す必要がないためTrueを返す
+			self.log.debug("session does not exist")
+			return True
+		account = self.tc.account
+		if account not in data.keys():
+			# アカウントが違う
+			self.log.debug("different account")
+			return False
+		session = data[account]
+		try:
+			url = "https://twitcasting.tv/%s/account" % account
+			r = session.get(url)
+			self.log.debug("request url: %s, response url: %s" % (url, r.url))
+			return r.url == url
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			return False
+

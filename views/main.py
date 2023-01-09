@@ -124,12 +124,14 @@ class Menu(BaseMenu):
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
+		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_LOGIN_TOGGLE")
 		self.RegisterMenuCommand(self.hTwitcastingMenu, [
 			"TC_RECORD_ARCHIVE",
 			"TC_RECORD_ALL",
 			"TC_UPDATE_USER",
 			"TC_ADD_TW",
 			"TC_RECORD_USER",
+			"TC_REMOVE_SESSION",
 			"TC_REMOVE_TOKEN",
 			"TC_SET_TOKEN",
 			"TC_MANAGE_USER",
@@ -245,6 +247,14 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.tc.record(d.GetData())
+
+		# ツイキャス：ログインの切り替え
+		if selected == menuItemsStore.getRef("TC_LOGIN_TOGGLE"):
+			globalVars.app.tc.toggleLogin()
+
+		# ツイキャス：セッションを削除
+		if selected == menuItemsStore.getRef("TC_REMOVE_SESSION"):
+			globalVars.app.tc.removeSession()
 
 		# ツイキャス：トークンを削除
 		if selected == menuItemsStore.getRef("TC_REMOVE_TOKEN"):

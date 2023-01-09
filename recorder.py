@@ -18,7 +18,7 @@ DEBUG = 0
 
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="", *, header="", userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
+	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -32,7 +32,7 @@ class Recorder(threading.Thread):
 		:param movie: 録画対象の動画を識別できる文字列
 		:type movie: str
 		:param header: ストリーミングのダウンロード時に追加で指定するHTTPヘッダ
-		:type headers: str
+		:type header: dict
 		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
 		:type userAgent: str
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
@@ -50,11 +50,20 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
-		self.header = header
+		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" % self.stream)
+
+	def processHeader(self, header):
+		# key: valueの形式でリストに格納
+		tmplst = []
+		for item_tuple in header.items():
+			item_str = ": ".join(item_tuple)
+			tmplst.append(item_str)
+		# 改行区切りの文字列としてインスタンス変数に格納
+		self.header = "\r\n".join(tmplst)
 
 	def getOutputFile(self):
 		"""設定値を元に、出力ファイルのパスを取得
@@ -176,7 +185,7 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
 		self.log.debug("command: " + " ".join(cmd))
-		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
+		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
 		self.log.info("saved: %s" % self.path)
 		while len(result.stdout) > 0:
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
@@ -192,7 +201,7 @@ class Recorder(threading.Thread):
 			sleep(15)
 			cmd = self.getCommand()
 			self.source.onRecord(self.path, self.movie)
-			result = subprocess.run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=True, encoding="utf-8")
+			result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
 			self.log.info("saved: %s" % self.path)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")

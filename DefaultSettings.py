@@ -36,6 +36,7 @@ class DefaultSettings:
 			"enable": False,
 			"saveComments": False,
 			"filetype": "mp4",
+			"login": False,
 		}
 		config["spaces"] = {
 			"enable": False,

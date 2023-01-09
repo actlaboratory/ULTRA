@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-23 12:18+0900\n"
+"POT-Creation-Date: 2023-01-09 15:18+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app.py:60 menuItemsDic.py:29 menuItemsDic.py:37
+#: app.py:62 menuItemsDic.py:31 menuItemsDic.py:39
 msgid "録画形式の設定"
 msgstr ""
 
-#: app.py:60
+#: app.py:62
 #, python-format
 msgid ""
 "%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値"
@@ -103,96 +103,104 @@ msgid "録画時にコメントをテキストファイルに保存する "
 msgstr ""
 
 #: menuItemsDic.py:21
-msgid "ユーザ情報を更新(&U)"
+msgid "ログイン状態で録画"
 msgstr ""
 
 #: menuItemsDic.py:22
-msgid "Twitterでフォローしているユーザを一括追加(&F)"
+msgid "ユーザ情報を更新(&U)"
 msgstr ""
 
 #: menuItemsDic.py:23
-msgid "過去ライブのダウンロード(&A)"
+msgid "Twitterでフォローしているユーザを一括追加(&F)"
 msgstr ""
 
 #: menuItemsDic.py:24
-msgid "過去ライブの一括ダウンロード(&D)"
+msgid "過去ライブのダウンロード(&A)"
 msgstr ""
 
 #: menuItemsDic.py:25
-msgid "指定したユーザのライブを録画(&R)"
+msgid "過去ライブの一括ダウンロード(&D)"
 msgstr ""
 
 #: menuItemsDic.py:26
-msgid "アクセストークンを削除"
+msgid "指定したユーザのライブを録画(&R)"
 msgstr ""
 
 #: menuItemsDic.py:27
+msgid "ログインセッションを削除"
+msgstr ""
+
+#: menuItemsDic.py:28
+msgid "アクセストークンを削除"
+msgstr ""
+
+#: menuItemsDic.py:29
 msgid "アクセストークンを設定(&T)"
 msgstr ""
 
-#: menuItemsDic.py:28 menuItemsDic.py:36
+#: menuItemsDic.py:30 menuItemsDic.py:38
 msgid "通知対象ユーザの管理(&M)"
 msgstr ""
 
-#: menuItemsDic.py:30
+#: menuItemsDic.py:32
 msgid "Twitter スペース(&S)"
 msgstr ""
 
-#: menuItemsDic.py:31
+#: menuItemsDic.py:33
 msgid "Twitter スペースとの連携機能を有効化(&E)"
 msgstr ""
 
-#: menuItemsDic.py:32
+#: menuItemsDic.py:34
 msgid "フォロー中のユーザをすべて追加(&F)"
 msgstr ""
 
-#: menuItemsDic.py:33
+#: menuItemsDic.py:35
 msgid "ユーザ情報の更新(&I)"
 msgstr ""
 
-#: menuItemsDic.py:34
+#: menuItemsDic.py:36
 msgid "スペースの&URLを指定して録画"
 msgstr ""
 
-#: menuItemsDic.py:35
+#: menuItemsDic.py:37
 msgid "連携アカウントの管理(&A)"
 msgstr ""
 
-#: menuItemsDic.py:38
+#: menuItemsDic.py:40
 msgid "設定(&S)"
 msgstr ""
 
-#: menuItemsDic.py:39
+#: menuItemsDic.py:41
 msgid "キーボードショートカットの設定(&K)"
 msgstr ""
 
-#: menuItemsDic.py:40
+#: menuItemsDic.py:42
 msgid "グローバルホットキーの設定(&H)"
 msgstr ""
 
-#: menuItemsDic.py:41
+#: menuItemsDic.py:43
 msgid "Windows起動時の自動起動を有効化(&W)"
 msgstr ""
 
-#: menuItemsDic.py:42
+#: menuItemsDic.py:44
 msgid "最新バージョンを確認(&U)"
 msgstr ""
 
-#: menuItemsDic.py:43
+#: menuItemsDic.py:45
 msgid "バージョン情報(&V)"
 msgstr ""
 
-#: notificationHandler.py:50
+#: notificationHandler.py:52
 #, python-format
 msgid "配信開始：%s、サービス：%s"
 msgstr ""
 
-#: recorder.py:160 recorder.py:162 recorder.py:173 recorder.py:185
-#: recorder.py:189 recorder.py:191
+#: recorder.py:169 recorder.py:171 recorder.py:182 recorder.py:194
+#: recorder.py:198 recorder.py:200
 msgid "録画エラー"
 msgstr ""
 
-#: recorder.py:160
+#: recorder.py:169
 msgid ""
 "録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してく"
 "ださい。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択し"
@@ -200,55 +208,55 @@ msgid ""
 "きる場合があります。"
 msgstr ""
 
-#: recorder.py:162 recorder.py:173
+#: recorder.py:171 recorder.py:182
 #, python-format
 msgid "%sのライブの録画処理を中断しました。"
 msgstr ""
 
-#: recorder.py:176
+#: recorder.py:185
 msgid "録画開始"
 msgstr ""
 
-#: recorder.py:176 recorder.py:203 sources\twitcasting.py:825
-#: sources\twitcasting.py:837
+#: recorder.py:185 recorder.py:212 sources\twitcasting.py:822
+#: sources\twitcasting.py:834
 #, python-format
 msgid "ユーザ：%(user)s、ムービーID：%(movie)s"
 msgstr ""
 
-#: recorder.py:177
+#: recorder.py:186
 msgid "録画中"
 msgstr ""
 
-#: recorder.py:185 recorder.py:189
+#: recorder.py:194 recorder.py:198
 #, python-format
 msgid "%sのライブを録画中にエラーが発生しました。"
 msgstr ""
 
-#: recorder.py:185 recorder.py:189 recorder.py:191
+#: recorder.py:194 recorder.py:198 recorder.py:200
 #, python-format
 msgid "詳細：%s"
 msgstr ""
 
-#: recorder.py:191
+#: recorder.py:200
 #, python-format
 msgid "%sのライブを録画中にエラーが発生したため、再度録画を開始します。"
 msgstr ""
 
-#: recorder.py:203
+#: recorder.py:212
 msgid "録画終了"
 msgstr ""
 
-#: twitterService.py:32 sources\spaces.py:535 sources\twitcasting.py:287
+#: twitterService.py:32 sources\spaces.py:535 sources\twitcasting.py:311
 msgid ""
 "認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってくださ"
 "い。"
 msgstr ""
 
-#: twitterService.py:33 sources\spaces.py:536 sources\twitcasting.py:288
+#: twitterService.py:33 sources\spaces.py:536 sources\twitcasting.py:312
 msgid "認証に失敗しました。もう一度お試しください。"
 msgstr ""
 
-#: twitterService.py:34 sources\spaces.py:537 sources\twitcasting.py:289
+#: twitterService.py:34 sources\spaces.py:537 sources\twitcasting.py:313
 msgid ""
 "しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。"
 msgstr ""
@@ -257,12 +265,12 @@ msgstr ""
 msgid "Twitterアカウント認証"
 msgstr ""
 
-#: twitterService.py:47 sources\spaces.py:553 sources\twitcasting.py:302
-#: sources\twitcasting.py:314
+#: twitterService.py:47 sources\spaces.py:553 sources\twitcasting.py:326
+#: sources\twitcasting.py:338
 msgid "処理結果"
 msgstr ""
 
-#: twitterService.py:47 sources\spaces.py:553 sources\twitcasting.py:302
+#: twitterService.py:47 sources\spaces.py:553 sources\twitcasting.py:326
 msgid "キャンセルされました。"
 msgstr ""
 
@@ -328,7 +336,7 @@ msgid ""
 "ソフトウェア終了時に、自動でアップデートされます。"
 msgstr ""
 
-#: sources\spaces.py:31 views\main.py:424
+#: sources\spaces.py:31 views\main.py:434
 msgid "Twitter スペース"
 msgstr ""
 
@@ -337,7 +345,7 @@ msgid "MP3形式"
 msgstr ""
 
 #: sources\spaces.py:41 sources\spaces.py:239 sources\twitcasting.py:60
-#: sources\twitcasting.py:239
+#: sources\twitcasting.py:262
 msgid "未接続"
 msgstr ""
 
@@ -357,8 +365,8 @@ msgid ""
 "ださい。今すぐ設定画面を開きますか？"
 msgstr ""
 
-#: sources\spaces.py:108 sources\spaces.py:201 views\main.py:261
-#: views\main.py:397 views\main.py:403
+#: sources\spaces.py:108 sources\spaces.py:201 views\main.py:271
+#: views\main.py:407 views\main.py:413
 msgid "完了"
 msgstr ""
 
@@ -372,7 +380,7 @@ msgstr ""
 msgid "フォロー中のユーザの取得に失敗しました。詳細:%s"
 msgstr ""
 
-#: sources\spaces.py:160 sources\twitcasting.py:224
+#: sources\spaces.py:160 sources\twitcasting.py:247
 msgid "接続完了"
 msgstr ""
 
@@ -380,7 +388,7 @@ msgstr ""
 msgid "スペースの監視を開始しました。"
 msgstr ""
 
-#: sources\spaces.py:163 sources\twitcasting.py:227
+#: sources\spaces.py:163 sources\twitcasting.py:250
 msgid "接続済み"
 msgstr ""
 
@@ -397,7 +405,7 @@ msgstr ""
 msgid "ユーザ情報の更新が完了しました。"
 msgstr ""
 
-#: sources\spaces.py:237 sources\twitcasting.py:216 sources\twitcasting.py:238
+#: sources\spaces.py:237 sources\twitcasting.py:239 sources\twitcasting.py:261
 msgid "切断"
 msgstr ""
 
@@ -445,7 +453,7 @@ msgstr ""
 msgid "認証情報の保存に失敗しました。"
 msgstr ""
 
-#: sources\spaces.py:664 sources\twitcasting.py:348
+#: sources\spaces.py:664 sources\twitcasting.py:372
 msgid "ユーザ情報の保存に失敗しました。"
 msgstr ""
 
@@ -456,7 +464,7 @@ msgstr ""
 msgid "名前"
 msgstr ""
 
-#: sources\spaces.py:708 views\main.py:237 views\main.py:244
+#: sources\spaces.py:708 views\main.py:239 views\main.py:246
 #: views\spacesManageUser.py:19 views\spacesManageUser.py:101
 #: views\spacesTokenManager.py:35 views\tcManageUser.py:20
 #: views\tcManageUser.py:99
@@ -468,12 +476,12 @@ msgstr ""
 msgid "%(field)s変更"
 msgstr ""
 
-#: sources\spaces.py:713 sources\twitcasting.py:198 sources\twitcasting.py:201
+#: sources\spaces.py:713 sources\twitcasting.py:221 sources\twitcasting.py:224
 #, python-format
 msgid "「%(old)s」→「%(new)s」"
 msgstr ""
 
-#: sources\twitcasting.py:43 sources\twitcasting.py:481 views\main.py:422
+#: sources\twitcasting.py:43 sources\twitcasting.py:1099 views\main.py:432
 msgid "ツイキャス"
 msgstr ""
 
@@ -489,220 +497,186 @@ msgstr ""
 msgid "音声のみ（MP3）"
 msgstr ""
 
-#: sources\twitcasting.py:103
+#: sources\twitcasting.py:101
 msgid "アクセストークンの有効期限が切れています"
 msgstr ""
 
-#: sources\twitcasting.py:103 sources\twitcasting.py:110
+#: sources\twitcasting.py:101 sources\twitcasting.py:108
 msgid ""
 "本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:105
+#: sources\twitcasting.py:103
 msgid ""
 "アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセ"
 "ストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:110
+#: sources\twitcasting.py:108
 msgid "アクセストークンの有効期限が近づいています"
 msgstr ""
 
-#: sources\twitcasting.py:112
+#: sources\twitcasting.py:110
 msgid ""
 "アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アク"
 "セストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:163
+#: sources\twitcasting.py:128
+msgid ""
+"ログインセッションが不正なため、ログイン状態での録画機能を無効にしました。再"
+"度この機能を使用するには、メニューの[ログイン状態で録画]を選択し、パスワード"
+"を入力する必要があります。"
+msgstr ""
+
+#: sources\twitcasting.py:185
 msgid "配信開始"
 msgstr ""
 
-#: sources\twitcasting.py:170
+#: sources\twitcasting.py:192
 msgid "録画対象の削除"
 msgstr ""
 
-#: sources\twitcasting.py:170 sources\twitcasting.py:171
+#: sources\twitcasting.py:192 sources\twitcasting.py:193
 #, python-format
 msgid "%sのライブを、録画対象から削除しました。"
 msgstr ""
 
-#: sources\twitcasting.py:198
+#: sources\twitcasting.py:221
 msgid "ユーザ名変更"
 msgstr ""
 
-#: sources\twitcasting.py:201
+#: sources\twitcasting.py:224
 msgid "名前変更"
 msgstr ""
 
-#: sources\twitcasting.py:216
+#: sources\twitcasting.py:239
 msgid "インターネット接続が切断されました。再試行します。"
 msgstr ""
 
-#: sources\twitcasting.py:217
+#: sources\twitcasting.py:240
 msgid "接続試行中"
 msgstr ""
 
-#: sources\twitcasting.py:224
+#: sources\twitcasting.py:247
 msgid "新着ライブの監視を開始しました。"
 msgstr ""
 
-#: sources\twitcasting.py:238
+#: sources\twitcasting.py:261
 msgid "ツイキャスとの接続を切断しました。"
 msgstr ""
 
-#: sources\twitcasting.py:243
+#: sources\twitcasting.py:266
 msgid "再接続"
 msgstr ""
 
-#: sources\twitcasting.py:243
+#: sources\twitcasting.py:266
 msgid "ツイキャスとの接続が切断されたため、再度接続します。"
 msgstr ""
 
-#: sources\twitcasting.py:267
+#: sources\twitcasting.py:290
 msgid ""
 "インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できませ"
 "ん。"
 msgstr ""
 
-#: sources\twitcasting.py:293 views\spacesTokenManager.py:85
+#: sources\twitcasting.py:317 views\spacesTokenManager.py:85
 msgid "アカウントの追加"
 msgstr ""
 
-#: sources\twitcasting.py:314
+#: sources\twitcasting.py:338
 msgid "認証が完了しました。"
 msgstr ""
 
-#: sources\twitcasting.py:383
+#: sources\twitcasting.py:407
 msgid "指定したユーザが見つかりません。"
 msgstr ""
 
-#: sources\twitcasting.py:465
+#: sources\twitcasting.py:518
 msgid "入力されたURLの形式が不正です。内容をご確認の上、再度お試しください。"
 msgstr ""
 
-#: sources\twitcasting.py:468
+#: sources\twitcasting.py:521
 msgid "過去ライブのダウンロード"
 msgstr ""
 
-#: sources\twitcasting.py:468
+#: sources\twitcasting.py:521
 msgid ""
 "ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧でき"
 "ないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウン"
 "ロードに成功する可能性があります。今すぐログインしますか？"
 msgstr ""
 
-#: sources\twitcasting.py:478
-msgid "Twitter"
-msgstr ""
-
-#: sources\twitcasting.py:483
-msgid ""
-"ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他の"
-"サービスでのログインはできません。"
-msgstr ""
-
-#: sources\twitcasting.py:485
-#, python-format
-msgid "%(service)sアカウント「%(account)s」のパスワードを入力"
-msgstr ""
-
-#: sources\twitcasting.py:486
-msgid "パスワードの入力"
-msgstr ""
-
-#: sources\twitcasting.py:494 sources\twitcasting.py:498
-msgid "ログイン中にエラーが発生しました。"
-msgstr ""
-
-#: sources\twitcasting.py:495
-msgid "ユーザ名またはパスワードが不正です。"
-msgstr ""
-
-#: sources\twitcasting.py:496
-msgid "Twitterユーザ名またはパスワードが不正です。設定を確認してください。"
-msgstr ""
-
-#: sources\twitcasting.py:497
-msgid ""
-"reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行って"
-"ください。"
-msgstr ""
-
-#: sources\twitcasting.py:499
-msgid "認証が必要です。ブラウザで操作を完了してください。"
-msgstr ""
-
-#: sources\twitcasting.py:585
+#: sources\twitcasting.py:582
 msgid "合い言葉の入力"
 msgstr ""
 
-#: sources\twitcasting.py:585
+#: sources\twitcasting.py:582
 msgid "合い言葉"
 msgstr ""
 
-#: sources\twitcasting.py:670
+#: sources\twitcasting.py:667
 msgid "アクセストークンが見つかりません"
 msgstr ""
 
-#: sources\twitcasting.py:670
+#: sources\twitcasting.py:667
 msgid ""
 "利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行い"
 "ますか？"
 msgstr ""
 
-#: sources\twitcasting.py:680
+#: sources\twitcasting.py:677
 msgid ""
 "録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確"
 "認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないことを"
 "確認してください。"
 msgstr ""
 
-#: sources\twitcasting.py:689
+#: sources\twitcasting.py:686
 msgid ""
 "ツイキャスAPIの実行回数が上限に達しました。しばらくたってから、再度実行してく"
 "ださい。"
 msgstr ""
 
-#: sources\twitcasting.py:691
+#: sources\twitcasting.py:688
 msgid ""
 "ツイキャスAPIが500エラーを返しました。しばらく待ってから、再度接続してくださ"
 "い。"
 msgstr ""
 
-#: sources\twitcasting.py:693
+#: sources\twitcasting.py:690
 msgid "現在ツイキャスとの連携機能を使用できません。開発者に連絡してください。"
 msgstr ""
 
-#: sources\twitcasting.py:706
+#: sources\twitcasting.py:703
 #, python-format
 msgid "ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s"
 msgstr ""
 
-#: sources\twitcasting.py:740
+#: sources\twitcasting.py:737
 msgid "このユーザのライブはすでに録画中です。"
 msgstr ""
 
-#: sources\twitcasting.py:744
+#: sources\twitcasting.py:741
 msgid "このユーザはすでに登録されています。"
 msgstr ""
 
-#: sources\twitcasting.py:758
+#: sources\twitcasting.py:755
 msgid "ユーザ名を指定して録画"
 msgstr ""
 
-#: sources\twitcasting.py:758
+#: sources\twitcasting.py:755
 #, python-format
 msgid ""
 "%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されま"
 "す。"
 msgstr ""
 
-#: sources\twitcasting.py:783
+#: sources\twitcasting.py:780
 msgid "対象ユーザの指定"
 msgstr ""
 
-#: sources\twitcasting.py:783
+#: sources\twitcasting.py:780
 msgid ""
 "フォロー中のユーザを取得するアカウントの@からはじまるアカウント名を入力してく"
 "ださい。\n"
@@ -711,76 +685,117 @@ msgid ""
 "す。"
 msgstr ""
 
-#: sources\twitcasting.py:825
+#: sources\twitcasting.py:822
 msgid "コメント保存開始"
 msgstr ""
 
-#: sources\twitcasting.py:837
+#: sources\twitcasting.py:834
 msgid "コメント保存終了"
 msgstr ""
 
-#: sources\twitcasting.py:944 sources\twitcasting.py:947
-#: sources\twitcasting.py:952
+#: sources\twitcasting.py:941 sources\twitcasting.py:944
+#: sources\twitcasting.py:949
 msgid "ユーザ情報の更新"
 msgstr ""
 
-#: sources\twitcasting.py:944
+#: sources\twitcasting.py:941
 msgid "ユーザ情報の更新を開始します。"
 msgstr ""
 
-#: sources\twitcasting.py:947
+#: sources\twitcasting.py:944
 #, python-format
 msgid "%sの情報を取得しています。"
 msgstr ""
 
-#: sources\twitcasting.py:952
+#: sources\twitcasting.py:949
 msgid "ユーザ情報の更新が終了しました。"
 msgstr ""
 
-#: sources\twitcasting.py:968
+#: sources\twitcasting.py:965
 msgid "一括追加"
 msgstr ""
 
-#: sources\twitcasting.py:972
+#: sources\twitcasting.py:969
 msgid "処理を開始します。"
 msgstr ""
 
-#: sources\twitcasting.py:992
+#: sources\twitcasting.py:989
 #, python-format
 msgid "%sを追加しました。"
 msgstr ""
 
-#: sources\twitcasting.py:999
+#: sources\twitcasting.py:996
 msgid "処理が終了しました。"
 msgstr ""
 
-#: sources\twitcasting.py:1044 sources\twitcasting.py:1047
-#: sources\twitcasting.py:1051 sources\twitcasting.py:1056
-#: sources\twitcasting.py:1059
+#: sources\twitcasting.py:1041 sources\twitcasting.py:1044
+#: sources\twitcasting.py:1048 sources\twitcasting.py:1053
+#: sources\twitcasting.py:1056
 msgid "一括録画"
 msgstr ""
 
-#: sources\twitcasting.py:1044
+#: sources\twitcasting.py:1041
 msgid "ライブ一覧を取得しています。"
 msgstr ""
 
-#: sources\twitcasting.py:1047
+#: sources\twitcasting.py:1044
 #, python-format
 msgid "処理を開始します。対象ライブ数：%i"
 msgstr ""
 
-#: sources\twitcasting.py:1051
+#: sources\twitcasting.py:1048
 #, python-format
 msgid "処理中（%(index)i/%(total)i）"
 msgstr ""
 
-#: sources\twitcasting.py:1056
+#: sources\twitcasting.py:1053
 msgid "ファイルが既に存在するため、録画をスキップします。"
 msgstr ""
 
-#: sources\twitcasting.py:1059
+#: sources\twitcasting.py:1056
 #, python-format
 msgid "完了。%i件録画しました。"
+msgstr ""
+
+#: sources\twitcasting.py:1096
+msgid "Twitter"
+msgstr ""
+
+#: sources\twitcasting.py:1101
+msgid ""
+"ログインに対応しているのはTwitterとツイキャスのアカウントのみです。その他の"
+"サービスでのログインはできません。"
+msgstr ""
+
+#: sources\twitcasting.py:1104
+#, python-format
+msgid "%(service)sアカウント「%(account)s」のパスワードを入力"
+msgstr ""
+
+#: sources\twitcasting.py:1105
+msgid "パスワードの入力"
+msgstr ""
+
+#: sources\twitcasting.py:1115 sources\twitcasting.py:1119
+msgid "ログイン中にエラーが発生しました。"
+msgstr ""
+
+#: sources\twitcasting.py:1116
+msgid "ユーザ名またはパスワードが不正です。"
+msgstr ""
+
+#: sources\twitcasting.py:1117
+msgid "Twitterユーザ名またはパスワードが不正です。設定を確認してください。"
+msgstr ""
+
+#: sources\twitcasting.py:1118
+msgid ""
+"reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行って"
+"ください。"
+msgstr ""
+
+#: sources\twitcasting.py:1120
+msgid "認証が必要です。ブラウザで操作を完了してください。"
 msgstr ""
 
 #: views\auth.py:23
@@ -843,7 +858,7 @@ msgstr ""
 msgid "識別子"
 msgstr ""
 
-#: views\globalKeyConfig.py:31 views\main.py:331
+#: views\globalKeyConfig.py:31 views\main.py:341
 msgid "ショートカットキーの設定"
 msgstr ""
 
@@ -852,7 +867,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:430 views\main.py:449
+#: views\main.py:440 views\main.py:459
 msgid "なし"
 msgstr ""
 
@@ -1026,97 +1041,97 @@ msgid ""
 "\n"
 msgstr ""
 
-#: views\main.py:164
+#: views\main.py:166
 msgid "ファイル(&F)"
 msgstr ""
 
-#: views\main.py:165
+#: views\main.py:167
 msgid "サービス(&S)"
 msgstr ""
 
-#: views\main.py:166
+#: views\main.py:168
 msgid "オプション(&O)"
 msgstr ""
 
-#: views\main.py:167
+#: views\main.py:169
 msgid "ヘルプ(&H)"
 msgstr ""
 
-#: views\main.py:212 views\main.py:218 views\main.py:287 views\main.py:454
+#: views\main.py:214 views\main.py:220 views\main.py:297 views\main.py:464
 #: views\settingsDialog.py:167
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
 "てください。"
 msgstr ""
 
-#: views\main.py:230 views\main.py:299
+#: views\main.py:232 views\main.py:309
 msgid "URLを入力"
 msgstr ""
 
-#: views\main.py:230
+#: views\main.py:232
 msgid "再生ページのURL"
 msgstr ""
 
-#: views\main.py:237 views\main.py:244
+#: views\main.py:239 views\main.py:246
 msgid "ユーザ名を入力"
 msgstr ""
 
-#: views\main.py:252
+#: views\main.py:262
 msgid "すでに削除されています。"
 msgstr ""
 
-#: views\main.py:254
+#: views\main.py:264
 msgid "アクセストークンの削除"
 msgstr ""
 
-#: views\main.py:254
+#: views\main.py:264
 msgid ""
 "ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
 msgstr ""
 
-#: views\main.py:261
+#: views\main.py:271
 msgid "アクセストークンを削除しました。"
 msgstr ""
 
-#: views\main.py:299
+#: views\main.py:309
 msgid "スペースのURL"
 msgstr ""
 
-#: views\main.py:304
+#: views\main.py:314
 msgid "このスペースは既に終了しています。"
 msgstr ""
 
-#: views\main.py:306
+#: views\main.py:316
 msgid "入力されたURLが正しくありません。"
 msgstr ""
 
-#: views\main.py:308
+#: views\main.py:318
 msgid "このスペースはまだ開始されていません。"
 msgstr ""
 
-#: views\main.py:339
+#: views\main.py:349
 msgid "グローバルホットキーの設定"
 msgstr ""
 
-#: views\main.py:378 views\main.py:394 views\spacesTokenManager.py:111
+#: views\main.py:388 views\main.py:404 views\spacesTokenManager.py:111
 msgid "確認"
 msgstr ""
 
-#: views\main.py:378
+#: views\main.py:388
 msgid ""
 "録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
 "しいですか？"
 msgstr ""
 
-#: views\main.py:394
+#: views\main.py:404
 msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
 msgstr ""
 
-#: views\main.py:397
+#: views\main.py:407
 msgid "Windows起動時の自動起動を無効化しました。"
 msgstr ""
 
-#: views\main.py:403
+#: views\main.py:413
 msgid "Windows起動時の自動起動を設定しました。"
 msgstr ""
 
