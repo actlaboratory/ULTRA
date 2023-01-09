@@ -56,6 +56,7 @@ class Twitcasting(SourceBase):
 		self.running = False
 		self.shouldExit = False
 		self.enableMenu(False)
+		globalVars.app.hMainView.menu.EnableMenu("TC_REMOVE_SESSION", os.path.exists(constants.TC_SESSION_DATA))
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 		self.setStatus(_("未接続"))
 		self.debug = not(hasattr(sys, "frozen")) and DEBUG
@@ -139,6 +140,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("session deleted")
 		except Exception as e:
 			self.log.error(traceback.format_exc())
+		globalVars.app.hMainView.menu.EnableMenu("TC_REMOVE_SESSION", False)
 
 	def enableMenu(self, mode):
 		tc = (
@@ -1126,6 +1128,7 @@ class SessionManager:
 			session = data[account]
 		self.session = session
 		self.saveSession(account, session)
+		globalVars.app.hMainView.menu.EnableMenu("TC_REMOVE_SESSION", True)
 		return errorCodes.OK
 
 	def login(self):
