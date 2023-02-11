@@ -34,7 +34,6 @@ def login(id,pw):
 		"Content-Type":"application/x-www-form-urlencoded",
 		"Accept":"Accept: text/html, application/xhtml+xml, image/jxr, */*",
 		"Accept-Language":"ja-JP",
-		"User-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
 	}
 	body = {
 		"username":id,

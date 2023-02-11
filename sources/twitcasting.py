@@ -1117,8 +1117,8 @@ class SessionManager:
 				code = session
 				messages = {
 					errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
-					errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("ユーザ名またはパスワードが不正です。"),
-					errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("Twitterユーザ名またはパスワードが不正です。設定を確認してください。"),
+					errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("パスワードが正しくありません。"),
+					errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("パスワードが正しくありません。なお、ULTRA Version 1.5.2の更新に伴い、ツイキャスの「ログインパスワード」を使用してログインするようになりました。ツイキャスのサイトでログインパスワードを設定し、そのパスワードをULTRAに設定する必要があります。"),
 					errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
 					errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
 					errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
