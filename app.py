@@ -18,8 +18,15 @@ class Main(AppBase.MainBase):
 	def __init__(self):
 		super().__init__()
 
+	def isDevelopmentMode(self):
+		# コマンドライン引数に`dev`を渡すと、開発中モードとして動作する。
+		return "dev" in sys.argv
+
 	def OnInit(self):
 		#多重起動防止
+		if self.isDevelopmentMode():
+			# 開発モードでは多重起動防止とパイプの処理を抑制
+			return True
 		globalVars.mutex = win32event.CreateMutex(None, 1, "ULTRA")
 		if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
 			globalVars.mutex = None
@@ -104,6 +111,12 @@ class Main(AppBase.MainBase):
 		#設定の保存やリソースの開放など、終了前に行いたい処理があれば記述できる
 		#ビューへのアクセスや終了の抑制はできないので注意。
 
+		if self.isDevelopmentMode():
+			# 開発モードでは、mutexやパイプの処理は不要
+			# アップデート
+			globalVars.update.runUpdate()
+			#戻り値は無視される
+			return 0
 		self._releaseMutex()
 		pipe.stopServer()
 
