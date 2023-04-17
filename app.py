@@ -56,15 +56,14 @@ class Main(AppBase.MainBase):
 		if self.config.getint("general", "fileVersion", 100) == 100:
 			# 録画形式設定
 			from sources import twitcasting
-			from sources import spaces
 			ext = self.config.getstring("record", "extension", "ts")
-			for source in (twitcasting.Twitcasting, spaces.Spaces):
-				if ext in source.getAvailableFiletypes():
-					source.setFiletype(ext)
-				else:
-					source.setFiletype(source.getDefaultFiletype())
-					import simpleDialog
-					simpleDialog.dialog(_("録画形式の設定"), _("%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値の%(ext_default)s形式に変更します。") % {"source": source.friendlyName, "ext": ext.upper(), "ext_default": source.getDefaultFiletype().upper()})
+			source = twitcasting.Twitcasting
+			if ext in source.getAvailableFiletypes():
+				source.setFiletype(ext)
+			else:
+				source.setFiletype(source.getDefaultFiletype())
+				import simpleDialog
+				simpleDialog.dialog(_("録画形式の設定"), _("%(source)sの録画形式として%(ext)s形式が使用できなくなりました。規定値の%(ext_default)s形式に変更します。") % {"source": source.friendlyName, "ext": ext.upper(), "ext_default": source.getDefaultFiletype().upper()})
 			self.config.remove_option("record", "extension")
 			self.config["general"]["fileVersion"] = 101
 		from sources import twitcasting
@@ -72,10 +71,6 @@ class Main(AppBase.MainBase):
 		# 「ツイキャスの監視を有効化」の設定値を確認
 		if self.config.getboolean("twitcasting", "enable", True) and self.tc.initialize():
 			self.tc.start()
-		from sources import spaces
-		self.spaces = spaces.Spaces()
-		if self.config.getboolean("spaces", "enable", False) and self.spaces.initialize():
-			self.spaces.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
