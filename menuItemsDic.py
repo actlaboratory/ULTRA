@@ -20,7 +20,7 @@ dic={
 	"TC_SAVE_COMMENTS": _("録画時にコメントをテキストファイルに保存する "),
 	"TC_LOGIN_TOGGLE": _("ログイン状態で録画"),
 	"TC_UPDATE_USER": _("ユーザ情報を更新(&U)"),
-	"TC_ADD_TW": _("Twitterでフォローしているユーザを一括追加(&F)"),
+	"TC_ADD_MULTIPLE": _("ユーザを一括追加(&B)"),
 	"TC_RECORD_ARCHIVE": _("過去ライブのダウンロード(&A)") + "...",
 	"TC_RECORD_ALL": _("過去ライブの一括ダウンロード(&D)"),
 	"TC_RECORD_USER": _("指定したユーザのライブを録画(&R)") + "...",

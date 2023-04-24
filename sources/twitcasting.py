@@ -146,7 +146,7 @@ class Twitcasting(SourceBase):
 		tc = (
 			"TC_SAVE_COMMENTS",
 			"TC_UPDATE_USER",
-			"TC_ADD_TW",
+			"TC_ADD_MULTIPLE",
 			"TC_RECORD_ARCHIVE",
 			"TC_RECORD_ALL",
 			"TC_RECORD_USER",
@@ -775,22 +775,26 @@ class Twitcasting(SourceBase):
 			return
 		ArchiveDownloader(self, target).start()
 
-	def addUsersFromTwitter(self):
-		"""Twitterでフォローしているユーザを一括追加
+	def addMultipleUsers(self):
+		"""ユーザを一括追加
 		"""
-		token = twitterService.getToken()
-		if token == None:
-			return
-		d = views.SimpleInputDialog.Dialog(_("対象ユーザの指定"), _("フォロー中のユーザを取得するアカウントの@からはじまるアカウント名を入力してください。\n後悔アカウント、認証に用いたアカウント、\nまたは認証に用いたアカウントがフォローしている非公開アカウントを指定できます。"), validationPattern="^(@?[a-zA-Z0-9_]*)$")
+		# ダイアログ表示用パラメータ
+		title = _("対象ユーザの指定")
+		msg = _("対象アカウントの@からはじまるアカウント名を、改行区切りで入力してください。")
+		pattern = "^(@?[a-zA-Z0-9_]*)$"
+		style = wx.TE_MULTILINE
+		d = views.SimpleInputDialog.Dialog(title, msg, validationPattern=pattern, style=style)
 		d.Initialize()
 		if d.Show() == wx.ID_CANCEL:
 			return
-		target = re.sub("@?(.*)","\\1", d.GetValue())
-		self.log.debug("target=%s" % target)
-		users = twitterService.getFollowList(token, target)
-		if users == None:
-			return
-		t = TwitterHelper(self, users)
+		# 改行区切りの文字列
+		users = d.GetValue()
+		users = users.split("\n")
+		# 先頭の'@'があれば削除
+		for i in range(len(users)):
+			if users[i][0] == "@":
+				users[i] = users[i][1:]
+		t = MultiUserChecker(self, users)
 		t.start()
 
 class CommentGetter(threading.Thread):
@@ -953,7 +957,7 @@ class UserChecker(threading.Thread):
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ情報の更新"), _("ユーザ情報の更新が終了しました。"), self.tc.friendlyName)
 		globalVars.app.hMainView.menu.EnableMenu("TC_MANAGE_USER", True)
 
-class TwitterHelper(threading.Thread):
+class MultiUserChecker(threading.Thread):
 	def __init__(self, tc, users):
 		super().__init__(daemon=True)
 		self.tc = tc

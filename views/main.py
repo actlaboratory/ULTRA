@@ -125,7 +125,7 @@ class Menu(BaseMenu):
 			"TC_RECORD_ARCHIVE",
 			"TC_RECORD_ALL",
 			"TC_UPDATE_USER",
-			"TC_ADD_TW",
+			"TC_ADD_MULTIPLE",
 			"TC_RECORD_USER",
 			"TC_REMOVE_SESSION",
 			"TC_REMOVE_TOKEN",
@@ -208,8 +208,8 @@ class Events(BaseEvents):
 			globalVars.app.tc.updateUser()
 
 		# ツイキャス：Twitterから一括追加
-		if selected == menuItemsStore.getRef("TC_ADD_TW"):
-			globalVars.app.tc.addUsersFromTwitter()
+		if selected == menuItemsStore.getRef("TC_ADD_MULTIPLE"):
+			globalVars.app.tc.addMultipleUsers()
 
 		# ツイキャス：過去ライブの録画
 		if selected == menuItemsStore.getRef("TC_RECORD_ARCHIVE"):
