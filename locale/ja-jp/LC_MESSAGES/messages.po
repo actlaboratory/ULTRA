@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-26 11:02+0900\n"
+"POT-Creation-Date: 2023-04-29 23:05+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -222,45 +222,6 @@ msgstr ""
 msgid "録画終了"
 msgstr ""
 
-#: twitterService.py:32 sources\twitcasting.py:313
-msgid ""
-"認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってくださ"
-"い。"
-msgstr ""
-
-#: twitterService.py:33 sources\twitcasting.py:314
-msgid "認証に失敗しました。もう一度お試しください。"
-msgstr ""
-
-#: twitterService.py:34 sources\twitcasting.py:315
-msgid ""
-"しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。"
-msgstr ""
-
-#: twitterService.py:38
-msgid "Twitterアカウント認証"
-msgstr ""
-
-#: twitterService.py:47 sources\twitcasting.py:328 sources\twitcasting.py:340
-msgid "処理結果"
-msgstr ""
-
-#: twitterService.py:47 sources\twitcasting.py:328
-msgid "キャンセルされました。"
-msgstr ""
-
-#: twitterService.py:75
-msgid ""
-"Twitterからフォローリストを取得できませんでした。指定したユーザが存在しない"
-"か、フォローしていない非公開アカウントである可能性があります。"
-msgstr ""
-
-#: twitterService.py:79
-msgid ""
-"Twitterからフォローリストを取得できませんでした。しばらくたってから再度お試し"
-"ください。状況が改善しない場合には、開発者までお問い合わせください。"
-msgstr ""
-
 #: update.py:50 update.py:59 update.py:73 update.py:79 update.py:90
 #: update.py:98 update.py:103 update.py:108 update.py:160
 #: views\updateDialog.py:39
@@ -311,229 +272,253 @@ msgid ""
 "ソフトウェア終了時に、自動でアップデートされます。"
 msgstr ""
 
-#: sources\twitcasting.py:43 sources\twitcasting.py:1107 views\main.py:369
+#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:369
 msgid "ツイキャス"
 msgstr ""
 
-#: sources\twitcasting.py:46
+#: sources\twitcasting.py:45
 msgid "動画（MP4）"
 msgstr ""
 
-#: sources\twitcasting.py:47
+#: sources\twitcasting.py:46
 msgid "動画（TS）"
 msgstr ""
 
-#: sources\twitcasting.py:48
+#: sources\twitcasting.py:47
 msgid "音声のみ（MP3）"
 msgstr ""
 
-#: sources\twitcasting.py:61 sources\twitcasting.py:264
+#: sources\twitcasting.py:60 sources\twitcasting.py:263
 msgid "未接続"
 msgstr ""
 
-#: sources\twitcasting.py:102
+#: sources\twitcasting.py:101
 msgid "アクセストークンの有効期限が切れています"
 msgstr ""
 
-#: sources\twitcasting.py:102 sources\twitcasting.py:109
+#: sources\twitcasting.py:101 sources\twitcasting.py:108
 msgid ""
 "本ソフトの使用を続けるには、アクセストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:104
+#: sources\twitcasting.py:103
 msgid ""
 "アクセストークンの有効期限が切れています。本ソフトの使用を続けるには、アクセ"
 "ストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:109
+#: sources\twitcasting.py:108
 msgid "アクセストークンの有効期限が近づいています"
 msgstr ""
 
-#: sources\twitcasting.py:111
+#: sources\twitcasting.py:110
 msgid ""
 "アクセストークンの有効期限が近づいています。本ソフトの使用を続けるには、アク"
 "セストークンを再度設定する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:129
+#: sources\twitcasting.py:128
 msgid ""
 "ログインセッションが不正なため、ログイン状態での録画機能を無効にしました。再"
 "度この機能を使用するには、メニューの[ログイン状態で録画]を選択し、パスワード"
 "を入力する必要があります。"
 msgstr ""
 
-#: sources\twitcasting.py:187
+#: sources\twitcasting.py:186
 msgid "配信開始"
 msgstr ""
 
-#: sources\twitcasting.py:194
+#: sources\twitcasting.py:193
 msgid "録画対象の削除"
 msgstr ""
 
-#: sources\twitcasting.py:194 sources\twitcasting.py:195
+#: sources\twitcasting.py:193 sources\twitcasting.py:194
 #, python-format
 msgid "%sのライブを、録画対象から削除しました。"
 msgstr ""
 
-#: sources\twitcasting.py:223
+#: sources\twitcasting.py:222
 msgid "ユーザ名変更"
 msgstr ""
 
-#: sources\twitcasting.py:223 sources\twitcasting.py:226
+#: sources\twitcasting.py:222 sources\twitcasting.py:225
 #, python-format
 msgid "「%(old)s」→「%(new)s」"
 msgstr ""
 
-#: sources\twitcasting.py:226
+#: sources\twitcasting.py:225
 msgid "名前変更"
 msgstr ""
 
-#: sources\twitcasting.py:241 sources\twitcasting.py:263
+#: sources\twitcasting.py:240 sources\twitcasting.py:262
 msgid "切断"
 msgstr ""
 
-#: sources\twitcasting.py:241
+#: sources\twitcasting.py:240
 msgid "インターネット接続が切断されました。再試行します。"
 msgstr ""
 
-#: sources\twitcasting.py:242
+#: sources\twitcasting.py:241
 msgid "接続試行中"
 msgstr ""
 
-#: sources\twitcasting.py:249
+#: sources\twitcasting.py:248
 msgid "接続完了"
 msgstr ""
 
-#: sources\twitcasting.py:249
+#: sources\twitcasting.py:248
 msgid "新着ライブの監視を開始しました。"
 msgstr ""
 
-#: sources\twitcasting.py:252
+#: sources\twitcasting.py:251
 msgid "接続済み"
 msgstr ""
 
-#: sources\twitcasting.py:263
+#: sources\twitcasting.py:262
 msgid "ツイキャスとの接続を切断しました。"
 msgstr ""
 
-#: sources\twitcasting.py:268
+#: sources\twitcasting.py:267
 msgid "再接続"
 msgstr ""
 
-#: sources\twitcasting.py:268
+#: sources\twitcasting.py:267
 msgid "ツイキャスとの接続が切断されたため、再度接続します。"
 msgstr ""
 
-#: sources\twitcasting.py:292
+#: sources\twitcasting.py:291
 msgid ""
 "インターネット接続に失敗しました。現在ツイキャスとの連携機能を使用できませ"
 "ん。"
 msgstr ""
 
-#: sources\twitcasting.py:319
+#: sources\twitcasting.py:312
+msgid ""
+"認証に成功しました。このウィンドウを閉じて、アプリケーションに戻ってくださ"
+"い。"
+msgstr ""
+
+#: sources\twitcasting.py:313
+msgid "認証に失敗しました。もう一度お試しください。"
+msgstr ""
+
+#: sources\twitcasting.py:314
+msgid ""
+"しばらくしても画面が切り替わらない場合は、別のブラウザでお試しください。"
+msgstr ""
+
+#: sources\twitcasting.py:318
 msgid "アカウントの追加"
 msgstr ""
 
-#: sources\twitcasting.py:340
+#: sources\twitcasting.py:327 sources\twitcasting.py:339
+msgid "処理結果"
+msgstr ""
+
+#: sources\twitcasting.py:327
+msgid "キャンセルされました。"
+msgstr ""
+
+#: sources\twitcasting.py:339
 msgid "認証が完了しました。"
 msgstr ""
 
-#: sources\twitcasting.py:374
+#: sources\twitcasting.py:373
 msgid "ユーザ情報の保存に失敗しました。"
 msgstr ""
 
-#: sources\twitcasting.py:409
+#: sources\twitcasting.py:408
 msgid "指定したユーザが見つかりません。"
 msgstr ""
 
-#: sources\twitcasting.py:522
+#: sources\twitcasting.py:521
 msgid "入力されたURLの形式が不正です。内容をご確認の上、再度お試しください。"
 msgstr ""
 
-#: sources\twitcasting.py:525
+#: sources\twitcasting.py:524
 msgid "過去ライブのダウンロード"
 msgstr ""
 
-#: sources\twitcasting.py:525
+#: sources\twitcasting.py:524
 msgid ""
 "ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧でき"
 "ないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウン"
 "ロードに成功する可能性があります。今すぐログインしますか？"
 msgstr ""
 
-#: sources\twitcasting.py:586
+#: sources\twitcasting.py:585
 msgid "合い言葉の入力"
 msgstr ""
 
-#: sources\twitcasting.py:586
+#: sources\twitcasting.py:585
 msgid "合い言葉"
 msgstr ""
 
-#: sources\twitcasting.py:671
+#: sources\twitcasting.py:670
 msgid "アクセストークンが見つかりません"
 msgstr ""
 
-#: sources\twitcasting.py:671
+#: sources\twitcasting.py:670
 msgid ""
 "利用可能なアクセストークンが見つかりません。ブラウザを起動し、認証作業を行い"
 "ますか？"
 msgstr ""
 
-#: sources\twitcasting.py:681
+#: sources\twitcasting.py:680
 msgid ""
 "録画に失敗しました。録画が公開されていること、入力したURLに誤りがないことを確"
 "認してください。合い言葉を入力した場合は、入力した合い言葉に誤りがないことを"
 "確認してください。"
 msgstr ""
 
-#: sources\twitcasting.py:690
+#: sources\twitcasting.py:689
 msgid ""
 "ツイキャスAPIの実行回数が上限に達しました。しばらくたってから、再度実行してく"
 "ださい。"
 msgstr ""
 
-#: sources\twitcasting.py:692
+#: sources\twitcasting.py:691
 msgid ""
 "ツイキャスAPIが500エラーを返しました。しばらく待ってから、再度接続してくださ"
 "い。"
 msgstr ""
 
-#: sources\twitcasting.py:694
+#: sources\twitcasting.py:693
 msgid "現在ツイキャスとの連携機能を使用できません。開発者に連絡してください。"
 msgstr ""
 
-#: sources\twitcasting.py:707
+#: sources\twitcasting.py:706
 #, python-format
 msgid "ツイキャスAPIとの通信中にエラーが発生しました。詳細：%s"
 msgstr ""
 
-#: sources\twitcasting.py:741
+#: sources\twitcasting.py:740
 msgid "このユーザのライブはすでに録画中です。"
 msgstr ""
 
-#: sources\twitcasting.py:745
+#: sources\twitcasting.py:744
 msgid "このユーザはすでに登録されています。"
 msgstr ""
 
-#: sources\twitcasting.py:759
+#: sources\twitcasting.py:758
 msgid "ユーザ名を指定して録画"
 msgstr ""
 
-#: sources\twitcasting.py:759
+#: sources\twitcasting.py:758
 #, python-format
 msgid ""
 "%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されま"
 "す。"
 msgstr ""
 
-#: sources\twitcasting.py:782
+#: sources\twitcasting.py:781
 msgid "対象ユーザの指定"
 msgstr ""
 
-#: sources\twitcasting.py:783
+#: sources\twitcasting.py:782
 msgid ""
-"対象アカウントの@からはじまるアカウント名を、改行区切りで入力してください。"
+"対象アカウントの@からはじまるアカウント名を、\n"
+"改行区切りで入力してください。"
 msgstr ""
 
 #: sources\twitcasting.py:830
@@ -657,10 +642,9 @@ msgstr ""
 msgid "ブラウザでの操作を待っています..."
 msgstr ""
 
-#: views\auth.py:24 views\chooseTwitterAccount.py:32
-#: views\KeyValueSettingDialogBase.py:84 views\KeyValueSettingDialogBase.py:275
-#: views\settingsDialog.py:92 views\SimpleInputDialog.py:56
-#: views\updateDialog.py:45
+#: views\auth.py:24 views\KeyValueSettingDialogBase.py:84
+#: views\KeyValueSettingDialogBase.py:275 views\settingsDialog.py:92
+#: views\SimpleInputDialog.py:56 views\updateDialog.py:45
 msgid "キャンセル"
 msgstr ""
 
@@ -681,19 +665,6 @@ msgstr ""
 #: views\KeyValueSettingDialogBase.py:348 views\main.py:89
 #: views\updateDialog.py:66
 msgid "エラー"
-msgstr ""
-
-#: views\chooseTwitterAccount.py:22
-msgid "Twitterアカウントを選択"
-msgstr ""
-
-#: views\chooseTwitterAccount.py:29
-msgid "アカウント"
-msgstr ""
-
-#: views\chooseTwitterAccount.py:31 views\KeyValueSettingDialogBase.py:83
-#: views\KeyValueSettingDialogBase.py:274 views\SimpleInputDialog.py:55
-msgid "ＯＫ"
 msgstr ""
 
 #: views\fontManager.py:25
@@ -727,7 +698,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:377 views\main.py:396
+#: views\main.py:375 views\main.py:394
 msgid "なし"
 msgstr ""
 
@@ -812,6 +783,11 @@ msgstr ""
 
 #: views\KeyValueSettingDialogBase.py:78
 msgid "削除(&D)"
+msgstr ""
+
+#: views\KeyValueSettingDialogBase.py:83 views\KeyValueSettingDialogBase.py:274
+#: views\SimpleInputDialog.py:55
+msgid "ＯＫ"
 msgstr ""
 
 #: views\KeyValueSettingDialogBase.py:125
@@ -917,7 +893,7 @@ msgstr ""
 msgid "ヘルプ(&H)"
 msgstr ""
 
-#: views\main.py:198 views\main.py:204 views\main.py:401
+#: views\main.py:198 views\main.py:204 views\main.py:399
 #: views\settingsDialog.py:167
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
@@ -986,10 +962,6 @@ msgstr ""
 
 #: views\main.py:350
 msgid "Windows起動時の自動起動を設定しました。"
-msgstr ""
-
-#: views\main.py:371
-msgid "Twitter スペース"
 msgstr ""
 
 #: views\settingsDialog.py:25
