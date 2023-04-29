@@ -27,11 +27,9 @@ SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
 TC_SESSION_DATA = os.path.abspath("data\\twitcasting\\session.dat")
-SPACES_USER_DATA = os.path.abspath("data\\spaces\\users.dat")
 FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = os.path.abspath("data\\twitcasting\\account.bin")
-AC_SPACES = os.path.abspath("data\\spaces\\account.bin")
 #フォントの設定可能サイズ範囲
 FONT_MIN_SIZE=5
 FONT_MAX_SIZE=35

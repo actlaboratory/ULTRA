@@ -304,7 +304,7 @@ class Events(BaseEvents):
 	def OnExit(self, event):
 		if event.CanVeto():
 			# Alt+F4が押された
-			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and (globalVars.app.tc.running or globalVars.app.spaces.running):
+			if globalVars.app.config.getboolean("general", "minimizeOnExit", True) and globalVars.app.tc.running:
 				self.hide()
 			else:
 				super().OnExit(event)
