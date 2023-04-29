@@ -779,11 +779,12 @@ class Twitcasting(SourceBase):
 		"""
 		# ダイアログ表示用パラメータ
 		title = _("対象ユーザの指定")
-		msg = _("対象アカウントの@からはじまるアカウント名を、改行区切りで入力してください。")
+		msg = _("対象アカウントの@からはじまるアカウント名を、\n改行区切りで入力してください。")
 		pattern = "^(@?[a-zA-Z0-9_]*)$"
 		style = wx.TE_MULTILINE
 		d = views.SimpleInputDialog.Dialog(title, msg, validationPattern=pattern, style=style)
 		d.Initialize()
+		d.edit.SetMinSize((-1,200))
 		if d.Show() == wx.ID_CANCEL:
 			return
 		# 改行区切りの文字列
