@@ -4,7 +4,6 @@ import base64
 import json
 import logging
 import traceback
-import twitterService
 import views.SimpleInputDialog
 from copy import deepcopy
 import wx.adv
@@ -961,7 +960,7 @@ class MultiUserChecker(threading.Thread):
 	def __init__(self, tc, users):
 		super().__init__(daemon=True)
 		self.tc = tc
-		self.log = logging.getLogger("%s.twitterHelper" %constants.LOG_PREFIX)
+		self.log = logging.getLogger("%s.multiUserChecker" %constants.LOG_PREFIX)
 		self.users = users
 
 	def showLog(self, message):

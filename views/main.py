@@ -207,7 +207,7 @@ class Events(BaseEvents):
 		if selected == menuItemsStore.getRef("TC_UPDATE_USER"):
 			globalVars.app.tc.updateUser()
 
-		# ツイキャス：Twitterから一括追加
+		# ツイキャス：一括追加
 		if selected == menuItemsStore.getRef("TC_ADD_MULTIPLE"):
 			globalVars.app.tc.addMultipleUsers()
 
@@ -367,8 +367,6 @@ class Events(BaseEvents):
 			prefix = ""
 			if refName.startswith("TC_"):
 				prefix = _("ツイキャス")
-			elif refName.startswith("SPACES_"):
-				prefix = _("Twitter スペース")
 			if prefix:
 				title = prefix + ":" + title
 			if refName in keys:
