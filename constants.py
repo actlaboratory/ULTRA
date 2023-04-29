@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.5.2"
-APP_LAST_RELEASE_DATE="2023-02-11"
+APP_VERSION="1.6.0"
+APP_LAST_RELEASE_DATE="2023-04-29"
 APP_COPYRIGHT_YEAR="2021-2023"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -27,11 +27,9 @@ SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
 TC_SESSION_DATA = os.path.abspath("data\\twitcasting\\session.dat")
-SPACES_USER_DATA = os.path.abspath("data\\spaces\\users.dat")
 FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = os.path.abspath("data\\twitcasting\\account.bin")
-AC_SPACES = os.path.abspath("data\\spaces\\account.bin")
 #フォントの設定可能サイズ範囲
 FONT_MIN_SIZE=5
 FONT_MAX_SIZE=35
@@ -57,20 +55,6 @@ UPDATER_WAKE_WORD = "hello"
 TC_CID = "1266762249164619776.2ba35a3fe972584b3ab34e30c0c88ab6b4516d6aaf951c8a02744e21f22b23ba"
 TC_URL = "https://apiv2.twitcasting.tv/oauth2/authorize"
 TC_PORT = 9339
-# Twitter関係
-TWITTER_CLIENT_ID = "bDVKekZERkMtNXNVMlFoWnNONWY6MTpjaQ"
-TWITTER_CONSUMER_KEY = "zAphCyhNj7ElkI5J1aXqH4Gcw"
-TWITTER_CONSUMER_SECRET = "Ioq2aSTDMThRopTD7LH7uA0eYzKYJgtwNe9j4vkDOOTNQoOWh4"
-TWITTER_PORT = 9339
-TWITTER_BEARER = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
-TWITTER_SCOPE = [
-    "tweet.read",
-    "users.read",
-    "follows.read",
-    "offline.access",
-    "space.read",
-]
-
 
 # その他
 NOT_FOUND = -1

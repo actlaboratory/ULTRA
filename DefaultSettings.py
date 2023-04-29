@@ -38,10 +38,6 @@ class DefaultSettings:
 			"filetype": "mp4",
 			"login": False,
 		}
-		config["spaces"] = {
-			"enable": False,
-			"filetype": "mp3",
-		}
 		config["record"] = {
 			"dir": "output\\%source%",
 			"createSubDir": True,
