@@ -13,3 +13,4 @@ https://github.com/actlaboratory/diff_archiver/archive/v1.0.1.zip
 beautifulsoup4
 lxml
 yt-dlp==2023.7.6
+pillow==9
