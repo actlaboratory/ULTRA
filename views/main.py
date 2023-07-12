@@ -106,6 +106,7 @@ class Menu(BaseMenu):
 		self.hServicesMenu.Bind(wx.EVT_MENU_OPEN, self.event.OnMenuOpen)
 		self.hTwitcastingMenu=wx.Menu()
 		self.hTwitcastingFiletypesMenu = wx.Menu()
+		self.hYDLMenu=wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -117,6 +118,7 @@ class Menu(BaseMenu):
 
 		# サービスメニューの中身
 		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
+		self.RegisterMenuCommand(self.hServicesMenu, "YDL_SUB", subMenu=self.hYDLMenu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
@@ -133,6 +135,10 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
+		# yt-dlpメニューの中身
+		self.RegisterMenuCommand(self.hYDLMenu, [
+			"YDL_DOWNLOAD",
+		])
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
@@ -266,6 +272,13 @@ class Events(BaseEvents):
 				return
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
+
+		# yt-dlp：URLを指定してダウンロード
+		if selected == menuItemsStore.getRef("YDL_DOWNLOAD"):
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("URLの指定"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.ydl.download(d.GetData())
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):

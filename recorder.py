@@ -18,7 +18,7 @@ DEBUG = 0
 
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
+	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False, ext=None):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -53,6 +53,10 @@ class Recorder(threading.Thread):
 		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
+		if ext is None:
+			self.ext = self.source.getFiletype()
+		else:
+			self.ext = ext
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" % self.stream)
 
@@ -76,7 +80,7 @@ class Recorder(threading.Thread):
 		if self.addMovieId:
 			fname += "(%s)" % self.movie
 		lst.append(fname)
-		ext = self.source.getFiletype()
+		ext = self.ext
 		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -144,15 +148,18 @@ class Recorder(threading.Thread):
 				"-headers",
 				'"%s"' % self.header,
 			]
+		if self.userAgent:
+			cmd += [
+				"-user-agent",
+				'"%s"' % self.userAgent,
+			]
 		cmd += [
-			"-user-agent",
-			'"%s"' % self.userAgent,
 			"-i",
 			'"%s"' % self.stream,
 			"-max_muxing_queue_size",
 			"1024",
 		]
-		if not self.needEncode(self.source.getFiletype()):
+		if not self.needEncode(self.ext):
 			cmd += [
 				"-c",
 				"copy",
