@@ -38,12 +38,12 @@ class Recorder(threading.Thread):
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
 		"""
-		self.addMovieId = False
+		# 配信開始日時がとれなかったことを示すフラグ
+		self.timeIsNone = time is None
 		if type(time) == int:
 			time = datetime.datetime.fromtimestamp(time)
 		elif time is None:
 			time = datetime.datetime.now()
-			self.addMovieId = True
 		self.stream = stream
 		self.userName = userName
 		self.time = time
@@ -77,7 +77,7 @@ class Recorder(threading.Thread):
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
 		fname = self.replaceUnusableChar(globalVars.app.config["record"]["fileName"])
-		if self.addMovieId:
+		if self.addMovieId():
 			fname += "(%s)" % self.movie
 		lst.append(fname)
 		ext = self.ext
@@ -236,9 +236,21 @@ class Recorder(threading.Thread):
 
 	def needEncode(self, ext):
 		from sources.twitcasting import Twitcasting
+		# ツイキャスは必ずMP4
 		if isinstance(self.source, Twitcasting) and ext == "mp4":
 			return False
 		return True
+	
+	def addMovieId(self):
+		# 配信開始日時がとれなかった
+		if self.timeIsNone:
+			return True
+		# ydl
+		from sources.ydl import YDL
+		if isinstance(self.source, YDL):
+			return True
+		# 通常は不要
+		return False
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
