@@ -31,6 +31,7 @@ dic={
 	"TC_FILETYPES": _("録画形式の設定"),
 	"YDL_SUB": _("その他のサービス（&yt-dlp）"),
 	"YDL_DOWNLOAD": _("&URLを指定してダウンロード"),
+	"YDL_FILETYPES": _("録画形式の設定"),
 	"OP_SETTINGS": _("設定(&S)") + "...",
 	"OP_SHORTCUT": _("キーボードショートカットの設定(&K)") + "...",
 	"OP_HOTKEY": _("グローバルホットキーの設定(&H)") + "...",

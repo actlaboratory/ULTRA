@@ -19,7 +19,7 @@ class YDL(SourceBase):
 	index = 1
 	filetypes = {
 		"b": _("動画"),
-		"a": _("音声のみ"),
+		"ba": _("音声のみ"),
 	}
 	defaultFiletype = "b"
 
@@ -32,8 +32,8 @@ class YDL(SourceBase):
 		options = {
 			# 詳しいログを出す
 			"verbose": True,
-			# とりあえず動画に固定
-			"format": "b",
+			# ダウンロードするファイル形式
+			"format": self.getFiletype(),
 			# ログ出力
 			"logger": self.log,
 			# プレイリストの各アイテムをダウンロードしないようにする

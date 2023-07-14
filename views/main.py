@@ -107,6 +107,7 @@ class Menu(BaseMenu):
 		self.hTwitcastingMenu=wx.Menu()
 		self.hTwitcastingFiletypesMenu = wx.Menu()
 		self.hYDLMenu=wx.Menu()
+		self.hYDLFiletypesMenu = wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -139,6 +140,7 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hYDLMenu, [
 			"YDL_DOWNLOAD",
 		])
+		self.RegisterMenuCommand(self.hYDLMenu, "YDL_FILETYPES", subMenu=self.hYDLFiletypesMenu)
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
@@ -168,6 +170,8 @@ class Events(BaseEvents):
 		menu = event.GetMenu()
 		if menu == self.parent.menu.hTwitcastingFiletypesMenu:
 			globalVars.app.tc.getFiletypesMenu(menu)
+		if menu == self.parent.menu.hYDLFiletypesMenu:
+			globalVars.app.ydl.getFiletypesMenu(menu)
 
 	def OnMenuSelect(self,event):
 		"""メニュー項目が選択されたときのイベントハンドら。"""
