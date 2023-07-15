@@ -52,5 +52,5 @@ class YDL(SourceBase):
 			self.log.error("unsupported: %s" % _type)
 			simpleDialog.errorDialog(_("%sのダウンロードは現在サポートされていません。") % _type)
 			return
-		r = recorder.Recorder(self, info["url"], "%(user)s(%(extractor)s)" % {"user": info["channel"], "extractor": info["extractor"]}, datetime.datetime.strptime(info["upload_date"], "%Y%m%d"), info["id"], header=info["http_headers"], userAgent="", ext=info["ext"])
+		r = recorder.Recorder(self, info["url"], "%(user)s(%(extractor)s)" % {"user": info["uploader"], "extractor": info["extractor"]}, datetime.datetime.strptime(info["upload_date"], "%Y%m%d"), info["id"], header=info["http_headers"], userAgent="", ext=info["ext"])
 		r.start()
