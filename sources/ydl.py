@@ -12,6 +12,10 @@ import recorder
 import simpleDialog
 from sources.base import SourceBase
 
+# debug
+# 0: 何もしない、1:info_jsonを保存
+DEBUG = 0
+
 
 class YDL(SourceBase):
 	name = "ydl"
@@ -46,6 +50,10 @@ class YDL(SourceBase):
 			self.log.error(traceback.format_exc())
 			simpleDialog.errorDialog(_("動画情報の取得に失敗しました。\n詳細：%s") % e)
 			return
+		# debug
+		if DEBUG:
+			with open("info_%s.json" % info["id"], "w", encoding="utf-8") as f:
+				json.dump(info, f, ensure_ascii=False, indent="\t")
 		# ビデオ以外は現状サポートしていない
 		_type = info.get("_type", "video")
 		if _type != "video":
