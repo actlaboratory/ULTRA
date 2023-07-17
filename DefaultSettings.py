@@ -10,7 +10,7 @@ class DefaultSettings:
 		config["general"]={
 			"language": "ja-JP",
 			"fileVersion": "101",
-			"locale": "ja-JP",
+			"locale": "ja_JP",
 			"autoHide": False,
 			"minimizeOnExit": True,
 		}
