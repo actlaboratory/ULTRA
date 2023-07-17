@@ -40,7 +40,7 @@ class Recorder(threading.Thread):
 		"""
 		# 配信開始日時がとれなかったことを示すフラグ
 		self.timeIsNone = time is None
-		if type(time) == int:
+		if type(time) in (int, float):
 			time = datetime.datetime.fromtimestamp(time)
 		elif time is None:
 			time = datetime.datetime.now()
