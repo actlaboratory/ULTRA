@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-29 23:05+0900\n"
+"POT-Creation-Date: 2023-07-17 10:32+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app.py:66 menuItemsDic.py:31
+#: app.py:66 menuItemsDic.py:31 menuItemsDic.py:34
 msgid "録画形式の設定"
 msgstr ""
 
@@ -143,26 +143,34 @@ msgid "通知対象ユーザの管理(&M)"
 msgstr ""
 
 #: menuItemsDic.py:32
-msgid "設定(&S)"
+msgid "その他のサービス（&yt-dlp）"
 msgstr ""
 
 #: menuItemsDic.py:33
-msgid "キーボードショートカットの設定(&K)"
-msgstr ""
-
-#: menuItemsDic.py:34
-msgid "グローバルホットキーの設定(&H)"
+msgid "&URLを指定してダウンロード"
 msgstr ""
 
 #: menuItemsDic.py:35
-msgid "Windows起動時の自動起動を有効化(&W)"
+msgid "設定(&S)"
 msgstr ""
 
 #: menuItemsDic.py:36
-msgid "最新バージョンを確認(&U)"
+msgid "キーボードショートカットの設定(&K)"
 msgstr ""
 
 #: menuItemsDic.py:37
+msgid "グローバルホットキーの設定(&H)"
+msgstr ""
+
+#: menuItemsDic.py:38
+msgid "Windows起動時の自動起動を有効化(&W)"
+msgstr ""
+
+#: menuItemsDic.py:39
+msgid "最新バージョンを確認(&U)"
+msgstr ""
+
+#: menuItemsDic.py:40
 msgid "バージョン情報(&V)"
 msgstr ""
 
@@ -171,12 +179,12 @@ msgstr ""
 msgid "配信開始：%s、サービス：%s"
 msgstr ""
 
-#: recorder.py:169 recorder.py:171 recorder.py:182 recorder.py:194
-#: recorder.py:198 recorder.py:200
+#: recorder.py:176 recorder.py:178 recorder.py:189 recorder.py:201
+#: recorder.py:205 recorder.py:207
 msgid "録画エラー"
 msgstr ""
 
-#: recorder.py:169
+#: recorder.py:176
 msgid ""
 "録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してく"
 "ださい。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択し"
@@ -184,41 +192,41 @@ msgid ""
 "きる場合があります。"
 msgstr ""
 
-#: recorder.py:171 recorder.py:182
+#: recorder.py:178 recorder.py:189
 #, python-format
 msgid "%sのライブの録画処理を中断しました。"
 msgstr ""
 
-#: recorder.py:185
+#: recorder.py:192
 msgid "録画開始"
 msgstr ""
 
-#: recorder.py:185 recorder.py:212 sources\twitcasting.py:830
+#: recorder.py:192 recorder.py:219 sources\twitcasting.py:830
 #: sources\twitcasting.py:842
 #, python-format
 msgid "ユーザ：%(user)s、ムービーID：%(movie)s"
 msgstr ""
 
-#: recorder.py:186
+#: recorder.py:193
 msgid "録画中"
 msgstr ""
 
-#: recorder.py:194 recorder.py:198
+#: recorder.py:201 recorder.py:205
 #, python-format
 msgid "%sのライブを録画中にエラーが発生しました。"
 msgstr ""
 
-#: recorder.py:194 recorder.py:198 recorder.py:200
+#: recorder.py:201 recorder.py:205 recorder.py:207
 #, python-format
 msgid "詳細：%s"
 msgstr ""
 
-#: recorder.py:200
+#: recorder.py:207
 #, python-format
 msgid "%sのライブを録画中にエラーが発生したため、再度録画を開始します。"
 msgstr ""
 
-#: recorder.py:212
+#: recorder.py:219
 msgid "録画終了"
 msgstr ""
 
@@ -272,7 +280,7 @@ msgid ""
 "ソフトウェア終了時に、自動でアップデートされます。"
 msgstr ""
 
-#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:369
+#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:386
 msgid "ツイキャス"
 msgstr ""
 
@@ -638,6 +646,30 @@ msgstr ""
 msgid "認証が必要です。ブラウザで操作を完了してください。"
 msgstr ""
 
+#: sources\ydl.py:22
+msgid "その他のサービス（yt-dlp）"
+msgstr ""
+
+#: sources\ydl.py:25
+msgid "動画"
+msgstr ""
+
+#: sources\ydl.py:26
+msgid "音声のみ"
+msgstr ""
+
+#: sources\ydl.py:51
+#, python-format
+msgid ""
+"動画情報の取得に失敗しました。\n"
+"詳細：%s"
+msgstr ""
+
+#: sources\ydl.py:61
+#, python-format
+msgid "%sのダウンロードは現在サポートされていません。"
+msgstr ""
+
 #: views\auth.py:23
 msgid "ブラウザでの操作を待っています..."
 msgstr ""
@@ -689,7 +721,7 @@ msgstr ""
 msgid "識別子"
 msgstr ""
 
-#: views\globalKeyConfig.py:31 views\main.py:278
+#: views\globalKeyConfig.py:31 views\main.py:295
 msgid "ショートカットキーの設定"
 msgstr ""
 
@@ -698,7 +730,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:375 views\main.py:394
+#: views\main.py:392 views\main.py:411
 msgid "なし"
 msgstr ""
 
@@ -877,90 +909,94 @@ msgid ""
 "\n"
 msgstr ""
 
-#: views\main.py:152
+#: views\main.py:160
 msgid "ファイル(&F)"
 msgstr ""
 
-#: views\main.py:153
+#: views\main.py:161
 msgid "サービス(&S)"
 msgstr ""
 
-#: views\main.py:154
+#: views\main.py:162
 msgid "オプション(&O)"
 msgstr ""
 
-#: views\main.py:155
+#: views\main.py:163
 msgid "ヘルプ(&H)"
 msgstr ""
 
-#: views\main.py:198 views\main.py:204 views\main.py:399
+#: views\main.py:208 views\main.py:214 views\main.py:416
 #: views\settingsDialog.py:167
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
 "てください。"
 msgstr ""
 
-#: views\main.py:216
+#: views\main.py:226 views\main.py:282
 msgid "URLを入力"
 msgstr ""
 
-#: views\main.py:216
+#: views\main.py:226
 msgid "再生ページのURL"
 msgstr ""
 
-#: views\main.py:223 views\main.py:230
+#: views\main.py:233 views\main.py:240
 msgid "ユーザ名を入力"
 msgstr ""
 
-#: views\main.py:223 views\main.py:230 views\tcManageUser.py:20
+#: views\main.py:233 views\main.py:240 views\tcManageUser.py:20
 #: views\tcManageUser.py:99
 msgid "ユーザ名"
 msgstr ""
 
-#: views\main.py:246
+#: views\main.py:256
 msgid "すでに削除されています。"
 msgstr ""
 
-#: views\main.py:248
+#: views\main.py:258
 msgid "アクセストークンの削除"
 msgstr ""
 
-#: views\main.py:248
+#: views\main.py:258
 msgid ""
 "ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
 msgstr ""
 
-#: views\main.py:255 views\main.py:344 views\main.py:350
+#: views\main.py:265 views\main.py:361 views\main.py:367
 msgid "完了"
 msgstr ""
 
-#: views\main.py:255
+#: views\main.py:265
 msgid "アクセストークンを削除しました。"
 msgstr ""
 
-#: views\main.py:286
+#: views\main.py:282
+msgid "URLの指定"
+msgstr ""
+
+#: views\main.py:303
 msgid "グローバルホットキーの設定"
 msgstr ""
 
-#: views\main.py:325 views\main.py:341
+#: views\main.py:342 views\main.py:358
 msgid "確認"
 msgstr ""
 
-#: views\main.py:325
+#: views\main.py:342
 msgid ""
 "録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
 "しいですか？"
 msgstr ""
 
-#: views\main.py:341
+#: views\main.py:358
 msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
 msgstr ""
 
-#: views\main.py:344
+#: views\main.py:361
 msgid "Windows起動時の自動起動を無効化しました。"
 msgstr ""
 
-#: views\main.py:350
+#: views\main.py:367
 msgid "Windows起動時の自動起動を設定しました。"
 msgstr ""
 

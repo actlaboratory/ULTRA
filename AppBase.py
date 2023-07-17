@@ -33,6 +33,12 @@ class MaiｎBase(wx.App):
 		#各種初期設定
 		self.InitLogger()
 		self.LoadSettings()
+		# localeは「ja_JP」のような形式。設定ファイルの定義ミスにより「_」ではなく「-」を使っていたため、必要に応じて最初に設定ファイルを書き換える。
+		locale_old = self.config["general"]["locale"]
+		if "-" in locale_old:
+			locale_new = locale_old.replace("-", "_")
+			self.log.warn("Fixed locale setting: %s -> %s" % (locale_old, locale_new))
+			self.config["general"]["locale"] = locale_new
 		try:
 			if self.config["general"]["locale"]!=None:
 				locale.setlocale(locale.LC_TIME,self.config["general"]["locale"])

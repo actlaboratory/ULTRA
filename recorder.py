@@ -18,7 +18,7 @@ DEBUG = 0
 
 
 class Recorder(threading.Thread):
-	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False):
+	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False, ext=None):
 		"""コンストラクタ
 
 		:param source: SourceBaseクラスを継承したオブジェクト。
@@ -38,12 +38,12 @@ class Recorder(threading.Thread):
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
 		"""
-		self.addMovieId = False
-		if type(time) == int:
+		# 配信開始日時がとれなかったことを示すフラグ
+		self.timeIsNone = time is None
+		if type(time) in (int, float):
 			time = datetime.datetime.fromtimestamp(time)
 		elif time is None:
 			time = datetime.datetime.now()
-			self.addMovieId = True
 		self.stream = stream
 		self.userName = userName
 		self.time = time
@@ -53,6 +53,10 @@ class Recorder(threading.Thread):
 		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
+		if ext is None:
+			self.ext = self.source.getFiletype()
+		else:
+			self.ext = ext
 		super().__init__(daemon=True)
 		self.log.info("stream URL: %s" % self.stream)
 
@@ -73,10 +77,10 @@ class Recorder(threading.Thread):
 		if globalVars.app.config.getboolean("record", "createSubDir", True):
 			lst.append(self.replaceUnusableChar(globalVars.app.config["record"]["subDirName"]))
 		fname = self.replaceUnusableChar(globalVars.app.config["record"]["fileName"])
-		if self.addMovieId:
+		if self.addMovieId():
 			fname += "(%s)" % self.movie
 		lst.append(fname)
-		ext = self.source.getFiletype()
+		ext = self.ext
 		path = "%s.%s" % ("\\".join(lst), ext)
 		path = self.extractVariable(path)
 		os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -144,15 +148,18 @@ class Recorder(threading.Thread):
 				"-headers",
 				'"%s"' % self.header,
 			]
+		if self.userAgent:
+			cmd += [
+				"-user-agent",
+				'"%s"' % self.userAgent,
+			]
 		cmd += [
-			"-user-agent",
-			'"%s"' % self.userAgent,
 			"-i",
 			'"%s"' % self.stream,
 			"-max_muxing_queue_size",
 			"1024",
 		]
-		if not self.needEncode(self.source.getFiletype()):
+		if not self.needEncode(self.ext):
 			cmd += [
 				"-c",
 				"copy",
@@ -229,9 +236,21 @@ class Recorder(threading.Thread):
 
 	def needEncode(self, ext):
 		from sources.twitcasting import Twitcasting
+		# ツイキャスは必ずMP4
 		if isinstance(self.source, Twitcasting) and ext == "mp4":
 			return False
 		return True
+	
+	def addMovieId(self):
+		# 配信開始日時がとれなかった
+		if self.timeIsNone:
+			return True
+		# ydl
+		from sources.ydl import YDL
+		if isinstance(self.source, YDL):
+			return True
+		# 通常は不要
+		return False
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
