@@ -5,19 +5,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: TCV\n"
+"Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-29 23:05+0900\n"
-"PO-Revision-Date: 2023-04-29 23:07+0900\n"
+"POT-Creation-Date: 2023-07-17 10:32+0900\n"
+"PO-Revision-Date: 2023-07-17 10:49+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.3.2\n"
 
-#: app.py:66 menuItemsDic.py:31
+#: app.py:66 menuItemsDic.py:31 menuItemsDic.py:34
 msgid "録画形式の設定"
 msgstr "Recording format settings"
 
@@ -149,26 +149,34 @@ msgid "通知対象ユーザの管理(&M)"
 msgstr "&Manage Notified Users"
 
 #: menuItemsDic.py:32
+msgid "その他のサービス（&yt-dlp）"
+msgstr "Other Services(&yt-dlp)"
+
+#: menuItemsDic.py:33
+msgid "&URLを指定してダウンロード"
+msgstr "Download by &URL"
+
+#: menuItemsDic.py:35
 msgid "設定(&S)"
 msgstr "&Settings"
 
-#: menuItemsDic.py:33
+#: menuItemsDic.py:36
 msgid "キーボードショートカットの設定(&K)"
 msgstr "Shortcut &Key Configuration"
 
-#: menuItemsDic.py:34
+#: menuItemsDic.py:37
 msgid "グローバルホットキーの設定(&H)"
 msgstr "Global &Hot Key Configuration"
 
-#: menuItemsDic.py:35
+#: menuItemsDic.py:38
 msgid "Windows起動時の自動起動を有効化(&W)"
 msgstr "Enable automatic startup on &Windows startup"
 
-#: menuItemsDic.py:36
+#: menuItemsDic.py:39
 msgid "最新バージョンを確認(&U)"
 msgstr "Check For &Updates"
 
-#: menuItemsDic.py:37
+#: menuItemsDic.py:40
 msgid "バージョン情報(&V)"
 msgstr "&Version Info"
 
@@ -177,12 +185,12 @@ msgstr "&Version Info"
 msgid "配信開始：%s、サービス：%s"
 msgstr "Broadcasting Started: %s, service: %s"
 
-#: recorder.py:169 recorder.py:171 recorder.py:182 recorder.py:194
-#: recorder.py:198 recorder.py:200
+#: recorder.py:176 recorder.py:178 recorder.py:189 recorder.py:201
+#: recorder.py:205 recorder.py:207
 msgid "録画エラー"
 msgstr "Recording error"
 
-#: recorder.py:169
+#: recorder.py:176
 msgid ""
 "録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してく"
 "ださい。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択し"
@@ -194,41 +202,41 @@ msgstr ""
 "interrupt the process. You may be able to start recording correctly by "
 "selecting Yes and changing where the recording is saved."
 
-#: recorder.py:171 recorder.py:182
+#: recorder.py:178 recorder.py:189
 #, python-format
 msgid "%sのライブの録画処理を中断しました。"
 msgstr "Recording process for %s's broadcasting has been canseled."
 
-#: recorder.py:185
+#: recorder.py:192
 msgid "録画開始"
 msgstr "Start recording"
 
-#: recorder.py:185 recorder.py:212 sources\twitcasting.py:830
+#: recorder.py:192 recorder.py:219 sources\twitcasting.py:830
 #: sources\twitcasting.py:842
 #, python-format
 msgid "ユーザ：%(user)s、ムービーID：%(movie)s"
 msgstr "User: %(user)s, Movie ID:%(movie)s"
 
-#: recorder.py:186
+#: recorder.py:193
 msgid "録画中"
 msgstr "Recording"
 
-#: recorder.py:194 recorder.py:198
+#: recorder.py:201 recorder.py:205
 #, python-format
 msgid "%sのライブを録画中にエラーが発生しました。"
 msgstr "An error has occured while recording %s's live."
 
-#: recorder.py:194 recorder.py:198 recorder.py:200
+#: recorder.py:201 recorder.py:205 recorder.py:207
 #, python-format
 msgid "詳細：%s"
 msgstr "Details: %s"
 
-#: recorder.py:200
+#: recorder.py:207
 #, python-format
 msgid "%sのライブを録画中にエラーが発生したため、再度録画を開始します。"
 msgstr "An error has occured while recording %s's live. retrying..."
 
-#: recorder.py:212
+#: recorder.py:219
 msgid "録画終了"
 msgstr "End of recording"
 
@@ -286,7 +294,7 @@ msgstr ""
 "Download has successfully finished.\n"
 "Update will be started when closing the application."
 
-#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:369
+#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:386
 msgid "ツイキャス"
 msgstr "TwitCasting"
 
@@ -693,6 +701,32 @@ msgid "認証が必要です。ブラウザで操作を完了してください�
 msgstr ""
 "Authorization is required. Open the browser, and finish the authentication."
 
+#: sources\ydl.py:22
+msgid "その他のサービス（yt-dlp）"
+msgstr "Other Services(yt-dlp)"
+
+#: sources\ydl.py:25
+msgid "動画"
+msgstr "video"
+
+#: sources\ydl.py:26
+msgid "音声のみ"
+msgstr "Audio only"
+
+#: sources\ydl.py:51
+#, python-format
+msgid ""
+"動画情報の取得に失敗しました。\n"
+"詳細：%s"
+msgstr ""
+"Failed to get video information.\n"
+"Details: %s"
+
+#: sources\ydl.py:61
+#, python-format
+msgid "%sのダウンロードは現在サポートされていません。"
+msgstr "Downloading %s is not currently supported."
+
 #: views\auth.py:23
 msgid "ブラウザでの操作を待っています..."
 msgstr "waiting for browser..."
@@ -746,7 +780,7 @@ msgstr "shortcut"
 msgid "識別子"
 msgstr "identifier"
 
-#: views\globalKeyConfig.py:31 views\main.py:278
+#: views\globalKeyConfig.py:31 views\main.py:295
 msgid "ショートカットキーの設定"
 msgstr "Shortcut Key Configuration"
 
@@ -755,7 +789,7 @@ msgstr "Shortcut Key Configuration"
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:375 views\main.py:394
+#: views\main.py:392 views\main.py:411
 msgid "なし"
 msgstr "None"
 
@@ -945,23 +979,23 @@ msgstr ""
 "and key names.\n"
 "\n"
 
-#: views\main.py:152
+#: views\main.py:160
 msgid "ファイル(&F)"
 msgstr "&File"
 
-#: views\main.py:153
+#: views\main.py:161
 msgid "サービス(&S)"
 msgstr "&Services"
 
-#: views\main.py:154
+#: views\main.py:162
 msgid "オプション(&O)"
 msgstr "&Options"
 
-#: views\main.py:155
+#: views\main.py:163
 msgid "ヘルプ(&H)"
 msgstr "&Help"
 
-#: views\main.py:198 views\main.py:204 views\main.py:399
+#: views\main.py:208 views\main.py:214 views\main.py:416
 #: views\settingsDialog.py:167
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
@@ -969,54 +1003,58 @@ msgid ""
 msgstr ""
 "Failed to save settings. Make sure you can access to the following files:"
 
-#: views\main.py:216
+#: views\main.py:226 views\main.py:282
 msgid "URLを入力"
 msgstr "Enter URL"
 
-#: views\main.py:216
+#: views\main.py:226
 msgid "再生ページのURL"
 msgstr "Playback page URL"
 
-#: views\main.py:223 views\main.py:230
+#: views\main.py:233 views\main.py:240
 msgid "ユーザ名を入力"
 msgstr "Enter user name"
 
-#: views\main.py:223 views\main.py:230 views\tcManageUser.py:20
+#: views\main.py:233 views\main.py:240 views\tcManageUser.py:20
 #: views\tcManageUser.py:99
 msgid "ユーザ名"
 msgstr "user name"
 
-#: views\main.py:246
+#: views\main.py:256
 msgid "すでに削除されています。"
 msgstr "It has already been deleted."
 
-#: views\main.py:248
+#: views\main.py:258
 msgid "アクセストークンの削除"
 msgstr "Delete access token"
 
-#: views\main.py:248
+#: views\main.py:258
 msgid ""
 "ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
 msgstr ""
 "Disable TwitCasting functions and remove the access token. Are you sure?"
 
-#: views\main.py:255 views\main.py:344 views\main.py:350
+#: views\main.py:265 views\main.py:361 views\main.py:367
 msgid "完了"
 msgstr "Finish"
 
-#: views\main.py:255
+#: views\main.py:265
 msgid "アクセストークンを削除しました。"
 msgstr "Removed the access token."
 
-#: views\main.py:286
+#: views\main.py:282
+msgid "URLの指定"
+msgstr "set URL"
+
+#: views\main.py:303
 msgid "グローバルホットキーの設定"
 msgstr "Global Hot Keys Settings"
 
-#: views\main.py:325 views\main.py:341
+#: views\main.py:342 views\main.py:358
 msgid "確認"
 msgstr "confirmation"
 
-#: views\main.py:325
+#: views\main.py:342
 msgid ""
 "録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
 "しいですか？"
@@ -1024,17 +1062,17 @@ msgstr ""
 "Recording process is running. If you exit, the recording will be "
 "interrupted. Are you sure?"
 
-#: views\main.py:341
+#: views\main.py:358
 msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
 msgstr ""
 "Automatic startup at Windows startup is already set. Do you want to un-set "
 "it?"
 
-#: views\main.py:344
+#: views\main.py:361
 msgid "Windows起動時の自動起動を無効化しました。"
 msgstr "Disabled automatic startup at Windows startup."
 
-#: views\main.py:350
+#: views\main.py:367
 msgid "Windows起動時の自動起動を設定しました。"
 msgstr "Set automatic startup at Windows startup."
 
@@ -1379,9 +1417,6 @@ msgstr "close"
 #~ msgid "Twitterとの通信に失敗しました。詳細：%s"
 #~ msgstr "Communication with Twitter failed. Details: %s"
 
-#~ msgid "ユーザ情報の取得に失敗しました。詳細：%s"
-#~ msgstr "Failed to retrieve user information. Details: %s"
-
 #~ msgid "認証情報の保存に失敗しました。"
 #~ msgstr "Failed to save credentials."
 
@@ -1409,9 +1444,6 @@ msgstr "close"
 
 #~ msgid "入力されたURLが正しくありません。"
 #~ msgstr "The URL entered is incorrect."
-
-#~ msgid "このスペースはまだ開始されていません。"
-#~ msgstr "This space has not yet started."
 
 #~ msgid "非公開アカウント"
 #~ msgstr "Private account"
