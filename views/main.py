@@ -282,7 +282,7 @@ class Events(BaseEvents):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("URLの指定"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
-			globalVars.app.ydl.download(d.GetData())
+			globalVars.app.ydl.downloadVideo(d.GetData())
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
