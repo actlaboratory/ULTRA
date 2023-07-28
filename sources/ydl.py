@@ -32,7 +32,7 @@ class YDL(SourceBase):
 		super().__init__()
 		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.ydl"))
 
-	def downloadVideo(self, url):
+	def downloadVideo(self, url, skipExisting=False):
 		try:
 			info = self._extractInfo(url)
 		except Exception as e:
@@ -55,7 +55,7 @@ class YDL(SourceBase):
 			time = None
 		id = info["id"]
 		headers = info.get("http_headers", {})
-		r = recorder.Recorder(self, url, user, time, id, header=headers, userAgent="", ext=info["ext"])
+		r = recorder.Recorder(self, url, user, time, id, header=headers, userAgent="", ext=info["ext"], skipExisting=skipExisting)
 		r.start()
 
 	def _extractInfo(self, url):
