@@ -23,6 +23,7 @@ from simpleDialog import *
 from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
+from views import ydlManageLists
 from views import settingsDialog
 from views import versionDialog
 
@@ -139,6 +140,7 @@ class Menu(BaseMenu):
 		# yt-dlpメニューの中身
 		self.RegisterMenuCommand(self.hYDLMenu, [
 			"YDL_DOWNLOAD",
+			"YDL_MANAGE_LISTS",
 		])
 		self.RegisterMenuCommand(self.hYDLMenu, "YDL_FILETYPES", subMenu=self.hYDLFiletypesMenu)
 
@@ -283,6 +285,14 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.ydl.downloadVideo(d.GetData())
+
+		# yd-dlp: 一括ダウンロードURLの管理
+		if selected == menuItemsStore.getRef("YDL_MANAGE_LISTS"):
+			d = ydlManageLists.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.ydl.listManager.setData(d.GetValue())
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
