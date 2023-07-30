@@ -57,7 +57,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 			parent,
 			[
 				(_("ID"), None),
-				(_("タイトル"), None),
+				(_("タイトル"), None if url == "" else True),
 				(_("URL"), url == ""),
 				(_("データ取得間隔（秒）"), True)
 			],
