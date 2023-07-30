@@ -73,6 +73,8 @@ class Main(AppBase.MainBase):
 			self.tc.start()
 		from sources import ydl
 		self.ydl = ydl.YDL()
+		if self.config.getboolean("ydl", "enable", True) and self.ydl.initialize():
+			self.ydl.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
