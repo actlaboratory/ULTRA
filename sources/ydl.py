@@ -138,8 +138,11 @@ class ListManager:
 				if oldValue[newKey2] != newValue[newKey2]:
 					self.log.debug("%s-%s: %s -> %s" % (newKey1, newKey2, oldValue[newKey2], newValue[newKey2]))
 					oldValue[newKey2] = newValue[newKey2]
+		rm = []
 		for oldKey in self._data:
 			if oldKey not in newData:
 				self.log.debug("removed: %s" % oldKey)
-				del self._data[oldKey]
+				rm.append(oldKey)
+		for key in rm:
+			del self._data[key]
 		self.save()
