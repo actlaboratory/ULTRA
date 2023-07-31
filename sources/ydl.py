@@ -38,10 +38,14 @@ class YDL(SourceBase):
 		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.ydl"))
 		self.listManager = ListManager()
 		self.initThread()
+		self.exitFlag = False
 
 	def run(self):
 		while True:
 			for key in self.listManager.getKeys():
+				# 終了すべきかどうか
+				if self.exitFlag:
+					break
 				# 処理中なら何もしない
 				if self.listManager.isProcessing(key):
 					time.sleep(3)
@@ -54,8 +58,11 @@ class YDL(SourceBase):
 				downloader = PlaylistDownloader(self, key, self.listManager.getUrl(key))
 				downloader.start()
 				time.sleep(3)
+			if self.exitFlag:
+				self.exitFlag = False
+				break
 
-	def downloadVideo(self, url, skipExisting=False, join=False):
+	def downloadVideo(self, url, skipExisting=False):
 		try:
 			info = self.extractInfo(url)
 		except Exception as e:
@@ -80,8 +87,7 @@ class YDL(SourceBase):
 		headers = info.get("http_headers", {})
 		r = recorder.Recorder(self, url, user, time, id, header=headers, userAgent="", ext=info["ext"], skipExisting=skipExisting)
 		r.start()
-		if join:
-			r.join()
+		return r
 
 	def extractInfo(self, url):
 		# yt-dlpのオプション
@@ -126,6 +132,9 @@ class YDL(SourceBase):
 	def onFinish(self, key):
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理終了：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onFinish(key)
+
+	def exit(self):
+		self.exitFlag = True
 
 
 class ListManager:
@@ -189,6 +198,12 @@ class ListManager:
 			if oldKey not in newData:
 				self.log.debug("removed: %s" % oldKey)
 				rm.append(oldKey)
+		# 削除すべきプレイリストが処理中ならば停止させる
+		activeDownloaders = getActiveDownloaders()
+		for downloader in activeDownloaders:
+			if downloader.getKey() in rm:
+				downloader.exit()
+		# 不要なエントリーを削除
 		for key in rm:
 			del self._data[key]
 		self.save()
@@ -227,10 +242,31 @@ class PlaylistDownloader(threading.Thread):
 		self.ydl = ydl
 		self.key = key
 		self.url = url
+		self.exitFlag = False
 
 	def run(self):
 		self.ydl.onStart(self.key)
 		urls = self.ydl.getPlaylistItems(self.url)
 		for url in urls:
-			self.ydl.downloadVideo(url, True, True)
+			if self.exitFlag:
+				self.ydl.onFinish(self.key)
+				break
+			r = self.ydl.downloadVideo(url, True)
+			while r.is_alive():
+				if self.exitFlag:
+					return
 		self.ydl.onFinish(self.key)
+
+	def getKey(self):
+		return self.key
+
+	def exit(self):
+		self.exitFlag = True
+
+
+def getActiveDownloaders():
+	ret = []
+	for t in threading.enumerate():
+		if type(t) == PlaylistDownloader:
+			ret.append(t)
+	return ret

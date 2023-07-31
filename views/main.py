@@ -288,11 +288,15 @@ class Events(BaseEvents):
 
 		# yd-dlp: 一括ダウンロードURLの管理
 		if selected == menuItemsStore.getRef("YDL_MANAGE_LISTS"):
+			globalVars.app.ydl.exit()
 			d = ydlManageLists.Dialog()
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL:
 				return
 			globalVars.app.ydl.listManager.setData(d.GetValue())
+			if globalVars.app.config.getboolean("ydl", "enable", True):
+				globalVars.app.ydl.initThread()
+				globalVars.app.ydl.start()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
