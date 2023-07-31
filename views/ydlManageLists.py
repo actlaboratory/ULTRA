@@ -43,7 +43,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 			ret[key] = {
 				"title": data[0][key],
 				"url": data[1][key],
-				"interval": data[2][key],
+				"interval": int(data[2][key]),
 			}
 		return ret
 
