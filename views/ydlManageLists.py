@@ -28,7 +28,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 		for key in data:
 			titles[key] = data[key]["title"]
 			urls[key] = data[key]["url"]
-			intervals[key] = data[key]["interval"]
+			intervals[key] = str(data[key]["interval"])
 		super().__init__("ydlManageLists", SettingDialog, columnInfo, titles, urls, intervals)
 
 	def Initialize(self):
