@@ -79,7 +79,7 @@ class YDL(SourceBase):
 		user = "%(user)s(%(extractor)s)" % {"user": info.get("uploader", "unknown_user"), "extractor": info.get("extractor", "unknown_service")}
 		if "timestamp" in info.keys():
 			time = info["timestamp"]
-		elif "upload_date" in info.keys():
+		elif "upload_date" in info.keys() and info["upload_date"] is not None:
 			time = datetime.datetime.strptime(info["upload_date"], "%Y%m%d")
 		else:
 			time = None
