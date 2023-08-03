@@ -71,7 +71,13 @@ class YDL(SourceBase):
 			return
 		# ビデオ以外は現状サポートしていない
 		_type = info.get("_type", "video")
-		if _type != "video":
+		if _type == "playlist":
+			# redirect to Playlist Downloader
+			self.log.debug("redirect to Playlist Downloader")
+			downloader = PlaylistDownloader(self, info["webpage_url"])
+			downloader.start()
+			return
+		elif _type != "video":
 			self.log.error("unsupported: %s" % _type)
 			wx.CallAfter(simpleDialog.errorDialog, _("%sのダウンロードは現在サポートされていません。") % _type)
 			return
@@ -126,10 +132,14 @@ class YDL(SourceBase):
 		return ret
 
 	def onStart(self, key):
+		if not key:
+			return
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理開始：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onStart(key)
 
 	def onFinish(self, key):
+		if not key:
+			return
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理終了：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onFinish(key)
 
