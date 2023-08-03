@@ -55,7 +55,7 @@ class YDL(SourceBase):
 				if lastTime and (datetime.datetime.fromtimestamp(lastTime) + datetime.timedelta(seconds=self.listManager.getInterval(key)) > datetime.datetime.now()):
 					time.sleep(3)
 					continue
-				downloader = PlaylistDownloader(self, key, self.listManager.getUrl(key))
+				downloader = PlaylistDownloader(self, self.listManager.getUrl(key), key)
 				downloader.start()
 				time.sleep(3)
 			if self.exitFlag:
@@ -237,7 +237,7 @@ class ListManager:
 
 
 class PlaylistDownloader(threading.Thread):
-	def __init__(self, ydl: YDL, key: str, url: str):
+	def __init__(self, ydl: YDL, url: str, key:str=""):
 		super().__init__(daemon=True)
 		self.ydl = ydl
 		self.key = key
