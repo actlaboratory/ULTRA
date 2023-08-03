@@ -257,10 +257,14 @@ class PlaylistDownloader(threading.Thread):
 	def run(self):
 		self.ydl.onStart(self.key)
 		urls = self.ydl.getPlaylistItems(self.url)
+		cnt = 0
+		total = len(urls)
 		for url in urls:
 			if self.exitFlag:
 				self.ydl.onFinish(self.key)
 				break
+			cnt += 1
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中：%(cnt)d/%(total)d") % {"cnt": cnt, "total": total})
 			r = self.ydl.downloadVideo(url, True)
 			while r.is_alive():
 				if self.exitFlag:
