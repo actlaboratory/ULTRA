@@ -36,28 +36,42 @@ class YDL(SourceBase):
 	def __init__(self):
 		super().__init__()
 		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.ydl"))
-		self.listManager = ListManager()
+		self.listManager = ListManager(self)
 		self.initThread()
 		self.exitFlag = False
 
 	def run(self):
 		while True:
+			self.log.debug("outer loop")
 			for key in self.listManager.getKeys():
-				# 終了すべきかどうか
-				if self.exitFlag:
-					break
+				self.log.debug("inner loop key: %s" % key)
 				# 処理中なら何もしない
 				if self.listManager.isProcessing(key):
+					self.log.debug("%s is processing" % key)
 					time.sleep(3)
+					# 終了すべきかどうか
+					if self.exitFlag:
+						self.log.debug("exit flag is set")
+						break
 					continue
 				# 次に処理すべき日時に達していなければ何もしない
 				lastTime = self.listManager.getLastTime(key)
 				if lastTime and (datetime.datetime.fromtimestamp(lastTime) + datetime.timedelta(seconds=self.listManager.getInterval(key)) > datetime.datetime.now()):
+					self.log.debug("skipped")
 					time.sleep(3)
+					# 終了すべきかどうか
+					if self.exitFlag:
+						self.log.debug("exit flag is set")
+						break
 					continue
 				downloader = PlaylistDownloader(self, self.listManager.getUrl(key), key)
 				downloader.start()
 				time.sleep(3)
+				# 終了すべきかどうか
+				if self.exitFlag:
+					self.log.debug("exit flag is set")
+					break
+			self.log.debug("inner loop ended")
 			if self.exitFlag:
 				self.exitFlag = False
 				break
@@ -69,12 +83,19 @@ class YDL(SourceBase):
 			self.log.error(traceback.format_exc())
 			wx.CallAfter(simpleDialog.errorDialog, _("動画情報の取得に失敗しました。\n詳細：%s") % e)
 			return
-		# ビデオ以外は現状サポートしていない
 		_type = info.get("_type", "video")
 		if _type == "playlist":
 			# redirect to Playlist Downloader
 			self.log.debug("redirect to Playlist Downloader")
-			downloader = PlaylistDownloader(self, info["webpage_url"])
+			entry = self.listManager.convertInfoToEntry(info, 3600, True)
+			key = tuple(entry.keys())[0]
+			if self.listManager.hasKey(key):
+				wx.CallAfter(simpleDialog.errorDialog, _("このプレイリストは、一括ダウンロードURLとして登録されています。"))
+				return
+			self.exit()
+			globalVars.app.hMainView.menu.EnableMenu("YDL_DOWNLOAD", False)
+			self.listManager.addEntry(entry)
+			downloader = PlaylistDownloader(self, self.listManager.getUrl(key), key)
 			downloader.start()
 			return
 		elif _type != "video":
@@ -103,7 +124,7 @@ class YDL(SourceBase):
 			# ダウンロードするファイル形式
 			"format": self.getFiletype(),
 			# ログ出力
-			"logger": self.log,
+			"logger": logging.getLogger("%s.%s:%d" % (constants.LOG_PREFIX, "sources.ydl.yt-dlp", int(time.time()))),
 			# プレイリストの各アイテムをダウンロードしないようにする
 			"extract_flat": "in_playlist",
 		}
@@ -132,14 +153,10 @@ class YDL(SourceBase):
 		return ret
 
 	def onStart(self, key):
-		if not key:
-			return
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理開始：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onStart(key)
 
 	def onFinish(self, key):
-		if not key:
-			return
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理終了：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onFinish(key)
 
@@ -148,7 +165,8 @@ class YDL(SourceBase):
 
 
 class ListManager:
-	def __init__(self):
+	def __init__(self, ydl: YDL):
+		self.ydl = ydl
 		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "ydl.listManager"))
 		self._data = {}
 		self.load()
@@ -176,15 +194,25 @@ class ListManager:
 		except:
 			self.log.error("Failed to save list.\n" + traceback.format_exc())
 
-	def convertInfoToEntry(self, info, interval):
+	def convertInfoToEntry(self, info, interval, temporary=False):
 		key = "%s:%s" % (info["extractor"], info["id"])
+		# KeyValueSettingの仕様に合わせて、キーは小文字で管理する
+		key = key.lower()
 		val = {
 			"title": info["title"],
 			"url": info["original_url"],
 			"interval": interval,
 		}
+		if temporary:
+			val["temporary"] = True
 		ret = {key: val}
+		self.log.debug("converted entry: %s" % ret)
 		return ret
+
+	def addEntry(self, entry):
+		self.log.debug("add: %s" % entry)
+		self._data.update(entry)
+		self.save()
 
 	def getData(self):
 		return self._data
@@ -225,29 +253,42 @@ class ListManager:
 	def onFinish(self, key):
 		del self._data[key]["processing"]
 		self._data[key]["last"] = time.time()
+		if self.isTemporary(key):
+			self.log.debug("remove temporary entry: %s" % key)
+			del self._data[key]
+			globalVars.app.hMainView.menu.EnableMenu("YDL_DOWNLOAD", True)
+			if globalVars.app.config.getboolean("ydl", "enable", True):
+				self.ydl.initThread()
+				self.ydl.start()
 		self.save()
 
 	def getKeys(self):
 		return self._data.keys()
-	
+
 	def getInterval(self, key):
 		return self._data[key]["interval"]
-	
+
 	def getLastTime(self, key):
 		return self._data[key].get("last", None)
-	
+
 	def getUrl(self, key):
 		return self._data[key]["url"]
-	
+
 	def getTitle(self, key):
 		return self._data[key]["title"]
-	
+
 	def isProcessing(self, key):
 		return "processing" in self._data[key]
 
+	def isTemporary(self, key):
+		return self._data[key].get("temporary", False)
+
+	def hasKey(self, key):
+		return key in self._data.keys()
+
 
 class PlaylistDownloader(threading.Thread):
-	def __init__(self, ydl: YDL, url: str, key:str=""):
+	def __init__(self, ydl: YDL, url: str, key:str):
 		super().__init__(daemon=True)
 		self.ydl = ydl
 		self.key = key
@@ -264,7 +305,7 @@ class PlaylistDownloader(threading.Thread):
 				self.ydl.onFinish(self.key)
 				break
 			cnt += 1
-			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中：%(cnt)d/%(total)d") % {"cnt": cnt, "total": total})
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中（%(title)s）：%(cnt)d/%(total)d") % {"title": self.ydl.listManager.getTitle(self.key), "cnt": cnt, "total": total})
 			r = self.ydl.downloadVideo(url, True)
 			while r.is_alive():
 				if self.exitFlag:
