@@ -160,6 +160,9 @@ class YDL(SourceBase):
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理終了：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onFinish(key)
 
+	def onCancel(self, key):
+		self.listManager.onCancel(key)
+
 	def exit(self):
 		self.exitFlag = True
 
@@ -250,6 +253,13 @@ class ListManager:
 		self._data[key]["processing"] = True
 		self.save()
 
+	def onCancel(self, key):
+		del self._data[key]["processing"]
+		if self.isTemporary(key):
+			self.log.debug("remove temporary entry: %s" % key)
+			del self._data[key]
+		self.save()
+
 	def onFinish(self, key):
 		del self._data[key]["processing"]
 		self._data[key]["last"] = time.time()
@@ -302,8 +312,7 @@ class PlaylistDownloader(threading.Thread):
 		total = len(urls)
 		for url in urls:
 			if self.exitFlag:
-				self.ydl.onFinish(self.key)
-				break
+				return
 			cnt += 1
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中（%(title)s）：%(cnt)d/%(total)d") % {"title": self.ydl.listManager.getTitle(self.key), "cnt": cnt, "total": total})
 			r = self.ydl.downloadVideo(url, True)
@@ -317,6 +326,7 @@ class PlaylistDownloader(threading.Thread):
 
 	def exit(self):
 		self.exitFlag = True
+		self.ydl.onCancel(self.key)
 
 
 def getActiveDownloaders():
