@@ -94,6 +94,7 @@ class YDL(SourceBase):
 				return
 			self.exit()
 			globalVars.app.hMainView.menu.EnableMenu("YDL_DOWNLOAD", False)
+			globalVars.app.hMainView.menu.EnableMenu("YDL_MANAGE_LISTS", False)
 			self.listManager.addEntry(entry)
 			downloader = PlaylistDownloader(self, self.listManager.getUrl(key), key)
 			downloader.start()
@@ -267,6 +268,7 @@ class ListManager:
 			self.log.debug("remove temporary entry: %s" % key)
 			del self._data[key]
 			globalVars.app.hMainView.menu.EnableMenu("YDL_DOWNLOAD", True)
+			globalVars.app.hMainView.menu.EnableMenu("YDL_MANAGE_LISTS", True)
 			if globalVars.app.config.getboolean("ydl", "enable", True):
 				self.ydl.initThread()
 				self.ydl.start()
