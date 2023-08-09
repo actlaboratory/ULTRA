@@ -417,6 +417,8 @@ class Events(BaseEvents):
 			prefix = ""
 			if refName.startswith("TC_"):
 				prefix = _("ツイキャス")
+			elif refName.startswith("YDL_"):
+				prefix = _("yt-dlp")
 			if prefix:
 				title = prefix + ":" + title
 			if refName in keys:
