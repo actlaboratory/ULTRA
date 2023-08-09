@@ -138,6 +138,7 @@ class Menu(BaseMenu):
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
 		# yt-dlpメニューの中身
+		self.RegisterCheckMenuCommand(self.hYDLMenu, "YDL_ENABLE")
 		self.RegisterMenuCommand(self.hYDLMenu, [
 			"YDL_DOWNLOAD",
 			"YDL_MANAGE_LISTS",
@@ -278,6 +279,20 @@ class Events(BaseEvents):
 				return
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
+
+		# yt-dlp：一括ダウンロードを有効化
+		if selected == menuItemsStore.getRef("YDL_ENABLE"):
+			if event.IsChecked():
+				globalVars.app.ydl.initThread()
+				globalVars.app.ydl.start()
+			else:
+				globalVars.app.ydl.exit()
+				from sources import ydl
+				for downloader in ydl.getActiveDownloaders():
+					downloader.exit()
+			globalVars.app.config["ydl"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
 
 		# yt-dlp：URLを指定してダウンロード
 		if selected == menuItemsStore.getRef("YDL_DOWNLOAD"):

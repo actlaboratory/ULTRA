@@ -41,6 +41,7 @@ class YDL(SourceBase):
 		self.exitFlag = False
 
 	def run(self):
+		wx.CallAfter(globalVars.app.hMainView.menu.CheckMenu, "YDL_ENABLE", True)
 		while True:
 			self.log.debug("outer loop")
 			for key in self.listManager.getKeys():
@@ -165,6 +166,7 @@ class YDL(SourceBase):
 		self.listManager.onCancel(key)
 
 	def exit(self):
+		wx.CallAfter(globalVars.app.hMainView.menu.CheckMenu, "YDL_ENABLE", False)
 		self.exitFlag = True
 
 
