@@ -39,9 +39,11 @@ class YDL(SourceBase):
 		self.listManager = ListManager(self)
 		self.initThread()
 		self.exitFlag = False
+		self.setStatus(_("一括ダウンロード無効"))
 
 	def run(self):
 		wx.CallAfter(globalVars.app.hMainView.menu.CheckMenu, "YDL_ENABLE", True)
+		self.setStatus(_("一括ダウンロード有効"))
 		while True:
 			self.log.debug("outer loop")
 			for key in self.listManager.getKeys():
@@ -163,11 +165,13 @@ class YDL(SourceBase):
 		self.listManager.onFinish(key)
 
 	def onCancel(self, key):
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中止：%s") % self.listManager.getTitle(key), self.friendlyName)
 		self.listManager.onCancel(key)
 
 	def exit(self):
 		wx.CallAfter(globalVars.app.hMainView.menu.CheckMenu, "YDL_ENABLE", False)
 		self.exitFlag = True
+		self.setStatus(_("一括ダウンロード無効"))
 
 
 class ListManager:
