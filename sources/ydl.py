@@ -184,6 +184,8 @@ class ListManager:
 		self.save()
 		# 前回、processingフラグを消さずに終了していた場合に備えて、最初にすべて削除する
 		self.clearProcessingFlags()
+		# 一時的に追加したはずの項目が残っていれば削除
+		self.clearTemporaryItems()
 
 	def load(self):
 		try:
@@ -313,6 +315,15 @@ class ListManager:
 				self.log.debug("clearing %s" % key)
 				del self._data[key]["processing"]
 		self.log.debug("finished clearing processing flags")
+		self.save()
+
+	def clearTemporaryItems(self):
+		self.log.debug("clearing temporary items...")
+		for key in tuple(self._data.keys()):
+			if "temporary" in self._data[key].keys():
+				self.log.debug("clearing %s" % key)
+				del self._data[key]
+		self.log.debug("finished clearing temporary items")
 		self.save()
 
 
