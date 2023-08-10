@@ -177,11 +177,13 @@ class YDL(SourceBase):
 class ListManager:
 	def __init__(self, ydl: YDL):
 		self.ydl = ydl
-		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "ydl.listManager"))
+		self.log = logging.getLogger("%s.%s" % (constants.LOG_PREFIX, "sources.ydl.listManager"))
 		self._data = {}
 		self.load()
 		# ファイル作成を兼ねて保存
 		self.save()
+		# 前回、processingフラグを消さずに終了していた場合に備えて、最初にすべて削除する
+		self.clearProcessingFlags()
 
 	def load(self):
 		try:
@@ -303,6 +305,15 @@ class ListManager:
 
 	def hasKey(self, key):
 		return key in self._data.keys()
+
+	def clearProcessingFlags(self):
+		self.log.debug("clearing processing flags...")
+		for key in self._data.keys():
+			if "processing" in self._data[key].keys():
+				self.log.debug("clearing %s" % key)
+				del self._data[key]["processing"]
+		self.log.debug("finished clearing processing flags")
+		self.save()
 
 
 class PlaylistDownloader(threading.Thread):
