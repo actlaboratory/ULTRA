@@ -344,7 +344,7 @@ class PlaylistDownloader(threading.Thread):
 			if self.exitFlag:
 				return
 			cnt += 1
-			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中（%(title)s）：%(cnt)d/%(total)d") % {"title": self.ydl.listManager.getTitle(self.key), "cnt": cnt, "total": total})
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中（%(title)s）：%(cnt)d/%(total)d") % {"title": self.ydl.listManager.getTitle(self.key), "cnt": cnt, "total": total}, self.ydl.friendlyName)
 			r = self.ydl.downloadVideo(url, True)
 			while r.is_alive():
 				if self.exitFlag:
