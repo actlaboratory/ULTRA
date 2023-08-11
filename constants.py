@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.7.0"
-APP_LAST_RELEASE_DATE="2023-07-17"
+APP_VERSION="1.8.0"
+APP_LAST_RELEASE_DATE="2023-08-11"
 APP_COPYRIGHT_YEAR="2021-2023"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -27,6 +27,7 @@ SETTING_FILE_NAME="data\\settings.ini"
 KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
 TC_SESSION_DATA = os.path.abspath("data\\twitcasting\\session.dat")
+YDL_LIST_DATA = os.path.abspath("data\\ydl\\list.dat")
 FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = os.path.abspath("data\\twitcasting\\account.bin")

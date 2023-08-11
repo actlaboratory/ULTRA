@@ -10,6 +10,9 @@ defaultKeymap["MAINVIEW"]={
 	"TC_RECORD_ARCHIVE": "",
 	"TC_RECORD_USER": "",
 	"TC_MANAGE_USER": "",
+	"YDL_ENABLE": "",
+	"YDL_DOWNLOAD": "",
+	"YDL_MANAGE_LISTS": "",
 	"OP_SETTINGS": "",
 	"HELP_UPDATE":"",
 	"HELP_VERSIONINFO":"",
@@ -19,4 +22,5 @@ defaultKeymap["HOTKEY"]={
 	"SHOW":"",
 	"EXIT": "",
 	"TC_ENABLE": "",
+	"YDL_ENABLE": "",
 }

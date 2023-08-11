@@ -23,6 +23,7 @@ from simpleDialog import *
 from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
+from views import ydlManageLists
 from views import settingsDialog
 from views import versionDialog
 
@@ -137,8 +138,10 @@ class Menu(BaseMenu):
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
 		# yt-dlpメニューの中身
+		self.RegisterCheckMenuCommand(self.hYDLMenu, "YDL_ENABLE")
 		self.RegisterMenuCommand(self.hYDLMenu, [
 			"YDL_DOWNLOAD",
+			"YDL_MANAGE_LISTS",
 		])
 		self.RegisterMenuCommand(self.hYDLMenu, "YDL_FILETYPES", subMenu=self.hYDLFiletypesMenu)
 
@@ -277,12 +280,38 @@ class Events(BaseEvents):
 			globalVars.app.tc.users = d.GetValue()
 			globalVars.app.tc.saveUserList()
 
+		# yt-dlp：一括ダウンロードを有効化
+		if selected == menuItemsStore.getRef("YDL_ENABLE"):
+			if event.IsChecked():
+				globalVars.app.ydl.initThread()
+				globalVars.app.ydl.start()
+			else:
+				globalVars.app.ydl.exit()
+				from sources import ydl
+				for downloader in ydl.getActiveDownloaders():
+					downloader.exit()
+			globalVars.app.config["ydl"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
 		# yt-dlp：URLを指定してダウンロード
 		if selected == menuItemsStore.getRef("YDL_DOWNLOAD"):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("URLの指定"))
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
-			globalVars.app.ydl.download(d.GetData())
+			globalVars.app.ydl.downloadVideo(d.GetData())
+
+		# yd-dlp: 一括ダウンロードURLの管理
+		if selected == menuItemsStore.getRef("YDL_MANAGE_LISTS"):
+			globalVars.app.ydl.exit()
+			d = ydlManageLists.Dialog()
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL:
+				return
+			globalVars.app.ydl.listManager.setData(d.GetValue())
+			if globalVars.app.config.getboolean("ydl", "enable", True):
+				globalVars.app.ydl.initThread()
+				globalVars.app.ydl.start()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
@@ -342,6 +371,10 @@ class Events(BaseEvents):
 			d = yesNoDialog(_("確認"), _("録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろしいですか？"))
 			if d == wx.ID_NO:
 				return
+		globalVars.app.ydl.exit()
+		from sources import ydl
+		for downloader in ydl.getActiveDownloaders():
+			downloader.exit()
 		self.parent.hFrame.Close(True)
 
 	def registerStartup(self):
@@ -384,6 +417,8 @@ class Events(BaseEvents):
 			prefix = ""
 			if refName.startswith("TC_"):
 				prefix = _("ツイキャス")
+			elif refName.startswith("YDL_"):
+				prefix = _("yt-dlp")
 			if prefix:
 				title = prefix + ":" + title
 			if refName in keys:
