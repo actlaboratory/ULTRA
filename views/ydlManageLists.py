@@ -19,7 +19,7 @@ class Dialog(views.KeyValueSettingDialogBase.KeyValueSettingDialogBase):
 			(_("ID"), 0, 300),
 			(_("タイトル"), 0, 300),
 			(_("URL"), 0, 300),
-			(_("データ取得間隔"), 0, 300),
+			(_("ダウンロード間隔"), 0, 300),
 		]
 		titles = {}
 		urls = {}
@@ -59,7 +59,7 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 				(_("ID"), None),
 				(_("タイトル"), None if url == "" else True),
 				(_("URL"), url == ""),
-				(_("データ取得間隔（秒）"), True)
+				(_("ダウンロード間隔（秒）"), True)
 			],
 			[None] * 4,
 			key, title, url, interval
@@ -72,9 +72,9 @@ class SettingDialog(views.KeyValueSettingDialogBase.SettingDialogBase):
 		return self.Validation(event)
 
 	def Validation(self, event):
-		# データ取得間隔は数値のみ
+		# ダウンロード間隔は数値のみ
 		if not re.fullmatch("[0-9]+", self.edits[3].GetValue()):
-			simpleDialog.errorDialog(_("データ取得間隔には数値（秒数）を指定してください。"))
+			simpleDialog.errorDialog(_("ダウンロード間隔には数値（秒数）を指定してください。"))
 			return
 		# プレイリストURLであることの確認
 		# すでにデータを取得済みならば確認不要
