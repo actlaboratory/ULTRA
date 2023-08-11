@@ -349,6 +349,7 @@ class PlaylistDownloader(threading.Thread):
 			while r.is_alive():
 				if self.exitFlag:
 					return
+				time.sleep(0.1)
 		self.ydl.onFinish(self.key)
 
 	def getKey(self):
