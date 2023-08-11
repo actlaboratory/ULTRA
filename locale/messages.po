@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ULTRA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-17 10:32+0900\n"
+"POT-Creation-Date: 2023-08-11 12:44+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: app.py:66 menuItemsDic.py:31 menuItemsDic.py:34
+#: app.py:66 menuItemsDic.py:31 menuItemsDic.py:36
 msgid "録画形式の設定"
 msgstr ""
 
@@ -28,17 +28,17 @@ msgid ""
 "の%(ext_default)s形式に変更します。"
 msgstr ""
 
-#: AppBase.py:49
+#: AppBase.py:55
 msgid ""
 "ログ機能の初期化に失敗しました。下記のファイルへのアクセスが可能であることを"
 "確認してください。"
 msgstr ""
 
-#: AppBase.py:58
+#: AppBase.py:64
 msgid "音声エンジンエラー"
 msgstr ""
 
-#: AppBase.py:58
+#: AppBase.py:64
 msgid ""
 "音声読み上げ機能の初期化に失敗したため、読み上げ機能を使用できません。出力先"
 "の変更をお試しください。"
@@ -147,30 +147,38 @@ msgid "その他のサービス（&yt-dlp）"
 msgstr ""
 
 #: menuItemsDic.py:33
+msgid "一括ダウンロードを有効化(&E)"
+msgstr ""
+
+#: menuItemsDic.py:34
 msgid "&URLを指定してダウンロード"
 msgstr ""
 
 #: menuItemsDic.py:35
-msgid "設定(&S)"
-msgstr ""
-
-#: menuItemsDic.py:36
-msgid "キーボードショートカットの設定(&K)"
+msgid "一括ダウンロードURLの管理(&M)"
 msgstr ""
 
 #: menuItemsDic.py:37
-msgid "グローバルホットキーの設定(&H)"
+msgid "設定(&S)"
 msgstr ""
 
 #: menuItemsDic.py:38
-msgid "Windows起動時の自動起動を有効化(&W)"
+msgid "キーボードショートカットの設定(&K)"
 msgstr ""
 
 #: menuItemsDic.py:39
-msgid "最新バージョンを確認(&U)"
+msgid "グローバルホットキーの設定(&H)"
 msgstr ""
 
 #: menuItemsDic.py:40
+msgid "Windows起動時の自動起動を有効化(&W)"
+msgstr ""
+
+#: menuItemsDic.py:41
+msgid "最新バージョンを確認(&U)"
+msgstr ""
+
+#: menuItemsDic.py:42
 msgid "バージョン情報(&V)"
 msgstr ""
 
@@ -280,7 +288,7 @@ msgid ""
 "ソフトウェア終了時に、自動でアップデートされます。"
 msgstr ""
 
-#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:386
+#: sources\twitcasting.py:42 sources\twitcasting.py:1107 views\main.py:419
 msgid "ツイキャス"
 msgstr ""
 
@@ -646,28 +654,71 @@ msgstr ""
 msgid "認証が必要です。ブラウザで操作を完了してください。"
 msgstr ""
 
-#: sources\ydl.py:22
+#: sources\ydl.py:28
 msgid "その他のサービス（yt-dlp）"
 msgstr ""
 
-#: sources\ydl.py:25
+#: sources\ydl.py:31
 msgid "動画"
 msgstr ""
 
-#: sources\ydl.py:26
+#: sources\ydl.py:32
 msgid "音声のみ"
 msgstr ""
 
-#: sources\ydl.py:51
+#: sources\ydl.py:42 sources\ydl.py:174
+msgid "一括ダウンロード無効"
+msgstr ""
+
+#: sources\ydl.py:46
+msgid "一括ダウンロード有効"
+msgstr ""
+
+#: sources\ydl.py:87
 #, python-format
 msgid ""
 "動画情報の取得に失敗しました。\n"
 "詳細：%s"
 msgstr ""
 
-#: sources\ydl.py:61
+#: sources\ydl.py:96
+msgid "このプレイリストは、一括ダウンロードURLとして登録されています。"
+msgstr ""
+
+#: sources\ydl.py:107
 #, python-format
 msgid "%sのダウンロードは現在サポートされていません。"
+msgstr ""
+
+#: sources\ydl.py:148
+#, python-format
+msgid ""
+"プレイリストの取得に失敗しました。\n"
+"詳細：%s"
+msgstr ""
+
+#: sources\ydl.py:160 sources\ydl.py:164 sources\ydl.py:168 sources\ydl.py:347
+msgid "プレイリストの保存"
+msgstr ""
+
+#: sources\ydl.py:160
+#, python-format
+msgid "処理開始：%s"
+msgstr ""
+
+#: sources\ydl.py:164
+#, python-format
+msgid "処理終了：%s"
+msgstr ""
+
+#: sources\ydl.py:168
+#, python-format
+msgid "処理中止：%s"
+msgstr ""
+
+#: sources\ydl.py:347
+#, python-format
+msgid "処理中（%(title)s）：%(cnt)d/%(total)d"
 msgstr ""
 
 #: views\auth.py:23
@@ -694,7 +745,7 @@ msgstr ""
 
 #: views\base.py:117 views\fontManager.py:25 views\fontManager.py:50
 #: views\globalKeyConfig.py:61 views\KeyValueSettingDialogBase.py:297
-#: views\KeyValueSettingDialogBase.py:348 views\main.py:89
+#: views\KeyValueSettingDialogBase.py:348 views\main.py:90
 #: views\updateDialog.py:66
 msgid "エラー"
 msgstr ""
@@ -721,7 +772,7 @@ msgstr ""
 msgid "識別子"
 msgstr ""
 
-#: views\globalKeyConfig.py:31 views\main.py:295
+#: views\globalKeyConfig.py:31 views\main.py:324
 msgid "ショートカットキーの設定"
 msgstr ""
 
@@ -730,7 +781,7 @@ msgstr ""
 #: views\globalKeyConfig.py:120 views\globalKeyConfig.py:128
 #: views\globalKeyConfig.py:138 views\globalKeyConfig.py:143
 #: views\keyConfig.py:57 views\KeyValueSettingDialogBase.py:333
-#: views\main.py:392 views\main.py:411
+#: views\main.py:427 views\main.py:446
 msgid "なし"
 msgstr ""
 
@@ -864,44 +915,44 @@ msgid ""
 "す。\n"
 msgstr ""
 
-#: views\main.py:47
+#: views\main.py:48
 msgid "動作履歴"
 msgstr ""
 
-#: views\main.py:48
+#: views\main.py:49 views\ydlManageLists.py:20 views\ydlManageLists.py:60
 msgid "タイトル"
 msgstr ""
 
-#: views\main.py:49
+#: views\main.py:50
 msgid "詳細"
 msgstr ""
 
-#: views\main.py:50 views\main.py:55
+#: views\main.py:51 views\main.py:56
 msgid "サービス"
 msgstr ""
 
-#: views\main.py:51
+#: views\main.py:52
 msgid "日時"
 msgstr ""
 
-#: views\main.py:54
+#: views\main.py:55
 msgid "動作状況"
 msgstr ""
 
-#: views\main.py:56
+#: views\main.py:57
 msgid "状態"
 msgstr ""
 
-#: views\main.py:58
+#: views\main.py:59
 msgid "準備完了"
 msgstr ""
 
-#: views\main.py:58
+#: views\main.py:59
 #, python-format
 msgid "%sを起動しました。"
 msgstr ""
 
-#: views\main.py:86
+#: views\main.py:87
 msgid ""
 "で設定されたホットキーが正しくありません。キーの重複、存在しないキー名の指"
 "定、使用できないキーパターンの指定などが考えられます。以下のキーの設定内容を"
@@ -909,95 +960,99 @@ msgid ""
 "\n"
 msgstr ""
 
-#: views\main.py:160
+#: views\main.py:163
 msgid "ファイル(&F)"
 msgstr ""
 
-#: views\main.py:161
+#: views\main.py:164
 msgid "サービス(&S)"
 msgstr ""
 
-#: views\main.py:162
+#: views\main.py:165
 msgid "オプション(&O)"
 msgstr ""
 
-#: views\main.py:163
+#: views\main.py:166
 msgid "ヘルプ(&H)"
 msgstr ""
 
-#: views\main.py:208 views\main.py:214 views\main.py:416
+#: views\main.py:211 views\main.py:217 views\main.py:295 views\main.py:451
 #: views\settingsDialog.py:167
 msgid ""
 "設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認し"
 "てください。"
 msgstr ""
 
-#: views\main.py:226 views\main.py:282
+#: views\main.py:229 views\main.py:299
 msgid "URLを入力"
 msgstr ""
 
-#: views\main.py:226
+#: views\main.py:229
 msgid "再生ページのURL"
 msgstr ""
 
-#: views\main.py:233 views\main.py:240
+#: views\main.py:236 views\main.py:243
 msgid "ユーザ名を入力"
 msgstr ""
 
-#: views\main.py:233 views\main.py:240 views\tcManageUser.py:20
+#: views\main.py:236 views\main.py:243 views\tcManageUser.py:20
 #: views\tcManageUser.py:99
 msgid "ユーザ名"
 msgstr ""
 
-#: views\main.py:256
+#: views\main.py:259
 msgid "すでに削除されています。"
 msgstr ""
 
-#: views\main.py:258
+#: views\main.py:261
 msgid "アクセストークンの削除"
 msgstr ""
 
-#: views\main.py:258
+#: views\main.py:261
 msgid ""
 "ツイキャス連携機能を無効化し、アクセストークンを削除します。よろしいですか？"
 msgstr ""
 
-#: views\main.py:265 views\main.py:361 views\main.py:367
+#: views\main.py:268 views\main.py:394 views\main.py:400
 msgid "完了"
 msgstr ""
 
-#: views\main.py:265
+#: views\main.py:268
 msgid "アクセストークンを削除しました。"
 msgstr ""
 
-#: views\main.py:282
+#: views\main.py:299
 msgid "URLの指定"
 msgstr ""
 
-#: views\main.py:303
+#: views\main.py:332
 msgid "グローバルホットキーの設定"
 msgstr ""
 
-#: views\main.py:342 views\main.py:358
+#: views\main.py:371 views\main.py:391
 msgid "確認"
 msgstr ""
 
-#: views\main.py:342
+#: views\main.py:371
 msgid ""
 "録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろ"
 "しいですか？"
 msgstr ""
 
-#: views\main.py:358
+#: views\main.py:391
 msgid "Windows起動時の自動起動はすでに設定されています。設定を解除しますか？"
 msgstr ""
 
-#: views\main.py:361
+#: views\main.py:394
 msgid "Windows起動時の自動起動を無効化しました。"
 msgstr ""
 
-#: views\main.py:367
+#: views\main.py:400
 msgid "Windows起動時の自動起動を設定しました。"
+msgstr ""
+
+#: views\main.py:421
+msgid "yt-dlp"
 msgstr ""
 
 #: views\settingsDialog.py:25
@@ -1226,4 +1281,45 @@ msgstr ""
 
 #: views\versionDialog.py:49
 msgid "閉じる"
+msgstr ""
+
+#: views\ydlManageLists.py:19 views\ydlManageLists.py:59
+msgid "ID"
+msgstr ""
+
+#: views\ydlManageLists.py:21 views\ydlManageLists.py:61
+msgid "URL"
+msgstr ""
+
+#: views\ydlManageLists.py:22
+msgid "ダウンロード間隔"
+msgstr ""
+
+#: views\ydlManageLists.py:35
+msgid "一括ダウンロードURLの管理"
+msgstr ""
+
+#: views\ydlManageLists.py:62
+msgid "ダウンロード間隔（秒）"
+msgstr ""
+
+#: views\ydlManageLists.py:69
+msgid "登録内容編集"
+msgstr ""
+
+#: views\ydlManageLists.py:77
+msgid "ダウンロード間隔には数値（秒数）を指定してください。"
+msgstr ""
+
+#: views\ydlManageLists.py:88
+#, python-format
+msgid ""
+"不正なURLが入力されました。\n"
+"詳細：%s"
+msgstr ""
+
+#: views\ydlManageLists.py:92
+msgid ""
+"この機能では、動画のURLを直接指定することができません。プレイリストやチャンネ"
+"ルページのURLを入力してください。"
 msgstr ""
