@@ -78,6 +78,7 @@ class YDL(SourceBase):
 			if self.exitFlag:
 				self.exitFlag = False
 				break
+			time.sleep(3)
 
 	def downloadVideo(self, url, skipExisting=False):
 		try:
