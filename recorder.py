@@ -237,7 +237,8 @@ class Recorder(threading.Thread):
 	def needEncode(self, ext):
 		from sources.twitcasting import Twitcasting
 		# ツイキャスは必ずMP4
-		if isinstance(self.source, Twitcasting) and ext == "mp4":
+		# 231009 tsも許容
+		if isinstance(self.source, Twitcasting) and ext in ("mp4", "ts"):
 			return False
 		return True
 	
