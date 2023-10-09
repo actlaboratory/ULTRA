@@ -184,7 +184,9 @@ class Twitcasting(SourceBase):
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
-				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], i["movie"]["hls_url"], i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
+				hls = i["movie"]["hls_url"]
+				hls = self.fixHlsUrl(hls)
+				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], hls, i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
 		for i in self.users:
@@ -198,6 +200,29 @@ class Twitcasting(SourceBase):
 		self.removeUsers(rm)
 		self.checkTokenExpires()
 		self.checkSessionStatus()
+
+	def fixHlsUrl(self, url):
+		self.log.debug("fixing HLS URL...")
+		# original URL: ...?video=1
+		# fixed URL: ...?mode=source
+		import urllib.parse
+		parsedUrl = urllib.parse.urlparse(url)
+		self.log.debug("parsed URL: " + str(parsedUrl))
+		queryStr = parsedUrl.query
+		self.log.debug("query: " + str(queryStr))
+		queryDict = urllib.parse.parse_qs(queryStr)
+		self.log.debug("parsed query: " + str(queryDict))
+		# dictの値は文字列でなくリスト
+		queryDict.clear()
+		queryDict["mode"] = ["source"]
+		self.log.debug("new query dict: " + str(queryDict))
+		queryStr = urllib.parse.urlencode(queryDict, doseq=True)
+		self.log.debug("new query string: " + str(queryStr))
+		newParsedUrl = parsedUrl._replace(query=queryStr)
+		self.log.debug("new parsed URL: " + str(newParsedUrl))
+		result = urllib.parse.urlunparse(newParsedUrl)
+		self.log.debug("result: " + str(result))
+		return result
 
 	def removeUsers(self, rm):
 		with tlock:
