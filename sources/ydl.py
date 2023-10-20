@@ -147,7 +147,7 @@ class YDL(SourceBase):
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			wx.CallAfter(simpleDialog.errorDialog, _("プレイリストの取得に失敗しました。\n詳細：%s") % e)
-			return
+			return []
 		ret = []
 		for entry in info.get("entries", []):
 			_type = entry.get("_type", "video")
