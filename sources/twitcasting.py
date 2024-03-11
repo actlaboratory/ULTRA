@@ -805,7 +805,9 @@ class Twitcasting(SourceBase):
 		# ダイアログ表示用パラメータ
 		title = _("対象ユーザの指定")
 		msg = _("対象アカウントの@からはじまるアカウント名を、\n改行区切りで入力してください。")
-		pattern = "^(@?[a-zA-Z0-9_]*)$"
+		# 240311 「c:xxx」のような形式をサポート
+		# 「:」の前が必ずしも1文字ではないこと（「ig:」など）、今後増減が予想されることから、どこに:があっても許容する
+		pattern = "^(@?[a-zA-Z0-9_:]*)$"
 		style = wx.TE_MULTILINE
 		d = views.SimpleInputDialog.Dialog(title, msg, validationPattern=pattern, style=style)
 		d.Initialize()
