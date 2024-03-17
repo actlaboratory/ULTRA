@@ -1,7 +1,7 @@
 		Universal Live Tracking and Recording App -ULTRA-
 
-	バージョン:　　ver.1.8.1
-	リリース:　　　2023-08-14
+	バージョン:　　ver.1.9.0
+	リリース:　　　2024-03-20
 	開発・配布元:　ACT Laboratory　(https://actlab.org/)
 	主要開発者:　　北畠一翔
 　　ソフト種別:　　オープンソースソフトウェア　(GitHubリポジトリ:https://github.com/actlaboratory/ULTRA/)
