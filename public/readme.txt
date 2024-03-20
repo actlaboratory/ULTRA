@@ -1,7 +1,7 @@
 		Universal Live Tracking and Recording App -ULTRA-
 
-	バージョン:　　ver.1.8.1
-	リリース:　　　2023-08-14
+	バージョン:　　ver.1.9.0
+	リリース:　　　2024-03-20
 	開発・配布元:　ACT Laboratory　(https://actlab.org/)
 	主要開発者:　　北畠一翔
 　　ソフト種別:　　オープンソースソフトウェア　(GitHubリポジトリ:https://github.com/actlaboratory/ULTRA/)
@@ -245,6 +245,7 @@ Windows10ではトースト通知、その他のバージョンではバルー�
 ５．３．１．４．３　保存ファイル名
 保存するファイル名を指定します。
 「%user%」を指定すると、その部分が配信者のユーザ名に置き換えられます。
+「%movie%」を指定すると、その部分が動画の識別子（配信サイト側で設定されたもの）に置き換えられます。
 また、%year%、%month%、%day%、%hour%、%minute%、%second%の各文字列は、配信開始日時に対応しています。
 既定では、「%user%_%year%%month%%day%_%hour%%minute%%second%」に設定されています。
 
