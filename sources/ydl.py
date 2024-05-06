@@ -80,12 +80,16 @@ class YDL(SourceBase):
 				break
 			time.sleep(3)
 
-	def downloadVideo(self, url, skipExisting=False):
+	def downloadVideo(self, url, skipExisting=False, silent=False):
+		# 240506: 各種エラーでダイアログを出さないモードを実装（一括ダウンロード用）
 		try:
 			info = self.extractInfo(url)
 		except Exception as e:
 			self.log.error(traceback.format_exc())
-			wx.CallAfter(simpleDialog.errorDialog, _("動画情報の取得に失敗しました。\n詳細：%s") % e)
+			if silent:
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ダウンロードエラー"), _("動画情報の取得に失敗しました。\n詳細：%s") % e, self.friendlyName)
+			else:
+				wx.CallAfter(simpleDialog.errorDialog, _("動画情報の取得に失敗しました。\n詳細：%s") % e)
 			return
 		_type = info.get("_type", "video")
 		if _type == "playlist":
@@ -94,7 +98,10 @@ class YDL(SourceBase):
 			entry = self.listManager.convertInfoToEntry(info, 3600, True)
 			key = tuple(entry.keys())[0]
 			if self.listManager.hasKey(key):
-				wx.CallAfter(simpleDialog.errorDialog, _("このプレイリストは、一括ダウンロードURLとして登録されています。"))
+				if silent:
+					wx.CallAfter(globalVars.app.hMainView.addLog, _("ダウンロードエラー"), _("このプレイリストは、一括ダウンロードURLとして登録されています。"), self.friendlyName)
+				else:
+					wx.CallAfter(simpleDialog.errorDialog, _("このプレイリストは、一括ダウンロードURLとして登録されています。"))
 				return
 			self.exit()
 			globalVars.app.hMainView.menu.EnableMenu("YDL_DOWNLOAD", False)
@@ -105,7 +112,10 @@ class YDL(SourceBase):
 			return
 		elif _type != "video":
 			self.log.error("unsupported: %s" % _type)
-			wx.CallAfter(simpleDialog.errorDialog, _("%sのダウンロードは現在サポートされていません。") % _type)
+			if silent:
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ダウンロードエラー"), _("%sのダウンロードは現在サポートされていません。") % _type, self.friendlyName)
+			else:
+				wx.CallAfter(simpleDialog.errorDialog, _("%sのダウンロードは現在サポートされていません。") % _type)
 			return
 		url = info["url"]
 		user = "%(user)s(%(extractor)s)" % {"user": info.get("uploader", "unknown_user"), "extractor": info.get("extractor", "unknown_service")}
@@ -346,7 +356,7 @@ class PlaylistDownloader(threading.Thread):
 				return
 			cnt += 1
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("プレイリストの保存"), _("処理中（%(title)s）：%(cnt)d/%(total)d") % {"title": self.ydl.listManager.getTitle(self.key), "cnt": cnt, "total": total}, self.ydl.friendlyName)
-			r = self.ydl.downloadVideo(url, True)
+			r = self.ydl.downloadVideo(url, skipExisting=True, silent=True)
 			if r is None:
 				continue
 			while r.is_alive():
