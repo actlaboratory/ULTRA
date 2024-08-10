@@ -760,10 +760,11 @@ class Twitcasting(SourceBase):
 				movie = self.getCurrentLive(userInfo["user"]["screen_id"])
 				if movie == None:
 					return
-				r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
+				r = recorder.Recorder(self, self.fixHlsUrl(movie["movie"]["hls_url"]), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
 				if r.isRecordedByAnotherThread():
 					simpleDialog.errorDialog(_("このユーザのライブはすでに録画中です。"))
 					return
+				# 本来録画されるはずだが、ライブ開始を逃してしまったので途中から始める
 				r.start()
 				return
 			simpleDialog.errorDialog(_("このユーザはすでに登録されています。"))
@@ -785,7 +786,7 @@ class Twitcasting(SourceBase):
 			movie = self.getCurrentLive(userName)
 			if movie == None:
 				return
-			r = recorder.Recorder(self, movie["movie"]["hls_url"], movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"])
+			r = recorder.Recorder(self, self.fixHlsUrl(movie["movie"]["hls_url"]), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
 			r.start()
 
 	def recordAll(self, user):
