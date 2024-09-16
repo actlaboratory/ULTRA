@@ -17,7 +17,7 @@ import hotkeyHandler
 import menuItemsStore
 import update
 from .base import *
-from recorder import getRecordingUsers
+from recorder import getRecordingUsers, getActiveObj
 from simpleDialog import *
 
 from views import globalKeyConfig
@@ -371,6 +371,8 @@ class Events(BaseEvents):
 			d = yesNoDialog(_("確認"), _("録画処理を実行中です。このまま終了すると、録画は中断されます。終了してもよろしいですか？"))
 			if d == wx.ID_NO:
 				return
+			for obj in getActiveObj():
+				obj.exit()
 		globalVars.app.ydl.exit()
 		from sources import ydl
 		for downloader in ydl.getActiveDownloaders():

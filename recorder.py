@@ -57,8 +57,12 @@ class Recorder(threading.Thread):
 			self.ext = self.source.getFiletype()
 		else:
 			self.ext = ext
-		super().__init__(daemon=True)
+		# アプリの終了時の処理が途中で中断されないように、`daemon=False`とする
+		super().__init__(daemon=False)
 		self.log.info("stream URL: %s" % self.stream)
+		self._exitFlag = False
+		# ffmpegのpopenオブジェクト
+		self.subProc: subprocess.Popen = None
 
 	def processHeader(self, header):
 		# key: valueの形式でリストに格納
@@ -192,24 +196,33 @@ class Recorder(threading.Thread):
 		self.log.debug("command: " + " ".join(cmd))
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
+		# 録画開始前に終了処理が行われていたら、ここで動作を終了
+		if self._exitFlag:
+			self.log.debug("Recording canceled")
+			return
 		# 録画に成功した、あるいは録画を中断すべきと判断するまで処理を繰り返す
 		while True:
 			self.source.onRecord(self.path, self.movie)
-			result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
+			self.subProc = subprocess.Popen(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
+			self.subProc.wait()
 			self.log.info("saved: %s" % self.path)
+			# 終了処理が行われていたらここで動作を止める
+			if self._exitFlag:
+				self.log.debug("recording canceled after saving a file")
+				return
 			# エラーメッセージがない、つまり録画成功
-			if len(result.stdout) == 0:
+			if len(self.subProc.stdout) == 0:
 				break
-			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
+			self.log.info("FFMPEG returned some errors.\n" + self.subProc.stdout)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
 				break
-			if "404 Not Found" in result.stdout:
+			if "404 Not Found" in self.subProc.stdout:
 				self.log.info("not found")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
 				break
-			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
+			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
 			sleep(15)
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
@@ -247,6 +260,12 @@ class Recorder(threading.Thread):
 			return True
 		# 通常は不要
 		return False
+
+	def exit(self):
+		self.log.debug("exitting...")
+		self._exitFlag = True
+		if self.subProc:
+			self.subProc.communicate("q")
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
