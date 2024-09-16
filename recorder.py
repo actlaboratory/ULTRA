@@ -189,13 +189,17 @@ class Recorder(threading.Thread):
 			if i + 1 == max:
 				globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)
 				return
-		self.source.onRecord(self.path, self.movie)
+		self.log.debug("command: " + " ".join(cmd))
 		globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		globalVars.app.tb.setAlternateText(_("録画中"))
-		self.log.debug("command: " + " ".join(cmd))
-		result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
-		self.log.info("saved: %s" % self.path)
-		while len(result.stdout) > 0:
+		# 録画に成功した、あるいは録画を中断すべきと判断するまで処理を繰り返す
+		while True:
+			self.source.onRecord(self.path, self.movie)
+			result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
+			self.log.info("saved: %s" % self.path)
+			# エラーメッセージがない、つまり録画成功
+			if len(result.stdout) == 0:
+				break
 			self.log.info("FFMPEG returned some errors.\n" + result.stdout)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
@@ -207,16 +211,6 @@ class Recorder(threading.Thread):
 				break
 			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result.stdout), self.source.friendlyName)
 			sleep(15)
-			cmd = self.getCommand()
-			self.source.onRecord(self.path, self.movie)
-			result = subprocess.run(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
-			self.log.info("saved: %s" % self.path)
-			if not self.source.onRecordError(self.movie):
-				self.log.info("End of recording")
-				break
-			if "404 Not Found" in result.stdout:
-				self.log.info("not found")
-				break
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
