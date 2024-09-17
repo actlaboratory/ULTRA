@@ -210,19 +210,21 @@ class Recorder(threading.Thread):
 			if self._exitFlag:
 				self.log.debug("recording canceled after saving a file")
 				return
+			# 標準出力を取得
+			result = self.subProc.communicate()[0]
 			# エラーメッセージがない、つまり録画成功
-			if len(self.subProc.stdout) == 0:
+			if len(result) == 0:
 				break
-			self.log.info("FFMPEG returned some errors.\n" + self.subProc.stdout)
+			self.log.info("FFMPEG returned some errors.\n" + result)
 			if not self.source.onRecordError(self.movie):
 				self.log.info("End of recording")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
 				break
-			if "404 Not Found" in self.subProc.stdout:
+			if "404 Not Found" in result:
 				self.log.info("not found")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
 				break
-			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % self.subProc.stdout), self.source.friendlyName)
+			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
 			sleep(15)
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
