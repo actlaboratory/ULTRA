@@ -55,6 +55,7 @@ class Twitcasting(SourceBase):
 		self.running = False
 		self.shouldExit = False
 		self.enableMenu(False)
+		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", globalVars.app.config.getboolean("twitcasting", "enable", False))
 		globalVars.app.hMainView.menu.EnableMenu("TC_REMOVE_SESSION", os.path.exists(constants.TC_SESSION_DATA))
 		globalVars.app.hMainView.menu.CheckMenu("TC_SAVE_COMMENTS", globalVars.app.config.getboolean("twitcasting", "saveComments", False))
 		self.setStatus(_("未接続"))
@@ -271,7 +272,6 @@ class Twitcasting(SourceBase):
 		self.log.debug("wss opened")
 		self.running = True
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
-		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", True)
 		globalVars.app.hMainView.menu.EnableMenu("HIDE")
 		self.setStatus(_("接続済み"))
 		self.enableMenu(True)
@@ -287,7 +287,6 @@ class Twitcasting(SourceBase):
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
 		self.setStatus(_("未接続"))
 		self.enableMenu(False)
-		globalVars.app.hMainView.menu.CheckMenu("TC_ENABLE", False)
 		if not self.shouldExit:
 			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
 			self.log.debug("Connection does not closed by user.")
