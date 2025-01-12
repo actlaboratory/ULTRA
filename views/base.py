@@ -37,6 +37,7 @@ class BaseView(object):
 		_winxptheme.SetWindowTheme(self.hFrame.GetHandle(),"","")
 		self.hFrame.Bind(wx.EVT_MOVE_END,self.events.WindowMove)
 		self.hFrame.Bind(wx.EVT_SIZE,self.events.WindowResize)
+		self.hFrame.Bind(wx.EVT_MAXIMIZE,self.events.WindowResize)
 		self.hFrame.Bind(wx.EVT_CLOSE,self.events.OnExit)
 		self.MakePanel(space)
 
@@ -45,9 +46,9 @@ class BaseView(object):
 		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.hPanel,None, wx.VERTICAL,style=wx.ALL,space=space)
 		self.hFrame.Layout()
 
-	def Clear(self):
+	def Clear(self, space=0):
 		self.hFrame.DestroyChildren()
-		self.MakePanel()
+		self.MakePanel(space)
 
 	def Show(self):
 		self.creator.GetPanel().Layout()
@@ -57,6 +58,7 @@ class BaseView(object):
 
 	def InstallMenuEvent(self,menu,event):
 		"""メニューを作り、指定されたイベント処理用オブジェクトと結びつける。"""
+		menu.parent=self			#下位互換の為ここで渡すしかない。applyで必要。
 		menu.Apply(self.hFrame)
 		self.menu=menu
 
@@ -96,6 +98,7 @@ class BaseMenu(object):
 		self.keymap_identifier=identifier
 		self.blockCount={}				#key=intのref、value=blockCount
 		self.desableItems=set()			#ブロック中のメニューのrefを格納
+		self.callbacks={}				#メニュー選択時のコールバックを格納
 		self.hMenuBar=wx.MenuBar()
 		if keyFilter:
 			self.keyFilter=keyFilter
@@ -116,14 +119,14 @@ class BaseMenu(object):
 				tmp+=v+"\n"
 			dialog(_("エラー"),tmp)
 
-	def ApplyShortcut(self,window=None):
+	def ApplyShortcut(self, window=None, event=None):
 		"""
 			キーマップ上のショートカットキーの更新を反映する
 			windowが指定されていれば、そのウィンドウに更新されたショートカットキーを割り当てる
 		"""
 		self.acceleratorTable=self.keymap.GetTable(self.keymap_identifier)
 		if window:
-			self.keymap.Set(self.keymap_identifier,window)
+			self.keymap.Set(self.keymap_identifier, window, event)
 
 	def Block(self,ref):
 		"""
@@ -176,7 +179,10 @@ class BaseMenu(object):
 	def RegisterMenuCommand(self,menu_handle,ref_id,title="",subMenu=None,index=-1):
 		if type(ref_id)==dict:
 			for k,v in ref_id.items():
-				self._RegisterMenuCommand(menu_handle,k,v,None,index)
+				if type(v) == str:
+					self._RegisterMenuCommand(menu_handle,k,v,None,index)
+				else:
+					self._RegisterMenuCommand(menu_handle,k,menuItemsDic.dic[k],None,index,v)
 				if index>=0:index+=1
 		elif type(ref_id)!=str and hasattr(ref_id,"__iter__"):
 			for k in ref_id:
@@ -187,7 +193,7 @@ class BaseMenu(object):
 				title=menuItemsDic.dic[ref_id]
 			return self._RegisterMenuCommand(menu_handle,ref_id,title,subMenu,index)
 
-	def _RegisterMenuCommand(self,menu_handle,ref_id,title,subMenu,index):
+	def _RegisterMenuCommand(self,menu_handle,ref_id,title,subMenu,index, callback=None):
 		if ref_id=="" and title=="":
 			if index>=0:
 				menu_handle.InsertSeparator(index)
@@ -206,6 +212,8 @@ class BaseMenu(object):
 				menu_handle.Insert(index,menuItemsStore.getRef(ref_id),s,subMenu)
 			else:
 				menu_handle.Append(menuItemsStore.getRef(ref_id),s,subMenu)
+		if callback:
+			self.callbacks[menuItemsStore.getRef(ref_id)] = callback
 		self.blockCount[menuItemsStore.getRef(ref_id)]=0
 
 	def RegisterCheckMenuCommand(self,menu_handle,ref_id,title="",index=-1):
@@ -279,6 +287,15 @@ class BaseMenu(object):
 			self._addMenuItemList(menu,ret)
 		return ret
 
+	def setCallbacks(self, items):
+		"""メニューバーなしのショートカットをまとめてコールバック登録する"""
+		for k,v in items.items():
+			self.callbacks[menuItemsStore.getRef(k)] = v
+
+	def getCallback(self,ref_id):
+		if ref_id in self.callbacks:
+			return self.callbacks[ref_id]
+
 	def _addMenuItemList(self,menu,ret):
 		if type(menu)==wx.Menu:
 			items=menu.GetMenuItems()
@@ -297,6 +314,18 @@ class BaseEvents(object):
 		self.parent=parent
 		self.identifier=identifier
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX,self.identifier))
+
+	def OnMenuSelect(self,event):
+		"""メニュー項目が選択されたときのイベントハンドら。"""
+		#ショートカットキーが無効状態のときは何もしない
+		if not self.parent.shortcutEnable:
+			event.Skip()
+			return
+
+		selected=event.GetId()		#メニュー識別子
+		callback = self.parent.menu.getCallback(selected)
+		if callback:
+			callback(event)
 
 	def OnExit(self,event):
 		event.Skip()
