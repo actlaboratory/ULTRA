@@ -8,6 +8,7 @@ import pywintypes
 import win32api
 import _winxptheme
 import wx
+import wx.lib.scrolledpanel
 #import wx.adv
 
 from . import fontManager
@@ -25,6 +26,7 @@ from views.viewObjectBase import notebookBase
 from views.viewObjectBase import textCtrlBase
 from views.viewObjectBase import spinCtrlBase
 from views.viewObjectBase import sliderBase
+from views.viewObjectBase import staticBitmapBase
 from views.viewObjects import clearSlider
 from views.viewObjects import gridBagSizer
 
@@ -66,7 +68,8 @@ class ViewCreatorBase():
 			"gauge": wx.Gauge,
 			"spinCtrl": spinCtrlBase.spinCtrl,
 			"slider": sliderBase.slider,
-			"clear_slider": clearSlider.clearSlider
+			"clear_slider": clearSlider.clearSlider,
+			"static_bitmap": staticBitmapBase.staticBitmap,
 		}
 		
 		#表示モード
@@ -84,7 +87,7 @@ class ViewCreatorBase():
 		self.font=fontManager.FontManager()
 
 		#親ウィンドウ
-		if type(parent) in (wx.Panel,):
+		if type(parent) in [wx.Panel,  wx.lib.scrolledpanel.ScrolledPanel]:
 			self.parent=parent
 			self._setFace(parent)
 		elif isinstance(parent, wx.Notebook) or isinstance(parent, wx.Choicebook) or isinstance(parent, wx.Listbook):
@@ -117,6 +120,12 @@ class ViewCreatorBase():
 			elif space==-1:
 				return self.sizer.AddStretchSpacer(1)
 			return self.sizer.AddSpacer(space)
+
+	# グリッド系Sizerに空セルを挿入
+	def AddEmptyCell(self):
+		if self.sizer.__class__==wx.BoxSizer or self.sizer.__class__==wx.StaticBoxSizer:
+			return
+		return self.sizer.Add((0,0))
 
 	#parentで指定したsizerの下に、新たなBoxSizerを設置
 	def BoxSizer(self,parent,orient=wx.VERTICAL,label="",space=0,style=0,proportion=0):
@@ -234,7 +243,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hCombo,hStaticText
 
-	def comboEdit(self,text, selection, event=None, defaultValue="", style=wx.CB_DROPDOWN, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def comboEdit(self,text, selection, event=None, defaultValue="", style=wx.CB_DROPDOWN, x=-1, sizerFlag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hCombo=self.winObject["comboBox"](parent,wx.ID_ANY,value=defaultValue,choices=selection,style=wx.BORDER_RAISED | style,name=text,size=(x,-1), enableTabFocus=enableTabFocus)
@@ -249,7 +258,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hCombo,hStaticText
 
-	def checkbox(self,text, event=None, state=False, style=0, x=-1, sizerFlag=0, proportion=0,margin=5, enableTabFocus=True):
+	def checkbox(self,text, event=None, state=False, style=0, x=-1, sizerFlag=wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5, enableTabFocus=True):
 		hPanel=wx.Panel(self.parent,wx.ID_ANY)
 		self._setFace(hPanel,mode=SKIP_COLOUR)
 		hSizer=self.BoxSizer(hPanel,self.getParentOrientation())
@@ -283,7 +292,7 @@ class ViewCreatorBase():
 			raise ValueError("ViewCreatorはCheckboxの作成に際し正しくない型の値を受け取りました。")
 
 	# 3stateチェックボックス
-	def checkbox3(self,text, event=None, state=None, style=0, x=-1, sizerFlag=0, proportion=0,margin=0, enableTabFocus=True):
+	def checkbox3(self,text, event=None, state=None, style=0, x=-1, sizerFlag=wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=0, enableTabFocus=True):
 		hPanel=wx.Panel(self.parent,wx.ID_ANY)
 		self._setFace(hPanel,mode=SKIP_COLOUR)
 		hSizer=self.BoxSizer(hPanel,self.getParentOrientation())
@@ -327,7 +336,7 @@ class ViewCreatorBase():
 		else:
 			raise ValueError("ViewCreatorはCheckboxの作成に際し正しくない型の値を受け取りました。")
 
-	def radiobox(self,text, items, event=None, dimension=0, orient=wx.VERTICAL, style=0, x=-1, sizerFlag=0, proportion=0,margin=5, enableTabFocus=True):
+	def radiobox(self,text, items, event=None, dimension=0, orient=wx.VERTICAL, style=0, x=-1, sizerFlag=wx.ALIGN_CENTER_VERTICAL|wx.ALL, proportion=0,margin=5, enableTabFocus=True):
 		if orient==wx.VERTICAL:
 			style=wx.RA_SPECIFY_COLS | style
 		else:
@@ -347,7 +356,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hRadioBox
 
-	def radio(self,text,event=None,state=False,style=0, x=-1, sizerFlag=0, proportion=0,margin=5, enableTabFocus=True):
+	def radio(self,text,event=None,state=False,style=0, x=-1, sizerFlag=wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5, enableTabFocus=True):
 		hPanel=wx.Panel(self.parent,wx.ID_ANY)
 		self._setFace(hPanel,mode=SKIP_COLOUR)
 		hSizer=self.BoxSizer(hPanel,self.getParentOrientation())
@@ -444,7 +453,7 @@ class ViewCreatorBase():
 		self.sizer.Layout()
 		return htab
 
-	def inputbox(self,text, event=None, defaultValue="", style=wx.BORDER_RAISED, x=-1, sizerFlag=wx.ALL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
+	def inputbox(self,text, event=None, defaultValue="", style=wx.BORDER_RAISED, x=-1, sizerFlag=wx.ALL|wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5,textLayout=wx.DEFAULT, enableTabFocus=True):
 		if self.mode&MODE_WRAPPING==MODE_NOWRAP:
 			style|=wx.TE_DONTWRAP
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
@@ -459,7 +468,7 @@ class ViewCreatorBase():
 		self.AddSpace()
 		return hTextCtrl,hStaticText
 
-	def gauge(self,text,max=0,defaultValue=0,style=wx.GA_HORIZONTAL | wx.GA_SMOOTH | wx.BORDER_RAISED,x=-1,sizerFlag=wx.ALL,proportion=0,margin=5,textLayout=wx.DEFAULT):
+	def gauge(self,text,max=0,defaultValue=0,style=wx.GA_HORIZONTAL | wx.GA_SMOOTH | wx.BORDER_RAISED,x=-1,sizerFlag=wx.ALL|wx.ALIGN_CENTER_VERTICAL,proportion=0,margin=5,textLayout=wx.DEFAULT):
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hGauge=self.winObject["gauge"](parent, wx.ID_ANY, size=(x,-1), style=style,name=text,)
@@ -498,6 +507,7 @@ class ViewCreatorBase():
 		hStaticText,sizer,parent=self._addDescriptionText(text,textLayout,sizerFlag, proportion,margin)
 
 		hSlider=self.winObject["clear_slider"](parent, wx.ID_ANY, size=(x,-1),value=defaultValue, minValue=min, maxValue=max, style=style, enableTabFocus=enableTabFocus)
+		hSlider.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 		hSlider.Bind(wx.EVT_SCROLL_CHANGED,event)
 		self._setFace(hSlider)
 		if x==-1:	#幅を拡張
@@ -506,6 +516,13 @@ class ViewCreatorBase():
 			Add(sizer,hSlider,proportion,sizerFlag,margin)
 		self.AddSpace()
 		return hSlider,hStaticText
+
+	def staticBitmap(self,text, bitmap=wx.NullBitmap, style=0, size=(-1,-1), sizerFlag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, proportion=0,margin=5):
+		staticBitmap=self.winObject["static_bitmap"](self.parent, wx.ID_ANY, size=size,  style=style, name=text)
+		self._setFace(staticBitmap)
+		Add(self.sizer,staticBitmap,proportion,sizerFlag,margin)
+		self.AddSpace()
+		return staticBitmap
 
 	"""
 	def webView(self):
@@ -548,6 +565,9 @@ class ViewCreatorBase():
 
 	def GetSizer(self):
 		return self.sizer
+
+	def GetMode(self):
+		return self.mode
 
 	def _addDescriptionText(self,text,textLayout,sizerFlag=0, proportion=0,margin=0):
 		if textLayout not in (None,wx.HORIZONTAL,wx.VERTICAL,wx.DEFAULT):

@@ -53,6 +53,7 @@ class clearSlider(sliderBase.slider):
 
     def paintEvent(self,event):
         dc = wx.PaintDC(self)
+
         ellipseWidth = dc.GetSize().GetHeight() / 2
 
         # はみ出た円を消すために背景色で塗る
@@ -62,17 +63,17 @@ class clearSlider(sliderBase.slider):
 
         # 枠描画のため背景色で塗る
         dc.SetPen(wx.Pen(wx.Colour(0, 102, 204), self.BORDER_WIDTH, wx.PENSTYLE_SOLID))
-        dc.DrawRectangle(self.getLeftMargin(), 0, dc.GetSize().GetWidth() - self.getLeftMargin() - self.getRightMargin(), dc.GetSize().GetHeight())
+        dc.DrawRectangle((int)(self.getLeftMargin()), 0, (int)(dc.GetSize().GetWidth() - self.getLeftMargin() - self.getRightMargin()), (int)(dc.GetSize().GetHeight()))
 
         # 現在のパーセンテージまで塗る
         dc.SetBrush(wx.Brush(wx.Colour(0, 102, 204), wx.BRUSHSTYLE_SOLID))
         dc.SetPen(wx.Pen(wx.Colour(0, 102, 204), 1, wx.PENSTYLE_SOLID))
-        dc.DrawRectangle(ellipseWidth / 2, 0, self.getValueBarLength(), dc.GetSize().GetHeight())
+        dc.DrawRectangle((int)(ellipseWidth / 2), 0, (int)(self.getValueBarLength()), (int)(dc.GetSize().GetHeight()))
 
         # 現在の位置に円を描画
         dc.SetBrush(wx.Brush(wx.Colour(255, 100, 0), wx.BRUSHSTYLE_SOLID))
         dc.SetPen(wx.Pen(wx.Colour(255, 100, 0), 1, wx.PENSTYLE_SOLID))
-        dc.DrawEllipse(self.BORDER_WIDTH / 2 + self.getValueBarLength() - self.BORDER_WIDTH / 2, 0, ellipseWidth, dc.GetSize().GetHeight())
+        dc.DrawEllipse((int)(self.BORDER_WIDTH / 2 + self.getValueBarLength() - self.BORDER_WIDTH / 2), 0, int(ellipseWidth), int(dc.GetSize().GetHeight()))
 
     #ウィンドウ内座標xからその位置のvalueの値を計算する
     def pos2value(self, x):
@@ -146,7 +147,7 @@ class clearSlider(sliderBase.slider):
             self.toolTip = None
 
     def SetValue(self,value):
-        super().SetValue(value)
+        super().SetValue(int(value))
         self.Refresh()
 
     def mouseClickEvent(self,event):
