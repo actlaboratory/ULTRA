@@ -65,6 +65,7 @@ class Twitcasting(SourceBase):
 		self.initializeLogger()
 		self.account = ""
 		self.nextSessionCheckTime = 0
+		self.movies = []
 
 	def initializeLogger(self):
 		websocket.enableTrace(True, globalVars.app.hLogHandler)
@@ -180,6 +181,10 @@ class Twitcasting(SourceBase):
 		if "movies" not in obj.keys() or obj["movies"] == None:
 			return
 		for i in obj["movies"]:
+			movieId = i["movie"]["id"]
+			if movieId in self.movies:
+				continue
+			self.movies.append(movieId)
 			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
 				continue
 			userId = i["broadcaster"]["id"]
@@ -270,26 +275,12 @@ class Twitcasting(SourceBase):
 		"""ソケット通信が始まった
 		"""
 		self.log.debug("wss opened")
-		self.running = True
-		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
-		globalVars.app.hMainView.menu.EnableMenu("HIDE")
-		self.setStatus(_("接続済み"))
-		self.enableMenu(True)
 
 	def onClose(self, ws, code, msg):
 		"""ソケット通信が切断された
 		"""
 		self.log.debug("wss closed. code:%s, msg:%s" % (code, msg))
 		time.sleep(3)
-		self.running = False
-		if self.getActiveSourceCount() == 0:
-			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
-		wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
-		self.setStatus(_("未接続"))
-		self.enableMenu(False)
-		if not self.shouldExit:
-			wx.CallAfter(globalVars.app.hMainView.addLog, _("再接続"), _("ツイキャスとの接続が切断されたため、再度接続します。"), self.friendlyName)
-			self.log.debug("Connection does not closed by user.")
 
 	def loadToken(self):
 		"""トークン情報をファイルから読み込み
@@ -401,6 +392,13 @@ class Twitcasting(SourceBase):
 		"""
 		if self.initialized == 0 and not self.initialize():
 			return
+		self.running = True
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("接続完了"), _("新着ライブの監視を開始しました。"), self.friendlyName)
+		globalVars.app.hMainView.menu.EnableMenu("HIDE")
+		self.setStatus(_("接続済み"))
+		self.enableMenu(True)
+		self.newLiveChecker = NewLiveChecker(self)
+		self.newLiveChecker.start()
 		while not self.shouldExit:
 			proxyUrl, proxyPort = globalVars.app.getProxyInfo()
 			if proxyUrl and proxyUrl.startswith("http://"):
@@ -508,6 +506,11 @@ class Twitcasting(SourceBase):
 		if hasattr(self, "socket"):
 			self.socket.close()
 		self.enableMenu(False)
+		self.running = False
+		if self.getActiveSourceCount() == 0:
+			globalVars.app.hMainView.menu.EnableMenu("HIDE", False)
+		wx.CallAfter(globalVars.app.hMainView.addLog, _("切断"), _("ツイキャスとの接続を切断しました。"), self.friendlyName)
+		self.setStatus(_("未接続"))
 
 	def getConfig(self, user):
 		"""通知方法の設定を取得。ユーザ専用の設定があればそれを、なければデフォルト値を返す。
@@ -1197,3 +1200,23 @@ class SessionManager:
 			self.log.error(traceback.format_exc())
 			return False
 
+class NewLiveChecker(threading.Thread):
+	def __init__(self, tc):
+		super().__init__(daemon=True)
+		self.tc = tc
+		self.log = logging.getLogger("%s.%s" %(constants.LOG_PREFIX, "sources.twitcasting.newLiveChecker"))
+
+	def run(self):
+		while True:
+			if self.tc.shouldExit:
+				break
+			r = requests.get("https://apiv2.twitcasting.tv/search/lives", {"limit": "100", "type": "new", "lang": "ja",}, headers=self.tc.header)
+			if r.status_code != 200:
+				if r.json()["error"]["code"] == 1000:
+					self.tc.showTokenError()
+				else:
+					self.tc.showError(r.json()["error"]["code"])
+				break
+			self.log.debug("received")
+			self.tc.onMessage(None, r.text)
+			time.sleep(10)
