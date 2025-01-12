@@ -185,6 +185,9 @@ class Twitcasting(SourceBase):
 			if movieId in self.movies:
 				continue
 			self.movies.append(movieId)
+			# MemoryError対策
+			if len(self.movies) > 100:
+				self.movies.pop(0)
 			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
 				continue
 			userId = i["broadcaster"]["id"]
