@@ -188,7 +188,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("%s not in %s" % (movieId, self.movies))
 			self.movies.append(movieId)
 			# MemoryError対策
-			if len(self.movies) > 100:
+			if len(self.movies) > 500:
 				remove = self.movies.pop(0)
 				self.log.debug("removed %s" % remove)
 			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
