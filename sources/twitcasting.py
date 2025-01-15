@@ -183,11 +183,14 @@ class Twitcasting(SourceBase):
 		for i in obj["movies"]:
 			movieId = i["movie"]["id"]
 			if movieId in self.movies:
+				self.log.debug("%s is already notified." % movieId)
 				continue
+			self.log.debug("%s not in %s" % (movieId, self.movies))
 			self.movies.append(movieId)
 			# MemoryError対策
 			if len(self.movies) > 100:
-				self.movies.pop(0)
+				remove = self.movies.pop(0)
+				self.log.debug("removed %s" % remove)
 			if not i["movie"]["is_live"] or i["movie"]["hls_url"] == "":
 				continue
 			userId = i["broadcaster"]["id"]
