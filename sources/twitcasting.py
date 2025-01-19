@@ -374,7 +374,15 @@ class Twitcasting(SourceBase):
 		"""
 		try:
 			with open(constants.TC_USER_DATA, "r", encoding="utf-8") as f:
-				self.users = json.load(f)
+				try:
+					self.users = json.load(f)
+				except json.JSONDecodeError as e:
+					# ログにファイルの内容を書き込むため、戦闘に戻す
+					f.seek(0)
+					self.log.error("Json decode error: %s" % f.read())
+					self.users = {}
+					# あえてアプリを落とす（原因がわかったら削除）
+					raise e
 		except FileNotFoundError:
 			self.users = {}
 			self.saveUserList()
