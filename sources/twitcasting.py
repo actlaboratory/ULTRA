@@ -1226,16 +1226,16 @@ class NewLiveChecker(threading.Thread):
 				break
 			try:
 				r = requests.get("https://apiv2.twitcasting.tv/search/lives", {"limit": "100", "type": "new", "lang": "ja",}, headers=self.tc.header)
+				if r.status_code != 200:
+					if r.json()["error"]["code"] == 1000:
+						self.tc.showTokenError()
+					else:
+						self.tc.showError(r.json()["error"]["code"])
+					break
+				self.log.debug("received")
+				self.tc.onMessage(None, r.text)
+				time.sleep(10)
 			except Exception as e:
 				self.log.error(traceback.format_exc())
 				time.sleep(10)
 				continue
-			if r.status_code != 200:
-				if r.json()["error"]["code"] == 1000:
-					self.tc.showTokenError()
-				else:
-					self.tc.showError(r.json()["error"]["code"])
-				break
-			self.log.debug("received")
-			self.tc.onMessage(None, r.text)
-			time.sleep(10)
