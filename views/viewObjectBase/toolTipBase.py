@@ -41,12 +41,12 @@ class toolTip():
         if self.dialog != None: self.destroy()
     
     def _fixPos(self, cursorPos=None):
-        borderW = (self.parent.GetTopLevelParent().GetScreenRect().GetWidth() - self.parent.GetTopLevelParent().GetClientSize()[0] + 2) / 2
-        borderT = (self.parent.GetTopLevelParent().GetScreenRect().GetHeight() - self.parent.GetTopLevelParent().GetClientSize()[1] - borderW - 1)
+        borderW = (int)((self.parent.GetTopLevelParent().GetScreenRect().GetWidth() - self.parent.GetTopLevelParent().GetClientSize()[0] + 2) / 2)
+        borderT = (int)((self.parent.GetTopLevelParent().GetScreenRect().GetHeight() - self.parent.GetTopLevelParent().GetClientSize()[1] - borderW - 1))
         clientRect = self.dialog.GetScreenRect()
         if cursorPos!=None: clientRect.SetPosition(wx.Point(cursorPos.x+10, cursorPos.y+10))
         clientBR = clientRect.GetBottomRight()
-        clientH = clientRect.GetHeight()
+        clientH = (int)(clientRect.GetHeight())
         maxBR = self.parent.GetTopLevelParent().GetScreenRect().GetBottomRight()
         x = maxBR.x - clientBR.x - borderW
         if x < 0:

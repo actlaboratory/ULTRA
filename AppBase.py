@@ -1,5 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 #Application Initializer
+#Copyright (C) 2019-2022 yamahubuki <itiro.ishino@gmail.com>
+
 
 import accessible_output2.outputs
 import datetime
@@ -14,12 +16,12 @@ import traceback
 import win32api
 import wx
 
-from accessible_output2.outputs.base import OutputError
-
 import constants
 import DefaultSettings
-import views.langDialog
 import simpleDialog
+import views.langDialog
+
+from accessible_output2.outputs.base import OutputError
 
 
 class MaiｎBase(wx.App):
@@ -33,12 +35,6 @@ class MaiｎBase(wx.App):
 		#各種初期設定
 		self.InitLogger()
 		self.LoadSettings()
-		# localeは「ja_JP」のような形式。設定ファイルの定義ミスにより「_」ではなく「-」を使っていたため、必要に応じて最初に設定ファイルを書き換える。
-		locale_old = self.config["general"]["locale"]
-		if "-" in locale_old:
-			locale_new = locale_old.replace("-", "_")
-			self.log.warn("Fixed locale setting: %s -> %s" % (locale_old, locale_new))
-			self.config["general"]["locale"] = locale_new
 		try:
 			if self.config["general"]["locale"]!=None:
 				locale.setlocale(locale.LC_TIME,self.config["general"]["locale"])
@@ -99,8 +95,12 @@ class MaiｎBase(wx.App):
 
 	def InitLogger(self):
 		"""ログ機能を初期化して準備する。"""
+		ex = ""
 		try:
 			self.deleteAllLogs()
+		except Exception as e:
+			ex = "".join(traceback.TracebackException.from_exception(e).format())
+		try:
 			self.hLogHandler=logging.handlers.RotatingFileHandler(constants.LOG_FILE_NAME, mode="w", encoding="UTF-8", maxBytes=2**20*256, backupCount=5)
 			self.hLogHandler.setLevel(logging.DEBUG)
 			self.hLogFormatter=logging.Formatter("%(name)s - %(levelname)s - %(message)s (%(asctime)s)")
@@ -113,6 +113,8 @@ class MaiｎBase(wx.App):
 		self.log=logging.getLogger(constants.LOG_PREFIX+".Main")
 		r="executable" if self.frozen else "interpreter"
 		self.log.info("Starting"+constants.APP_NAME+" "+constants.APP_VERSION+" as %s!" % r)
+		if ex:
+			self.log.error("failed to deleteAllLogs().\n"+ex)
 
 	def deleteAllLogs(self):
 		for i in glob.glob("%s*" % constants.LOG_FILE_NAME):
@@ -153,6 +155,7 @@ class MaiｎBase(wx.App):
 		"""スクリーンリーダーでしゃべらせる。"""
 		self.speech.speak(s, interrupt=interrupt)
 		self.speech.braille(s)
+		self.log.debug("speech: " + s + ", interrupt=" + str(interrupt))
 
 	def SetTimeZone(self):
 		bias=win32api.GetTimeZoneInformation(True)[1][0]*-1

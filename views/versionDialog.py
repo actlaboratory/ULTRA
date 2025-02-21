@@ -40,7 +40,7 @@ class dialog(baseDialog.BaseDialog):
 
         self.info, dummy = versionCreator.inputbox("", defaultValue="\r\n".join(textList), style=wx.TE_MULTILINE|wx.TE_READONLY | wx.TE_NO_VSCROLL | wx.BORDER_RAISED, sizerFlag=wx.EXPAND, x=750, textLayout=None)
         f = self.info.GetFont()
-        f.SetPointSize(f.GetPointSize() * (2/3))
+        f.SetPointSize((int)(f.GetPointSize() * (2/3)))
         self.info.SetFont(f)
         self.info.SetMinSize(wx.Size(750,240))
 

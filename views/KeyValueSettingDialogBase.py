@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#Falcon Key-Value setting view base
-#Copyright (C) 2020-2021 yamahubuki <itiro.ishino@gmail.com>
-#Note: All comments except these top lines will be written in Japanese. 
+# Key-Value setting view base
+#Copyright (C) 2020-2022 yamahubuki <itiro.ishino@gmail.com>
 
 import wx
 
@@ -44,14 +43,15 @@ class KeyValueSettingDialogBase(BaseDialog):
 
 	def Initialize(self,parent,title):
 		super().Initialize(parent,title)
-		self.InstallControls()
-		return True
-		self.initialized=True
-
-	def InstallControls(self):
-		"""いろんなwidgetを設置する。"""
 		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.VERTICAL,20,style=wx.ALL,proportion=20)
-		self.hListCtrl, dummy=self.creator.virtualListCtrl(_("現在の登録内容"), proportion=0, sizerFlag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,size=(750,300),style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+		self.InstallControls()
+		self.installButtonArea()
+		self.initialized=True
+		return True
+
+	def InstallControls(self, listTitle=_("現在の登録内容")):
+		"""いろんなwidgetを設置する。"""
+		self.hListCtrl, dummy=self.creator.virtualListCtrl(listTitle, proportion=0, sizerFlag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,size=(750,300),style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
 
 		for i,info in enumerate(self.columnInfo):
 			self.hListCtrl.InsertColumn(i,info[0],format=info[1],width=info[2])
@@ -66,7 +66,7 @@ class KeyValueSettingDialogBase(BaseDialog):
 		self.hListCtrl.Bind(wx.EVT_LIST_ITEM_DESELECTED,self.ItemSelected)
 
 		#処理ボタン
-		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.creator.GetSizer(),wx.HORIZONTAL,20,"",wx.EXPAND)
+		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.creator.GetPanel(),self.creator.GetSizer(),wx.HORIZONTAL,20,"",wx.EXPAND)
 		for i in range(len(self.specialButtons)):
 			self.specialButtons[i] = self.creator.button(self.specialButtons[i][0],self.specialButtons[i][1])
 			self.specialButtons[i].Enable(False)
@@ -78,6 +78,7 @@ class KeyValueSettingDialogBase(BaseDialog):
 		self.deleteButton=self.creator.button(_("削除(&D)"),self.delete)
 		self.deleteButton.Enable(False)
 
+	def installButtonArea(self):
 		#ボタンエリア
 		self.creator=views.ViewCreator.ViewCreator(self.viewMode,self.panel,self.sizer,wx.HORIZONTAL,20,"",wx.ALIGN_RIGHT | wx.ALL,margin=20)
 		self.bOk=self.creator.okbutton(_("ＯＫ"),self.OkButtonEvent)
@@ -109,7 +110,7 @@ class KeyValueSettingDialogBase(BaseDialog):
 			デフォルトではキーに関係なく有効なので、制限したい場合はオーバーライドする。
 		"""
 		return True
-		
+
 	def GetData(self):
 		return self.values
 
@@ -181,6 +182,9 @@ class KeyValueSettingDialogBase(BaseDialog):
 		for i in range(len(self.values)):
 			del self.values[i][key]
 		self.hListCtrl.DeleteItem(index)
+		if self.hListCtrl.GetItemCount() == 0:
+			self.editButton.Enable(False)
+			self.deleteButton.Enable(False)
 		self.hListCtrl.SetFocus()
 
 	def _SetItem(self,index,column,data):
