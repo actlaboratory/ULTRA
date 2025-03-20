@@ -196,7 +196,8 @@ class Twitcasting(SourceBase):
 			userId = i["broadcaster"]["id"]
 			if userId in self.users.keys():
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
-				hls = i["movie"]["hls_url"]
+				# HLSのURL
+				hls = self.getHlsUrl(i)
 				hls = self.fixHlsUrl(hls)
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], hls, i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
@@ -212,6 +213,18 @@ class Twitcasting(SourceBase):
 		self.removeUsers(rm)
 		self.checkTokenExpires()
 		self.checkSessionStatus()
+
+	def getHlsUrl(self, movie):
+		# 「ログイン状態で録画」の状態によってURLを変える
+		if hasattr(self, "sessionManager"):
+			# ログイン状態
+			url = f"https://twitcasting.tv/{movie['broadcaster']['screen_id']}/metastream.m3u8?video=1"
+			url = self.fixHlsUrl(url)
+		else:
+			# ログインしていない
+			url = movie["movie"]["hls_url"]
+		self.log.info("HLS URL: " + url)
+		return url
 
 	def fixHlsUrl(self, url):
 		self.log.debug("fixing HLS URL...")
@@ -776,7 +789,7 @@ class Twitcasting(SourceBase):
 				movie = self.getCurrentLive(userInfo["user"]["screen_id"])
 				if movie == None:
 					return
-				r = recorder.Recorder(self, self.fixHlsUrl(movie["movie"]["hls_url"]), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
+				r = recorder.Recorder(self, self.getHlsUrl(movie), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
 				if r.isRecordedByAnotherThread():
 					simpleDialog.errorDialog(_("このユーザのライブはすでに録画中です。"))
 					return
