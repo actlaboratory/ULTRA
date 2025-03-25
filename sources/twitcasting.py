@@ -1137,6 +1137,9 @@ class SessionManager:
 			assert type(tuple(data.keys())[0]) == str
 			assert type(tuple(data.values())[0]) == requests.Session
 			return data
+		except FileNotFoundError as e:
+			self.log.debug("session file does not exist")
+			return {"": None}
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return {"": None}
