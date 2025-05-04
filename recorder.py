@@ -50,6 +50,7 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
+		self.cookies = ""
 		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
@@ -65,11 +66,18 @@ class Recorder(threading.Thread):
 		self.subProc: subprocess.Popen = None
 
 	def processHeader(self, header):
+		self.log.debug("Processing HTTP headers...")
 		# key: valueの形式でリストに格納
 		tmplst = []
-		for item_tuple in header.items():
-			item_str = ": ".join(item_tuple)
-			tmplst.append(item_str)
+		for key, value in header.items():
+			if key.lower() == "cookie":
+				self.log.debug("Processing cookies")
+				cookieList = value.split(";")
+				self.log.debug(f"cookie: {value} -> {cookieList}")
+				self.cookies = "\r\n".join(cookieList)
+				continue
+			itemStr = f"{key}: {value}"
+			tmplst.append(itemStr)
 		# 改行区切りの文字列としてインスタンス変数に格納
 		self.header = "\r\n".join(tmplst)
 
@@ -155,8 +163,13 @@ class Recorder(threading.Thread):
 			]
 		if self.userAgent:
 			cmd += [
-				"-user-agent",
+				"-user_agent",
 				'"%s"' % self.userAgent,
+			]
+		if self.cookies:
+			cmd += [
+				"-cookies",
+				'"%s"' % self.cookies,
 			]
 		cmd += [
 			"-i",
