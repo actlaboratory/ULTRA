@@ -215,14 +215,21 @@ class Twitcasting(SourceBase):
 
 	def getHlsUrl(self, movie):
 		self.log.debug("Retrieving HLS URL")
-		try:
-			r = requests.get(f'https://twitcasting.tv/streamserver.php?target={movie["broadcaster"]["screen_id"]}&mode=client&player=pc_web')
-			self.log.debug("get: " + r.url)
-			self.log.debug("status: " + str(r.status_code))
-			data = r.json()
-			url = data["tc-hls"]["streams"]["low"]
-		except Exception as e:
-			self.log.debug("Failed to get HLS URL. falling ba ck to movie data.")
+		if hasattr(self, "sessionManager"):
+			try:
+				session = self.sessionManager.getSession()
+				# ツイキャスの非公開APIから再生URLを取得
+				r = session.get(f'https://twitcasting.tv/streamserver.php?target={movie["broadcaster"]["screen_id"]}&mode=client&player=pc_web')
+				self.log.debug("get: " + r.url)
+				self.log.debug("status: " + str(r.status_code))
+				data = r.json()
+				url = data["tc-hls"]["streams"]["low"]
+			except Exception as e:
+				self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ログイン状態で録画"), _("ログイン状態で録画するためのURLを取得できませんでした。未ログイン状態と同じURLで続行します。"), self.friendlyName)
+				url = movie["movie"]["hls_url"]
+		else:
+			# 未ログイン時は、APIが返すURLをそのまま使用
 			url = movie["movie"]["hls_url"]
 		self.log.info("HLS URL: " + url)
 		return url
