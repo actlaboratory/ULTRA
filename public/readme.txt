@@ -15,6 +15,7 @@ Universal Live Tracking and Recording Appは、インターネット上に公開
 １．２　動作環境について
 64ビット版Windows10で動作確認を行っています。
 多くの場合、Windowsの他のバージョンでも動作すると思われます。
+ただし、同梱しているffmpegが64ビット版のため、32ビット版Windowsでは動作しません。
 
 ULTRAはWindowsの標準的なコントロールのみを使用しており、画面読み上げソフトなどの支援技術と一緒に使用できます。
 
