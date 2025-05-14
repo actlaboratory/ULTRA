@@ -12,5 +12,5 @@ https://github.com/actlaboratory/named-pipe/archive/v1.0.4.zip
 https://github.com/actlaboratory/diff_archiver/archive/v1.0.1.zip
 beautifulsoup4
 lxml
-yt-dlp==2024.10.22
+yt-dlp==2025.4.30
 pillow==9.5
