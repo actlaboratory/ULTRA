@@ -193,6 +193,8 @@ class Recorder(threading.Thread):
 			try:
 				cmd = self.getCommand()
 			except IOError:
+				import traceback
+				self.log.info("IOError: %s" % traceback.format_exc())
 				d = simpleDialog.yesNoDialog(_("録画エラー"), _("録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してください。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択してください。[はい]を選択して録画の保存先を変更することで、正しく録画を開始できる場合があります。"))
 				if d == wx.ID_NO:
 					globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)
