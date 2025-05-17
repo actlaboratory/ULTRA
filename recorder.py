@@ -94,7 +94,7 @@ class Recorder(threading.Thread):
 		lst.append(fname)
 		ext = self.ext
 		path = "%s.%s" % ("\\".join(lst), ext)
-		path = self.extractVariable(path)
+		path = self.replaceUnusableChar(self.extractVariable(path))
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
 		if os.path.exists(path) and not self.skipExisting:
