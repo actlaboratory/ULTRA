@@ -50,6 +50,7 @@ class Recorder(threading.Thread):
 		self.log = getLogger("%s.%s" % (constants.LOG_PREFIX, "recorder"))
 		self.source = source
 		self.movie = movie
+		self.cookies = ""
 		self.processHeader(header)
 		self.userAgent = userAgent
 		self.skipExisting = skipExisting
@@ -65,11 +66,18 @@ class Recorder(threading.Thread):
 		self.subProc: subprocess.Popen = None
 
 	def processHeader(self, header):
+		self.log.debug("Processing HTTP headers...")
 		# key: valueの形式でリストに格納
 		tmplst = []
-		for item_tuple in header.items():
-			item_str = ": ".join(item_tuple)
-			tmplst.append(item_str)
+		for key, value in header.items():
+			if key.lower() == "cookie":
+				self.log.debug("Processing cookies")
+				cookieList = value.split(";")
+				self.log.debug(f"cookie: {value} -> {cookieList}")
+				self.cookies = "\r\n".join(cookieList)
+				continue
+			itemStr = f"{key}: {value}"
+			tmplst.append(itemStr)
 		# 改行区切りの文字列としてインスタンス変数に格納
 		self.header = "\r\n".join(tmplst)
 
@@ -86,7 +94,7 @@ class Recorder(threading.Thread):
 		lst.append(fname)
 		ext = self.ext
 		path = "%s.%s" % ("\\".join(lst), ext)
-		path = self.extractVariable(path)
+		path = self.replaceUnusableChar(self.extractVariable(path))
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		path = os.path.abspath(path)
 		if os.path.exists(path) and not self.skipExisting:
@@ -155,8 +163,13 @@ class Recorder(threading.Thread):
 			]
 		if self.userAgent:
 			cmd += [
-				"-user-agent",
+				"-user_agent",
 				'"%s"' % self.userAgent,
+			]
+		if self.cookies:
+			cmd += [
+				"-cookies",
+				'"%s"' % self.cookies,
 			]
 		cmd += [
 			"-i",
@@ -180,6 +193,8 @@ class Recorder(threading.Thread):
 			try:
 				cmd = self.getCommand()
 			except IOError:
+				import traceback
+				self.log.info("IOError: %s" % traceback.format_exc())
 				d = simpleDialog.yesNoDialog(_("録画エラー"), _("録画の開始に失敗しました。録画の保存先が適切に設定されていることを確認してください。定期的に再試行する場合は[はい]、処理を中断する場合は[いいえ]を選択してください。[はい]を選択して録画の保存先を変更することで、正しく録画を開始できる場合があります。"))
 				if d == wx.ID_NO:
 					globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)

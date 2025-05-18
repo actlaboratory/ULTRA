@@ -198,7 +198,6 @@ class Twitcasting(SourceBase):
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("配信開始"), i["broadcaster"]["screen_id"], self.friendlyName)
 				# HLSのURL
 				hls = self.getHlsUrl(i)
-				hls = self.fixHlsUrl(hls)
 				globalVars.app.notificationHandler.notify(self, i["broadcaster"]["screen_id"], i["movie"]["link"], hls, i["movie"]["created"], self.getConfig(userId), i["movie"]["id"], header=self.getRecordHeader())
 				self.updateUserInfo(userId, i["broadcaster"]["screen_id"], i["broadcaster"]["name"])
 		rm = []
@@ -215,39 +214,25 @@ class Twitcasting(SourceBase):
 		self.checkSessionStatus()
 
 	def getHlsUrl(self, movie):
-		# 「ログイン状態で録画」の状態によってURLを変える
+		self.log.debug("Retrieving HLS URL")
 		if hasattr(self, "sessionManager"):
-			# ログイン状態
-			url = f"https://twitcasting.tv/{movie['broadcaster']['screen_id']}/metastream.m3u8?video=1"
-			url = self.fixHlsUrl(url)
+			try:
+				session = self.sessionManager.getSession()
+				# ツイキャスの非公開APIから再生URLを取得
+				r = session.get(f'https://twitcasting.tv/streamserver.php?target={movie["broadcaster"]["screen_id"]}&mode=client&player=pc_web')
+				self.log.debug("get: " + r.url)
+				self.log.debug("status: " + str(r.status_code))
+				data = r.json()
+				url = data["tc-hls"]["streams"]["low"]
+			except Exception as e:
+				self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("ログイン状態で録画"), _("ログイン状態で録画するためのURLを取得できませんでした。未ログイン状態と同じURLで続行します。"), self.friendlyName)
+				url = movie["movie"]["hls_url"]
 		else:
-			# ログインしていない
+			# 未ログイン時は、APIが返すURLをそのまま使用
 			url = movie["movie"]["hls_url"]
 		self.log.info("HLS URL: " + url)
 		return url
-
-	def fixHlsUrl(self, url):
-		self.log.debug("fixing HLS URL...")
-		# original URL: ...?video=1
-		# fixed URL: ...?mode=source
-		import urllib.parse
-		parsedUrl = urllib.parse.urlparse(url)
-		self.log.debug("parsed URL: " + str(parsedUrl))
-		queryStr = parsedUrl.query
-		self.log.debug("query: " + str(queryStr))
-		queryDict = urllib.parse.parse_qs(queryStr)
-		self.log.debug("parsed query: " + str(queryDict))
-		# dictの値は文字列でなくリスト
-		queryDict.clear()
-		queryDict["mode"] = ["source"]
-		self.log.debug("new query dict: " + str(queryDict))
-		queryStr = urllib.parse.urlencode(queryDict, doseq=True)
-		self.log.debug("new query string: " + str(queryStr))
-		newParsedUrl = parsedUrl._replace(query=queryStr)
-		self.log.debug("new parsed URL: " + str(newParsedUrl))
-		result = urllib.parse.urlunparse(newParsedUrl)
-		self.log.debug("result: " + str(result))
-		return result
 
 	def removeUsers(self, rm):
 		with tlock:
@@ -510,7 +495,10 @@ class Twitcasting(SourceBase):
 			# ログイン情報
 			session = self.sessionManager.getSession()
 			cookies = session.cookies
-			header["cookie"] = "tc_id=%s;tc_ss=%s" % (cookies["tc_id"], cookies["tc_ss"])
+			cookieList = []
+			for item in cookies:
+				cookieList.append(f"{item.name}={item.value}")
+			header["cookie"] = ";".join(cookieList)
 		self.log.debug("record header: %s" % (header))
 		return header
 
@@ -815,7 +803,7 @@ class Twitcasting(SourceBase):
 			movie = self.getCurrentLive(userName)
 			if movie == None:
 				return
-			r = recorder.Recorder(self, self.fixHlsUrl(movie["movie"]["hls_url"]), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
+			r = recorder.Recorder(self, self.getHlsUrl(movie), movie["broadcaster"]["screen_id"], movie["movie"]["created"], movie["movie"]["id"], header=self.getRecordHeader())
 			r.start()
 
 	def recordAll(self, user):
@@ -1137,6 +1125,9 @@ class SessionManager:
 			assert type(tuple(data.keys())[0]) == str
 			assert type(tuple(data.values())[0]) == requests.Session
 			return data
+		except FileNotFoundError as e:
+			self.log.debug("session file does not exist")
+			return {"": None}
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return {"": None}

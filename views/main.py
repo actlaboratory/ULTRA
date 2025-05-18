@@ -364,7 +364,7 @@ class Events(BaseEvents):
 
 	def show(self):
 		self.parent.hFrame.Show()
-		self.parent.hPanel.SetFocus()
+		self.parent.hFrame.Raise()
 
 	def exitWithConfirmation(self):
 		if getRecordingUsers() != []:

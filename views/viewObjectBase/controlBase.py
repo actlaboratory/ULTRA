@@ -34,4 +34,4 @@ class controlBase():
 	#ポップアップメニューの表示位置をクライアント座標のwx.Pointで返す
 	#デフォルトではウィンドウ中央
 	def getPopupMenuPosition(self):
-		return wx.Point(self.GetSize().x/2,self.GetSize().y/2)
+		return wx.Point(int(self.GetSize().x/2),int(self.GetSize().y/2))
