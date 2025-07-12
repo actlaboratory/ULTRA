@@ -223,7 +223,7 @@ class Twitcasting(SourceBase):
 				self.log.debug("get: " + r.url)
 				self.log.debug("status: " + str(r.status_code))
 				data = r.json()
-				url = data["tc-hls"]["streams"]["low"]
+				url = data["tc-hls"]["streams"]["high"]
 			except Exception as e:
 				self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("ログイン状態で録画"), _("ログイン状態で録画するためのURLを取得できませんでした。未ログイン状態と同じURLで続行します。"), self.friendlyName)
