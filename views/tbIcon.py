@@ -13,6 +13,9 @@ class TaskbarIcon(wx.adv.TaskBarIcon):
 		self.icon = wx.Icon(constants.APP_ICON)
 		self.SetIcon(self.icon, constants.APP_NAME)
 		self.Bind(wx.adv.EVT_TASKBAR_LEFT_DCLICK, self.onDoubleClick)
+		# windows11ではタスクトレイアイコン上でエンターを押下した際の動作が変わったっぽいので下記もダブルクリックと同視する
+		self.Bind(wx.adv.EVT_TASKBAR_LEFT_UP, self.onDoubleClick)
+
 
 	def CreatePopupMenu(self):
 		bm = BaseMenu("mainView")
