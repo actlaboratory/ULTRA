@@ -1,4 +1,7 @@
 Universal Live Tracking and Recording App(ULTRA) 更新履歴
+2025/xx/xx Version 1.x.x
+1. Windows11環境にて、キーボード操作でタスクトレーからULTRAを起動できない問題を修正しました。
+
 2025/05/18 Version 1.10.0
 1. ツイキャスの「ログイン状態で録画」が再び動作しなくなった問題を修正しました。
 2. 上記1.への対応のため、同梱のffmpegを更新しました。これに伴い、32ビット環境では動作しなくなります。
