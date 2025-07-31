@@ -176,7 +176,8 @@ class Twitcasting(SourceBase):
 				data = json.dumps(data, indent="\t", ensure_ascii=False)
 				f.write(data + "\n")
 				f.write("----------" + "\n")
-		self.loadUserList()
+		with tlock:
+			self.loadUserList()
 		obj = json.loads(text)
 		if "movies" not in obj.keys() or obj["movies"] == None:
 			return
