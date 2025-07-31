@@ -216,21 +216,24 @@ class Twitcasting(SourceBase):
 
 	def getHlsUrl(self, movie):
 		self.log.debug("Retrieving HLS URL")
-		if hasattr(self, "sessionManager"):
-			try:
-				session = self.sessionManager.getSession()
-				# ツイキャスの非公開APIから再生URLを取得
-				r = session.get(f'https://twitcasting.tv/streamserver.php?target={movie["broadcaster"]["screen_id"]}&mode=client&player=pc_web')
-				self.log.debug("get: " + r.url)
-				self.log.debug("status: " + str(r.status_code))
-				data = r.json()
-				url = data["tc-hls"]["streams"]["low"]
-			except Exception as e:
-				self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
+		loginEnabled = hasattr(self, "sessionManager")
+		try:
+			session = self.sessionManager.getSession() if loginEnabled else requests.session()
+			# ツイキャスの非公開APIから再生URLを取得
+			r = session.get(f'https://twitcasting.tv/streamserver.php?target={movie["broadcaster"]["screen_id"]}&mode=client&player=pc_web')
+			self.log.debug("get: " + r.url)
+			self.log.debug("status: " + str(r.status_code))
+			data = r.json()
+			urls = data["tc-hls"]["streams"]
+			if "high" in urls:
+				url = urls["high"]
+			else:
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画警告"), _("高画質版URLを取得できませんでした。録画データの画質が低下する可能性があります。"), self.friendlyName)
+				url = urls["low"]
+		except Exception as e:
+			self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
+			if loginEnabled:
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("ログイン状態で録画"), _("ログイン状態で録画するためのURLを取得できませんでした。未ログイン状態と同じURLで続行します。"), self.friendlyName)
-				url = movie["movie"]["hls_url"]
-		else:
-			# 未ログイン時は、APIが返すURLをそのまま使用
 			url = movie["movie"]["hls_url"]
 		self.log.info("HLS URL: " + url)
 		return url
