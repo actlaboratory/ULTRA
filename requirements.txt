@@ -7,7 +7,7 @@ https://github.com/actlaboratory/proxyUtil/archive/0.2.4.zip
 websocket-client==1.2.3
 requests
 https://github.com/actlaboratory/implicitGrantManager/archive/v1.3.0.zip
-https://github.com/actlaboratory/soundPlayer/archive/0.3.1.zip
+https://github.com/actlaboratory/soundPlayer/archive/0.5.4.zip
 https://github.com/actlaboratory/named-pipe/archive/v1.0.4.zip
 https://github.com/actlaboratory/diff_archiver/archive/v1.0.1.zip
 beautifulsoup4
