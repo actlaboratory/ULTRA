@@ -9,7 +9,7 @@ import update
 import os
 import globalVars
 import pipe
-import proxyUtil
+#import proxyUtil
 import notificationHandler
 import threading
 import sys
@@ -39,8 +39,8 @@ class Main(AppBase.MainBase):
 	def initialize(self):
 		self.setGlobalVars()
 		# プロキシの設定を適用
-		self.proxyEnviron = proxyUtil.virtualProxyEnviron()
-		self.setProxyEnviron()
+		# self.proxyEnviron = proxyUtil.virtualProxyEnviron()
+		# self.setProxyEnviron()
 		# スレッドで例外が起きてもsys.exceptHookが呼ばれるようにする
 		self.installThreadExcepthook()
 		# タスクバーアイコンの準備
@@ -75,6 +75,10 @@ class Main(AppBase.MainBase):
 		self.ydl = ydl.YDL()
 		if self.config.getboolean("ydl", "enable", True) and self.ydl.initialize():
 			self.ydl.start()
+		from sources import Live17
+		self.live17 = Live17.Live17()
+		if self.config.getboolean("live17", "enable", True) and self.live17.initialize():
+			self.live17.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
