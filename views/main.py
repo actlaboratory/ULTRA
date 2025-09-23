@@ -24,6 +24,7 @@ from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
 from views import ydlManageLists
+from views import live17ManageLists
 from views import settingsDialog
 from views import versionDialog
 
@@ -150,9 +151,11 @@ class Menu(BaseMenu):
 		self.RegisterMenuCommand(self.hYDLMenu, "YDL_FILETYPES", subMenu=self.hYDLFiletypesMenu)
 
 		# Live17メニューの中身
+		self.RegisterCheckMenuCommand(self.hLive17Menu, "LIVE17_ENABLE")
 		self.RegisterMenuCommand(self.hLive17Menu, [
 			"LIVE17_DOWNLOAD",
 			"LIVE17_DOWNLOAD_ALL",
+			"LIVE17_MANAGE_LISTS",
 		])
 		self.RegisterMenuCommand(self.hLive17Menu, "LIVE17_FILETYPES", subMenu=self.hLive17FiletypesMenu)
 
@@ -326,6 +329,20 @@ class Events(BaseEvents):
 				globalVars.app.ydl.initThread()
 				globalVars.app.ydl.start()
 
+		# Live17：一括ダウンロードを有効化
+		if selected == menuItemsStore.getRef("LIVE17_ENABLE"):
+			if event.IsChecked():
+				globalVars.app.live17.initThread()
+				globalVars.app.live17.start()
+			else:
+				globalVars.app.live17.exit()
+				from sources import live17
+				for downloader in live17.getActiveDownloaders():
+					downloader.exit()
+			globalVars.app.config["live17"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
 		# Live17：URLを指定してダウンロード
 		if selected == menuItemsStore.getRef("LIVE17_DOWNLOAD"):
 			d = SimpleInputDialog.Dialog(_("URLを入力"), _("URLの指定"))
@@ -339,6 +356,18 @@ class Events(BaseEvents):
 			d.Initialize()
 			if d.Show() == wx.ID_CANCEL: return
 			globalVars.app.live17.getArchiveList(d.GetData())
+
+		# live17: 一括ダウンロードURLの管理
+		if selected == menuItemsStore.getRef("LIVE17_MANAGE_LISTS"):
+			globalVars.app.live17.exit()
+			d = live17ManageLists.Dialog(self.parent.app.live17.listManager.getData())
+			d.Initialize(self.parent.hFrame)
+			if d.Show() == wx.ID_CANCEL:
+				return
+			self.parent.app.live17.listManager.setData(d.GetValue())
+			if globalVars.app.config.getboolean("live17", "enable", True):
+				self.parent.app.live17.initThread()
+				self.parent.app.live17.start()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
