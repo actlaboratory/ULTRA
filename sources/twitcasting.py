@@ -772,7 +772,8 @@ class Twitcasting(SourceBase):
 		:param userName: ユーザ名
 		:type userName: str
 		"""
-		self.loadUserList()
+		with tlock:
+			self.loadUserList()
 		userInfo = self.getUserInfo(userName)
 		if userInfo == None:
 			return
@@ -801,7 +802,8 @@ class Twitcasting(SourceBase):
 			"soundFile": "",
 			"remove": (datetime.datetime.now() + datetime.timedelta(hours=10)).timestamp(),
 		}
-		self.saveUserList()
+		with tlock:
+			self.saveUserList()
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("ユーザ名を指定して録画"), _("%sを、録画対象として追加しました。この登録は一定時間経過後に自動で削除されます。") %userInfo["user"]["screen_id"])
 		if userInfo["user"]["is_live"]:
 			movie = self.getCurrentLive(userName)
@@ -1028,10 +1030,9 @@ class MultiUserChecker(threading.Thread):
 			userInfo = self.tc.getUserInfo(i, False)
 			if userInfo != None:
 				userId = userInfo["user"]["id"]
-				self.tc.loadUserList()
-				if userId not in self.tc.users.keys():
-					with tlock:
-						self.tc.loadUserList()
+				with tlock:
+					self.tc.loadUserList()
+					if userId not in self.tc.users.keys():
 						self.tc.users[userId] = {
 							"user": userInfo["user"]["screen_id"],
 							"name": userInfo["user"]["name"],
@@ -1043,10 +1044,10 @@ class MultiUserChecker(threading.Thread):
 							"soundFile": globalVars.app.config["notification"]["soundFile"],
 						}
 						self.tc.saveUserList()
-					self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
-					self.log.debug("%s added." % i)
-				else:
-					self.log.debug("%s is already added." % i)
+						self.showLog(_("%sを追加しました。") % userInfo["user"]["screen_id"])
+						self.log.debug("%s added." % i)
+					else:
+						self.log.debug("%s is already added." % i)
 			else:
 				self.log.debug("%s does not exist." % i)
 			time.sleep(60)
