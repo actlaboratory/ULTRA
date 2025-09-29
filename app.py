@@ -9,7 +9,7 @@ import update
 import os
 import globalVars
 import pipe
-#import proxyUtil
+import proxyUtil
 import notificationHandler
 import threading
 import sys
@@ -39,8 +39,8 @@ class Main(AppBase.MainBase):
 	def initialize(self):
 		self.setGlobalVars()
 		# プロキシの設定を適用
-		# self.proxyEnviron = proxyUtil.virtualProxyEnviron()
-		# self.setProxyEnviron()
+		self.proxyEnviron = proxyUtil.virtualProxyEnviron()
+		self.setProxyEnviron()
 		# スレッドで例外が起きてもsys.exceptHookが呼ばれるようにする
 		self.installThreadExcepthook()
 		# タスクバーアイコンの準備
