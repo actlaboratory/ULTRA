@@ -227,6 +227,9 @@ class Twitcasting(SourceBase):
 			urls = data["tc-hls"]["streams"]
 			if "high" in urls:
 				url = urls["high"]
+			# 2025/11/03 'medium'というURLがあるという報告を受けたため対応
+			elif "medium" in urls:
+				url = urls["medium"]
 			else:
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画警告"), _("高画質版URLを取得できませんでした。録画データの画質が低下する可能性があります。"), self.friendlyName)
 				url = urls["low"]
