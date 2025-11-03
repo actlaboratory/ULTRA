@@ -192,7 +192,9 @@ class Menu(BaseMenu):
 		quality_default = globalVars.app.config.getstring("twitcasting", "quality", "high", constants.TC_QUALITY_PRIORITY)
 		count = 0
 		for quality in constants.TC_QUALITY_PRIORITY:
-			name = constants.TC_RECORD_QUALITIES.get(quality, quality)
+			# Twitcastingクラスから画質名を取得
+			from sources.twitcasting import Twitcasting
+			name = Twitcasting.qualityNames.get(quality, quality)
 			id = constants.TC_QUALITY_MENU_INDEX + count
 			menu.AppendRadioItem(id, name)
 			if quality == quality_default:

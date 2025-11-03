@@ -47,6 +47,12 @@ class Twitcasting(SourceBase):
 		"mp3": _("音声のみ（MP3）"),
 	}
 	defaultFiletype = "mp4"
+	# 録画画質の名称（翻訳可能）
+	qualityNames = {
+		"high": _("高画質版"),
+		"medium": _("中画質版"),
+		"low": _("低画質版")
+	}
 
 	def __init__(self):
 		super().__init__()
@@ -259,7 +265,7 @@ class Twitcasting(SourceBase):
 					break
 			if selectedQuality and qualityPriority.index(selectedQuality) > qualityPriority.index(preferredQuality):
 				# 設定された画質に応じて警告メッセージを変更
-				expectedQualityName = constants.TC_RECORD_QUALITIES.get(preferredQuality, _("指定画質"))
+				expectedQualityName = self.qualityNames.get(preferredQuality, _("指定画質"))
 				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画警告"), _("%(quality)sのURLを取得できませんでした。録画データの画質が低下する可能性があります。") % {"quality": expectedQualityName}, self.friendlyName)
 		except Exception as e:
 			self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
