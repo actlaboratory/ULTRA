@@ -225,6 +225,7 @@ class Twitcasting(SourceBase):
 			self.log.debug("status: " + str(r.status_code))
 			data = r.json()
 			urls = data["tc-hls"]["streams"]
+			self.log.debug("available URLs: " + str(urls))
 			if "high" in urls:
 				url = urls["high"]
 			# 2025/11/03 'medium'というURLがあるという報告を受けたため対応
