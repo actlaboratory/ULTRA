@@ -75,6 +75,10 @@ class Main(AppBase.MainBase):
 		self.ydl = ydl.YDL()
 		if self.config.getboolean("ydl", "enable", True) and self.ydl.initialize():
 			self.ydl.start()
+		from sources import live17
+		self.live17 = live17.Live17()
+		if self.config.getboolean("live17", "enable", True) and self.live17.initialize():
+			self.live17.start()
 		self.hMainView.Show()
 		if self.config.getboolean("general", "autoHide", False):
 			self.hMainView.events.hide()
