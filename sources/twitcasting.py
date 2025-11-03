@@ -226,14 +226,41 @@ class Twitcasting(SourceBase):
 			data = r.json()
 			urls = data["tc-hls"]["streams"]
 			self.log.debug("available URLs: " + str(urls))
-			if "high" in urls:
-				url = urls["high"]
-			# 2025/11/03 'medium'というURLがあるという報告を受けたため対応
-			elif "medium" in urls:
-				url = urls["medium"]
-			else:
-				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画警告"), _("高画質版URLを取得できませんでした。録画データの画質が低下する可能性があります。"), self.friendlyName)
-				url = urls["low"]
+			# ここで設定ファイルから画質設定を読み込む
+			preferredQuality = globalVars.app.config.getstring("twitcasting", "quality", "high", constants.TC_QUALITY_PRIORITY)
+			# 優先度リストを作成（指定された画質以下のみを含む）
+			qualityPriority = constants.TC_QUALITY_PRIORITY
+			try:
+				startIndex = qualityPriority.index(preferredQuality)
+				allowedQualities = qualityPriority[startIndex:]
+			except ValueError:
+				# 不正な設定値の場合はデフォルトの動作
+				self.log.warning(f"Invalid quality setting: {preferredQuality}, using default priority")
+				allowedQualities = qualityPriority
+			# 許可された画質の中から利用可能なものを選択
+			url = None
+			for quality in allowedQualities:
+				if quality in urls:
+					url = urls[quality]
+					self.log.debug(f"Selected quality: {quality}")
+					break
+			if url is None:
+				# フォールバック：利用可能な任意のURLを使用
+				if urls:
+					url = list(urls.values())[0]
+					self.log.warning(f"No preferred quality available, using {list(urls.keys())[0]}")
+				else:
+					raise Exception("No URLs available in response")
+			# 選択された画質が設定より低い場合に警告を表示
+			selectedQuality = None
+			for quality in qualityPriority:
+				if url == urls.get(quality):
+					selectedQuality = quality
+					break
+			if selectedQuality and qualityPriority.index(selectedQuality) > qualityPriority.index(preferredQuality):
+				# 設定された画質に応じて警告メッセージを変更
+				expectedQualityName = constants.TC_RECORD_QUALITIES.get(preferredQuality, _("指定画質"))
+				wx.CallAfter(globalVars.app.hMainView.addLog, _("録画警告"), _("%(quality)sのURLを取得できませんでした。録画データの画質が低下する可能性があります。") % {"quality": expectedQualityName}, self.friendlyName)
 		except Exception as e:
 			self.log.info("Failed to get HLS URL. falling back to movie data.\n" + traceback.format_exc())
 			if loginEnabled:

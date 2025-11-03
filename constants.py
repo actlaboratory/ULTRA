@@ -58,6 +58,15 @@ TC_CID = "1266762249164619776.2ba35a3fe972584b3ab34e30c0c88ab6b4516d6aaf951c8a02
 TC_URL = "https://apiv2.twitcasting.tv/oauth2/authorize"
 TC_PORT = 9339
 
+# ツイキャス録画画質
+TC_RECORD_QUALITIES = {
+	"high": "高画質版",
+	"medium": "中画質版",
+	"low": "低画質版"
+}
+# 画質の優先順位リスト（高 → 低の順）
+TC_QUALITY_PRIORITY = ("high", "medium", "low")
+
 # その他
 NOT_FOUND = -1
 TC_WSS_URL = "wss://realtime.twitcasting.tv/lives"
