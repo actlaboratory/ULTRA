@@ -108,6 +108,8 @@ class Menu(BaseMenu):
 		self.hServicesMenu.Bind(wx.EVT_MENU_OPEN, self.event.OnMenuOpen)
 		self.hTwitcastingMenu=wx.Menu()
 		self.hTwitcastingFiletypesMenu = wx.Menu()
+		self.hTwitcastingQualitiesMenu = wx.Menu()
+		self.setupTwitcastingQualitiesMenu(self.hTwitcastingQualitiesMenu)
 		self.hYDLMenu=wx.Menu()
 		self.hYDLFiletypesMenu = wx.Menu()
 		self.hLive17Menu=wx.Menu()
@@ -141,6 +143,7 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
+		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_QUALITY", subMenu=self.hTwitcastingQualitiesMenu)
 
 		# yt-dlpメニューの中身
 		self.RegisterCheckMenuCommand(self.hYDLMenu, "YDL_ENABLE")
@@ -181,6 +184,20 @@ class Menu(BaseMenu):
 		target.SetMenuBar(self.hMenuBar)
 		# 「ウィンドウを隠す」を無効化
 		self.EnableMenu("HIDE", False)
+
+	def setupTwitcastingQualitiesMenu(self, menu: wx.Menu):
+		menu.Bind(wx.EVT_MENU, self.event.onQualitySelected)
+		for i in range(menu.GetMenuItemCount()):
+			menu.DestroyItem(menu.FindItemByPosition(0))
+		quality_default = globalVars.app.config.getstring("twitcasting", "quality", "high", constants.TC_QUALITY_PRIORITY)
+		count = 0
+		for quality in constants.TC_QUALITY_PRIORITY:
+			name = constants.TC_RECORD_QUALITIES.get(quality, quality)
+			id = constants.TC_QUALITY_MENU_INDEX + count
+			menu.AppendRadioItem(id, name)
+			if quality == quality_default:
+				menu.Check(id, True)
+			count += 1
 
 class Events(BaseEvents):
 	def OnMenuOpen(self, event):
@@ -508,3 +525,11 @@ class Events(BaseEvents):
 		if newMap.write() != errorCodes.OK:
 			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.KEYMAP_FILE_NAME))
 		return True
+
+	def onQualitySelected(self, event):
+		id = event.GetId()
+		index = id - constants.TC_QUALITY_MENU_INDEX
+		selectedQuality = constants.TC_QUALITY_PRIORITY[index]
+		globalVars.app.config["twitcasting"]["quality"] = selectedQuality
+		if globalVars.app.config.write() != errorCodes.OK:
+			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))

@@ -29,6 +29,7 @@ dic={
 	"TC_SET_TOKEN": _("アクセストークンを設定(&T)"),
 	"TC_MANAGE_USER": _("通知対象ユーザの管理(&M)") + "...",
 	"TC_FILETYPES": _("録画形式の設定"),
+	"TC_QUALITY": _("録画画質の設定"),
 	"YDL_SUB": _("その他のサービス（&yt-dlp）"),
 	"YDL_ENABLE": _("一括ダウンロードを有効化(&E)"),
 	"YDL_DOWNLOAD": _("&URLを指定してダウンロード"),
