@@ -24,6 +24,7 @@ from views import globalKeyConfig
 from views import SimpleInputDialog
 from views import tcManageUser
 from views import ydlManageLists
+from views import live17ManageLists
 from views import settingsDialog
 from views import versionDialog
 
@@ -107,8 +108,12 @@ class Menu(BaseMenu):
 		self.hServicesMenu.Bind(wx.EVT_MENU_OPEN, self.event.OnMenuOpen)
 		self.hTwitcastingMenu=wx.Menu()
 		self.hTwitcastingFiletypesMenu = wx.Menu()
+		self.hTwitcastingQualitiesMenu = wx.Menu()
+		self.setupTwitcastingQualitiesMenu(self.hTwitcastingQualitiesMenu)
 		self.hYDLMenu=wx.Menu()
 		self.hYDLFiletypesMenu = wx.Menu()
+		self.hLive17Menu=wx.Menu()
+		self.hLive17FiletypesMenu = wx.Menu()
 		self.hOptionMenu = wx.Menu()
 		self.hHelpMenu=wx.Menu()
 
@@ -121,6 +126,7 @@ class Menu(BaseMenu):
 		# サービスメニューの中身
 		self.RegisterMenuCommand(self.hServicesMenu, "TC_SUB", subMenu=self.hTwitcastingMenu)
 		self.RegisterMenuCommand(self.hServicesMenu, "YDL_SUB", subMenu=self.hYDLMenu)
+		self.RegisterMenuCommand(self.hServicesMenu, "LIVE17_SUB", subMenu=self.hLive17Menu)
 		# ツイキャスメニューの中身
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_ENABLE")
 		self.RegisterCheckMenuCommand(self.hTwitcastingMenu, "TC_SAVE_COMMENTS")
@@ -137,6 +143,8 @@ class Menu(BaseMenu):
 			"TC_MANAGE_USER",
 		])
 		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_FILETYPES", subMenu=self.hTwitcastingFiletypesMenu)
+		self.RegisterMenuCommand(self.hTwitcastingMenu, "TC_QUALITY", subMenu=self.hTwitcastingQualitiesMenu)
+
 		# yt-dlpメニューの中身
 		self.RegisterCheckMenuCommand(self.hYDLMenu, "YDL_ENABLE")
 		self.RegisterMenuCommand(self.hYDLMenu, [
@@ -144,6 +152,15 @@ class Menu(BaseMenu):
 			"YDL_MANAGE_LISTS",
 		])
 		self.RegisterMenuCommand(self.hYDLMenu, "YDL_FILETYPES", subMenu=self.hYDLFiletypesMenu)
+
+		# Live17メニューの中身
+		self.RegisterCheckMenuCommand(self.hLive17Menu, "LIVE17_ENABLE")
+		self.RegisterMenuCommand(self.hLive17Menu, [
+			"LIVE17_DOWNLOAD",
+			"LIVE17_DOWNLOAD_ALL",
+			"LIVE17_MANAGE_LISTS",
+		])
+		self.RegisterMenuCommand(self.hLive17Menu, "LIVE17_FILETYPES", subMenu=self.hLive17FiletypesMenu)
 
 		# オプションメニュー
 		self.RegisterMenuCommand(self.hOptionMenu, [
@@ -168,6 +185,22 @@ class Menu(BaseMenu):
 		# 「ウィンドウを隠す」を無効化
 		self.EnableMenu("HIDE", False)
 
+	def setupTwitcastingQualitiesMenu(self, menu: wx.Menu):
+		menu.Bind(wx.EVT_MENU, self.event.onQualitySelected)
+		for i in range(menu.GetMenuItemCount()):
+			menu.DestroyItem(menu.FindItemByPosition(0))
+		quality_default = globalVars.app.config.getstring("twitcasting", "quality", "high", constants.TC_QUALITY_PRIORITY)
+		count = 0
+		for quality in constants.TC_QUALITY_PRIORITY:
+			# Twitcastingクラスから画質名を取得
+			from sources.twitcasting import Twitcasting
+			name = Twitcasting.qualityNames.get(quality, quality)
+			id = constants.TC_QUALITY_MENU_INDEX + count
+			menu.AppendRadioItem(id, name)
+			if quality == quality_default:
+				menu.Check(id, True)
+			count += 1
+
 class Events(BaseEvents):
 	def OnMenuOpen(self, event):
 		menu = event.GetMenu()
@@ -175,6 +208,8 @@ class Events(BaseEvents):
 			globalVars.app.tc.getFiletypesMenu(menu)
 		if menu == self.parent.menu.hYDLFiletypesMenu:
 			globalVars.app.ydl.getFiletypesMenu(menu)
+		if menu == self.parent.menu.hLive17FiletypesMenu:
+			globalVars.app.live17.getFiletypesMenu(menu)
 
 	def OnMenuSelect(self,event):
 		"""メニュー項目が選択されたときのイベントハンドら。"""
@@ -312,6 +347,46 @@ class Events(BaseEvents):
 			if globalVars.app.config.getboolean("ydl", "enable", True):
 				globalVars.app.ydl.initThread()
 				globalVars.app.ydl.start()
+
+		# Live17：一括ダウンロードを有効化
+		if selected == menuItemsStore.getRef("LIVE17_ENABLE"):
+			if event.IsChecked():
+				globalVars.app.live17.initThread()
+				globalVars.app.live17.start()
+			else:
+				globalVars.app.live17.exit()
+				from sources import live17
+				for downloader in live17.getActiveDownloaders():
+					downloader.exit()
+			globalVars.app.config["live17"]["enable"] = event.IsChecked()
+			if globalVars.app.config.write() != errorCodes.OK:
+				errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))
+
+		# Live17：URLを指定してダウンロード
+		if selected == menuItemsStore.getRef("LIVE17_DOWNLOAD"):
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("URLの指定"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.live17.downloadArchive(d.GetData())
+
+		# Live17：URLを指定してダウンロード
+		if selected == menuItemsStore.getRef("LIVE17_DOWNLOAD_ALL"):
+			d = SimpleInputDialog.Dialog(_("URLを入力"), _("ユーザーページURLの指定"))
+			d.Initialize()
+			if d.Show() == wx.ID_CANCEL: return
+			globalVars.app.live17.getArchiveList(d.GetData())
+
+		# live17: 一括ダウンロードURLの管理
+		if selected == menuItemsStore.getRef("LIVE17_MANAGE_LISTS"):
+			globalVars.app.live17.exit()
+			d = live17ManageLists.Dialog(self.parent.app.live17.listManager.getData())
+			d.Initialize(self.parent.hFrame)
+			if d.Show() == wx.ID_CANCEL:
+				return
+			self.parent.app.live17.listManager.setData(d.GetValue())
+			if globalVars.app.config.getboolean("live17", "enable", True):
+				self.parent.app.live17.initThread()
+				self.parent.app.live17.start()
 
 		# 設定
 		if selected == menuItemsStore.getRef("OP_SETTINGS"):
@@ -452,3 +527,11 @@ class Events(BaseEvents):
 		if newMap.write() != errorCodes.OK:
 			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.KEYMAP_FILE_NAME))
 		return True
+
+	def onQualitySelected(self, event):
+		id = event.GetId()
+		index = id - constants.TC_QUALITY_MENU_INDEX
+		selectedQuality = constants.TC_QUALITY_PRIORITY[index]
+		globalVars.app.config["twitcasting"]["quality"] = selectedQuality
+		if globalVars.app.config.write() != errorCodes.OK:
+			errorDialog(_("設定の保存に失敗しました。下記のファイルへのアクセスが可能であることを確認してください。") + "\n" + os.path.abspath(constants.SETTING_FILE_NAME))

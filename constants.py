@@ -9,8 +9,8 @@ import os.path
 APP_FULL_NAME = "Universal Live Tracking and Recording App"#アプリケーションの完全な名前
 APP_NAME="ULTRA"#アプリケーションの名前
 APP_ICON = "ultra.ico"
-APP_VERSION="1.10.1"
-APP_LAST_RELEASE_DATE="2025-08-03"
+APP_VERSION="1.11.0"
+APP_LAST_RELEASE_DATE="2025-11-03"
 APP_COPYRIGHT_YEAR="2021-2025"
 APP_LICENSE="Apache License 2.0"
 APP_DEVELOPERS="Kazto Kitabatake, ACT Laboratory"
@@ -28,6 +28,7 @@ KEYMAP_FILE_NAME="data\\keymap.ini"
 TC_USER_DATA = os.path.abspath("data\\twitcasting\\users.dat")
 TC_SESSION_DATA = os.path.abspath("data\\twitcasting\\session.dat")
 YDL_LIST_DATA = os.path.abspath("data\\ydl\\list.dat")
+LIVE17_LIST_DATA = os.path.abspath("data\\17LIVE\\list.dat")
 FFMPEG_PATH = os.path.abspath("bin\\ffmpeg.exe")
 # 各サービスのアカウントデータの格納場所
 AC_TWITCASTING = os.path.abspath("data\\twitcasting\\account.bin")
@@ -57,9 +58,14 @@ TC_CID = "1266762249164619776.2ba35a3fe972584b3ab34e30c0c88ab6b4516d6aaf951c8a02
 TC_URL = "https://apiv2.twitcasting.tv/oauth2/authorize"
 TC_PORT = 9339
 
+# ツイキャス録画画質
+# 画質の優先順位リスト（高 → 低の順）
+TC_QUALITY_PRIORITY = ("high", "medium", "low")
+
 # その他
 NOT_FOUND = -1
 TC_WSS_URL = "wss://realtime.twitcasting.tv/lives"
 TOKEN_EXPIRE_MAX = 604800
 PIPE_NAME = "ACTLAB_ULTRA"
 FILETYPES_MENU_INDEX = 10000
+TC_QUALITY_MENU_INDEX = 20000
