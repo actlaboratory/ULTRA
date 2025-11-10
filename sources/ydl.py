@@ -363,6 +363,7 @@ class PlaylistDownloader(threading.Thread):
 				if self.exitFlag:
 					return
 				time.sleep(0.1)
+			time.sleep(globalVars.app.config.getint("ydl", "interval_sec", 30, 0, 3600))
 		self.ydl.onFinish(self.key)
 
 	def getKey(self):
