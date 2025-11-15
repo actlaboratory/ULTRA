@@ -363,7 +363,10 @@ class PlaylistDownloader(threading.Thread):
 				if self.exitFlag:
 					return
 				time.sleep(0.1)
-			time.sleep(globalVars.app.config.getint("ydl", "interval_sec", 30, 0, 3600))
+			if r.getStatus() != recorder.STATUS_SKIPED:
+				time.sleep(globalVars.app.config.getint("ydl", "interval_sec", 30, 0, 86400))
+				if self.exitFlag:
+					return
 		self.ydl.onFinish(self.key)
 
 	def getKey(self):
