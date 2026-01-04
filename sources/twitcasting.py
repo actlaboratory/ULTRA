@@ -627,7 +627,13 @@ class Twitcasting(SourceBase):
 			if join:
 				r.join()
 			return
-		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"])
+		# movieInfoが取得できた場合の処理（こちらがメイン）
+		if hasattr(self, "sessionManager"):
+			session = self.sessionManager.getSession()
+		else:
+			# Noneを渡せば新しいセッションが作られる
+			session = None
+		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"], session)
 		if stream == None:
 			return
 		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=self.getRecordHeader(), skipExisting=skipExisting)

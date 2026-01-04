@@ -16,6 +16,12 @@ from logging import getLogger
 # 0:何もしない、1:ffmpegのログをカレントディレクトリに保存
 DEBUG = 0
 
+# ステータス定数
+STATUS_PREPARED = 0
+STATUS_RECORDING = 1
+STATUS_SUCCESS = 2
+STATUS_SKIPED = 8
+STATUS_ERROR = 9
 
 class Recorder(threading.Thread):
 	def __init__(self, source, stream, userName, time, movie="", *, header={}, userAgent="Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko", skipExisting=False, ext=None):
@@ -64,6 +70,7 @@ class Recorder(threading.Thread):
 		self._exitFlag = False
 		# ffmpegのpopenオブジェクト
 		self.subProc: subprocess.Popen = None
+		self.status = STATUS_PREPARED
 
 	def processHeader(self, header):
 		self.log.debug("Processing HTTP headers...")
@@ -187,6 +194,7 @@ class Recorder(threading.Thread):
 
 	def run(self):
 		if self.shouldSkip():
+			self.status = STATUS_SKIPED
 			return
 		# 録画に成功した、あるいは録画を中断すべきと判断するまで処理を繰り返す
 		while True:
@@ -218,9 +226,11 @@ class Recorder(threading.Thread):
 				self.log.debug("Recording canceled")
 				return
 			self.source.onRecord(self.path, self.movie)
+			self.status = STATUS_RECORDING
 			self.subProc = subprocess.Popen(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
 			self.log.debug("Subprocess opened, pid: %d" % self.subProc.pid)
 			self.subProc.wait()
+			self.status = STATUS_ERROR # ややこしいので成功が確認できない限りはエラー扱いにしておく
 			self.log.info("saved: %s" % self.path)
 			# 終了処理が行われていたらここで動作を止める
 			if self._exitFlag:
@@ -230,6 +240,7 @@ class Recorder(threading.Thread):
 			result = self.subProc.communicate()[0]
 			# エラーメッセージがない、つまり録画成功
 			if len(result) == 0:
+				self.status = STATUS_SUCCESS
 				break
 			self.log.info("FFMPEG returned some errors.\n" + result)
 			if not self.source.onRecordError(self.movie):
@@ -253,6 +264,9 @@ class Recorder(threading.Thread):
 		"""誰のライブを録画中かを返す
 		"""
 		return self.userName
+
+	def getStatus(self):
+		return self.status
 
 	def isRecordedByAnotherThread(self):
 		for i in getActiveObj(self):
