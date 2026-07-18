@@ -528,13 +528,13 @@ class Twitcasting(SourceBase):
 		globalVars.app.hMainView.menu.CheckMenu("TC_LOGIN_TOGGLE", result)
 		globalVars.app.config["twitcasting"]["login"] = result
 
-	def getRecordHeader(self):
+	def getRecordHeader(self, session=None):
 		header = {}
 		header["Origin"] = "https://twitcasting.tv"
 		header["Referer"] = "https://twitcasting.tv/"
-		if hasattr(self, "sessionManager"):
-			# ログイン情報
+		if session is None and hasattr(self, "sessionManager"):
 			session = self.sessionManager.getSession()
+		if session is not None:
 			cookies = session.cookies
 			cookieList = []
 			for item in cookies:
@@ -597,6 +597,9 @@ class Twitcasting(SourceBase):
 		:type url: str
 		"""
 		self.log.debug("archive URL: %s" % url)
+		if not hasattr(self, "sessionManager"):
+			simpleDialog.errorDialog(_("過去ライブを録画するには、ログインして録画機能を有効にする必要があります。"))
+			return
 		movieInfo = self.getMovieInfoFromUrl(url, False)
 		self.log.debug("movie info: %s" % movieInfo)
 		if movieInfo == None:
@@ -620,13 +623,14 @@ class Twitcasting(SourceBase):
 			self.log.debug("movie ID: %s" % movieId)
 			user = lst[-3]
 			self.log.debug("user: %s" % user)
-			r = recorder.Recorder(self, stream, user, None, movieId, header=self.getRecordHeader(), skipExisting=skipExisting)
+			r = recorder.Recorder(self, stream, user, None, movieId, header=self.getRecordHeader(session=session), skipExisting=skipExisting)
 			if r.shouldSkip():
 				return errorCodes.RECORD_SKIPPED
 			r.start()
 			if join:
 				r.join()
 			return
+<<<<<<< Updated upstream
 		# movieInfoが取得できた場合の処理（こちらがメイン）
 		if hasattr(self, "sessionManager"):
 			session = self.sessionManager.getSession()
@@ -634,9 +638,13 @@ class Twitcasting(SourceBase):
 			# Noneを渡せば新しいセッションが作られる
 			session = None
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"], session)
+=======
+		loginSession = self.sessionManager.getSession() if hasattr(self, "sessionManager") else None
+		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"], session=loginSession)
+>>>>>>> Stashed changes
 		if stream == None:
 			return
-		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=self.getRecordHeader(), skipExisting=skipExisting)
+		r = recorder.Recorder(self, stream, movieInfo["broadcaster"]["screen_id"], movieInfo["movie"]["created"], movieInfo["movie"]["id"], header=self.getRecordHeader(session=loginSession), skipExisting=skipExisting)
 		if r.shouldSkip():
 			return errorCodes.RECORD_SKIPPED
 		r.start()
@@ -658,10 +666,15 @@ class Twitcasting(SourceBase):
 		"""
 		if session is None:
 			session = requests.session()
+		if "_twpid" not in session.cookies:
+			import time as _time
+			import random as _random
+			twpid = "tw.%d.%d" % (int(_time.time() * 1000), _random.randint(10**17, 10**18 - 1))
+			session.cookies.set("_twpid", twpid, domain="twitcasting.tv", path="/")
 		try:
 			req = session.get(url,headers={
 				"Origin": "https://twitcasting.tv",
-				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
 			})
 		except:
 			self.showNotFoundError()
@@ -680,7 +693,7 @@ class Twitcasting(SourceBase):
 				req = session.post(url, "password=%s" %pw, headers={
 					"Content-Type": "application/x-www-form-urlencoded",
 					"Origin": "https://twitcasting.tv",
-					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
 				})
 			except:
 				self.showNotFoundError()
@@ -1139,6 +1152,9 @@ class ArchiveDownloader(threading.Thread):
 		return dict["movies"]
 
 	def run(self):
+		if not hasattr(self.tc, "sessionManager"):
+			wx.CallAfter(simpleDialog.errorDialog, _("過去ライブを録画するには、ログインして録画機能を有効にする必要があります。"))
+			return
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("ライブ一覧を取得しています。"), self.tc.friendlyName)
 		movies = [i for i in self.getAllMovies() if i["is_recorded"] and (not i["is_protected"])]
 		movies.reverse()
@@ -1261,7 +1277,7 @@ class SessionManager:
 			url = "https://twitcasting.tv/%s/account" % account
 			r = session.get(url)
 			self.log.debug("request url: %s, response url: %s" % (url, r.url))
-			return r.url == url
+			return r.url.rstrip("/") == url.rstrip("/")
 		except Exception as e:
 			self.log.error(traceback.format_exc())
 			return False
