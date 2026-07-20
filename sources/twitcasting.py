@@ -597,9 +597,6 @@ class Twitcasting(SourceBase):
 		:type url: str
 		"""
 		self.log.debug("archive URL: %s" % url)
-		if not hasattr(self, "sessionManager"):
-			simpleDialog.errorDialog(_("過去ライブを録画するには、ログインして録画機能を有効にする必要があります。"))
-			return
 		movieInfo = self.getMovieInfoFromUrl(url, False)
 		self.log.debug("movie info: %s" % movieInfo)
 		if movieInfo == None:
@@ -607,13 +604,12 @@ class Twitcasting(SourceBase):
 				simpleDialog.errorDialog(_("入力されたURLの形式が不正です。内容をご確認の上、再度お試しください。"))
 				return
 			self.verifyCredentials(False)
-			d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), _("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
-			if d == wx.ID_NO:
-				return
-			sessionManager = SessionManager(self)
-			if not sessionManager.login():
-				return
-			session = sessionManager.getSession()
+			if hasattr(self, "sessionManager"):
+				session = self.sessionManager.getSession()
+			else:
+				session = self.promptArchiveLogin(_("ライブ情報の取得に失敗しました。プレミア配信など、一部のユーザにしか閲覧できないライブの場合、ULTRAと連携しているアカウントでログインすることで、ダウンロードに成功する可能性があります。今すぐログインしますか？"))
+				if session is None:
+					return
 			# get stream data
 			stream = self.getStreamFromUrl(url, session=session)
 			if stream is None:
@@ -630,7 +626,12 @@ class Twitcasting(SourceBase):
 			if join:
 				r.join()
 			return
-		loginSession = self.sessionManager.getSession()
+		if hasattr(self, "sessionManager"):
+			loginSession = self.sessionManager.getSession()
+		else:
+			loginSession = self.promptArchiveLogin(_("過去ライブをダウンロードするには、ログインする必要があります。今すぐログインしますか？"))
+			if loginSession is None:
+				return
 		stream = self.getStreamFromUrl(url, movieInfo["movie"]["is_protected"], session=loginSession)
 		if stream == None:
 			return
@@ -640,6 +641,22 @@ class Twitcasting(SourceBase):
 		r.start()
 		if join:
 			r.join()
+
+	def promptArchiveLogin(self, message):
+		"""過去ライブのダウンロードに使うセッションを、その場でのログインにより取得する
+
+		:param message: ログインするかどうかを尋ねる確認ダイアログの本文
+		:type message: str
+		:return: ログインに成功すればセッション、失敗またはキャンセルされた場合はNone
+		:rtype: requests.Session | None
+		"""
+		d = simpleDialog.yesNoDialog(_("過去ライブのダウンロード"), message)
+		if d == wx.ID_NO:
+			return None
+		sessionManager = SessionManager(self)
+		if not sessionManager.login():
+			return None
+		return sessionManager.getSession()
 
 	def validateArchiveUrl(self, url):
 		if not re.match(r"https?://.*twitcasting\.tv/.+/movie/\d+$", url):
