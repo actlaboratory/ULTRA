@@ -44,8 +44,8 @@ def login(id,pw):
 	result = session.post("https://twitcasting.tv/indexcaslogin.php?redir=%2F"+"&keep=1", body, headers=headers, timeout=5)
 
 	#STEP3: 結果の判定と返却
-	if result.status_code!=200 or len(result.history)!=1 or result.history[0].status_code!=302 or result.url!="https://twitcasting.tv/":
-		if result.status_code==200 and len(result.history)==0 and result.url.startswith("https://twitcasting.tv/indexcaslogin.php?"):
+	if result.status_code!=200 or len(result.history)==0 or "indexcaslogin" in result.url:
+		if result.status_code==200 and len(result.history)==0 and "indexcaslogin" in result.url:
 			return errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT
 		return errorCodes.LOGIN_TWITCASTING_ERROR
 	return session
