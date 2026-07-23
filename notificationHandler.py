@@ -31,7 +31,7 @@ class NotificationHandler:
 		"""新着ライブの通知
 
 		:param source: SourceBaseクラスを継承したオブジェクト
-		:param source: source
+		:type source: Source
 		:param userName: 配信者のユーザ名
 		:type userName: str
 		:param link: 配信ページへのリンク
@@ -45,7 +45,7 @@ class NotificationHandler:
 		:param movie: 通知対象の動画を識別するための文字列
 		:type movie: str
 		:param header: 録画時に送信するHTTPヘッダー
-		:type movie: dict
+		:type header: dict
 		"""
 		self.loadSettings(config)
 		if self.baloon:

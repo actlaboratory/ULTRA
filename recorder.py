@@ -32,14 +32,14 @@ class Recorder(threading.Thread):
 		:param stream: ストリーミングURL
 		:type stream: str
 		:param userName: 配信者のユーザ名
-		:type user: str
+		:type userName: str
 		:param time: 放送開始日時のUnixタイムスタンプまたはdatetime.datetimeオブジェクト
 		:type time: int/datetime.datetime
 		:param movie: 録画対象の動画を識別できる文字列
 		:type movie: str
 		:param header: ストリーミングのダウンロード時に追加で指定するHTTPヘッダ
 		:type header: dict
-		:param user-agent: 相手サーバに通知するユーザエージェント(省略時はIE11となる)
+		:param userAgent: 相手サーバに通知するユーザエージェント(省略時はChromeとなる)
 		:type userAgent: str
 		:param skipExisting: 保存先ファイルが存在する場合、録画処理を中断するかどうか
 		:type skipExisting: bool
