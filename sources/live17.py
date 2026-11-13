@@ -19,6 +19,9 @@ import recorder
 import simpleDialog
 from sources.base import SourceBase
 
+# wap-api.17app.co の一部エンドポイント(cells)がAkamaiにより403で拒否されるようになったため、api-dsaを使用する
+API_BASE = "https://api-dsa.17app.co/api/v1/"
+
 
 class Live17(SourceBase):
 	name = "17live"
@@ -104,13 +107,13 @@ class Live17(SourceBase):
 	def getUserFromRoomId(self, room_id):
 		session = requests.session()
 		session.get("https://17.live", headers=getHeaders())
-		url = "https://wap-api.17app.co/api/v1/user/room/" + str(room_id)
+		url = API_BASE + "user/room/" + str(room_id)
 
 		self.log.debug("getUserIdFromRoomId:" + url)
 		response = session.get(url, headers=getHeaders())
 		self.log.debug("getUserIdFromRoomId:" + str(response.status_code))
 		self.log.debug("getUserIdFromRoomId:" + response.text)
-		response_data = json.loads(response.text)
+		response_data = parseResponse(response)
 		return {
 			"user_id": response_data["userID"],
 			"user_display_name": response_data["displayName"]
@@ -166,12 +169,12 @@ class Live17(SourceBase):
 	def getArchiveInfo(self, archive_id):
 		session = requests.session()
 		session.get("https://17.live", headers=getHeaders())
-		url = "https://wap-api.17app.co/api/v1/archives/" + archive_id
+		url = API_BASE + "archives/" + archive_id
 		self.log.debug("getArchiveInfo:" + url)
 		response = session.get(url, headers=getHeaders())
 		self.log.debug("getArchiveInfo:" + str(response.status_code))
 		self.log.debug("getArchiveInfo:" + response.text)
-		return json.loads(response.text)
+		return parseResponse(response)
 
 	def onStart(self, key):
 		self.listManager.onStart(key)
@@ -204,13 +207,13 @@ class ArchiveDownloader(threading.Thread):
 		session = requests.session()
 		session.get("https://17.live", headers=getHeaders())
 		while True:
-			url = "https://wap-api.17app.co/api/v1/cells?tab=archive&userID=" + self.user_id + "&cursor=" + cursor + "&sortBy=createdAt&count=10&visibility=1"
+			url = API_BASE + "cells?tab=archive&userID=" + self.user_id + "&cursor=" + urllib.parse.quote(cursor) + "&sortBy=createdAt&count=10&visibility=1"
 
 			self.log.debug("getArchiveList:" + url)
 			response = session.get(url, headers=getHeaders())
 			self.log.debug("getArchiveList:" + str(response.status_code))
 			self.log.debug("getArchiveList:" + response.text)
-			receive_data = json.loads(response.text)
+			receive_data = parseResponse(response)
 
 			result += receive_data["cells"]
 			cursor = receive_data["cursor"]
@@ -222,7 +225,14 @@ class ArchiveDownloader(threading.Thread):
 
 	def run(self):
 		self.live17.onStart(self.user_id)
-		movies = self.getUserArchiveList()
+		try:
+			movies = self.getUserArchiveList()
+		except Exception as e:
+			self.log.error(traceback.format_exc())
+			wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("%(title)s：アーカイブ一覧の取得に失敗しました。詳細：%(detail)s") % {"title": self.user_display_name, "detail": e}, self.live17.friendlyName)
+			# 処理中フラグを残すと以後チェックされなくなるため、取得時刻を更新して次回の間隔まで待つ
+			self.live17.onFinish(self.user_id)
+			return
 		movies.reverse()	# 古い方からダウンロードしたい
 
 		wx.CallAfter(globalVars.app.hMainView.addLog, _("一括録画"), _("%(title)s：アーカイブ%(total)d件") % {"title": self.user_display_name, "total": len(movies)}, self.live17.friendlyName)
@@ -245,7 +255,16 @@ class ArchiveDownloader(threading.Thread):
 
 	def exit(self):
 		self.exitFlag = True
-		self.live17.onCancel(self.key)
+		self.live17.onCancel(self.user_id)
+
+
+def parseResponse(response):
+	if response.status_code != 200:
+		raise Exception(_("サーバーからエラーが返されました。(HTTP %d)") % response.status_code)
+	try:
+		return json.loads(response.text)
+	except json.JSONDecodeError:
+		raise Exception(_("サーバーから不正な応答が返されました。"))
 
 
 def getHeaders():
