@@ -10,11 +10,16 @@ from time import sleep
 import threading
 import globalVars
 import os
+from collections import deque
 from logging import getLogger
 
 # debug
 # 0:何もしない、1:ffmpegのログをカレントディレクトリに保存
 DEBUG = 0
+
+# ffmpegの出力のうち、エラーの判定と表示のために保持する行数（末尾から数える）
+# ffmpegが同じエラーを出し続けてもメモリーを使い切らないように、上限を設ける
+OUTPUT_MAX_LINES = 100
 
 # ステータス定数
 STATUS_PREPARED = 0
@@ -227,9 +232,15 @@ class Recorder(threading.Thread):
 				return
 			self.source.onRecord(self.path, self.movie)
 			self.status = STATUS_RECORDING
-			self.subProc = subprocess.Popen(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", creationflags=subprocess.CREATE_NO_WINDOW)
+			self.subProc = subprocess.Popen(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", errors="replace", creationflags=subprocess.CREATE_NO_WINDOW)
 			self.log.debug("Subprocess opened, pid: %d" % self.subProc.pid)
+			# ffmpegの出力を別スレッドで読み続ける
+			# 読まずに終了を待つと、パイプのバッファーが埋まった時点でffmpegが止まり、デッドロックになる
+			output = deque(maxlen=OUTPUT_MAX_LINES)
+			reader = threading.Thread(target=self.readOutput, args=(self.subProc.stdout, output), daemon=True)
+			reader.start()
 			self.subProc.wait()
+			reader.join()
 			self.status = STATUS_ERROR # ややこしいので成功が確認できない限りはエラー扱いにしておく
 			self.log.info("saved: %s" % self.path)
 			# 終了処理が行われていたらここで動作を止める
@@ -237,7 +248,7 @@ class Recorder(threading.Thread):
 				self.log.debug("recording canceled after saving a file")
 				return
 			# 標準出力を取得
-			result = self.subProc.communicate()[0]
+			result = "".join(output)
 			# エラーメッセージがない、つまり録画成功
 			if len(result) == 0:
 				self.status = STATUS_SUCCESS
@@ -256,6 +267,18 @@ class Recorder(threading.Thread):
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
+
+	def readOutput(self, stream, output):
+		"""ffmpegの出力を、プロセスが終了するまで読み続ける
+
+		:param stream: ffmpegの標準出力
+		:type stream: io.TextIOWrapper
+		:param output: 読み取った行を格納するdeque。上限を超えた古い行は捨てられる
+		:type output: collections.deque
+		"""
+		for line in stream:
+			output.append(line)
+		stream.close()
 
 	def shouldSkip(self):
 		return self.skipExisting and os.path.exists(self.getOutputFile())
@@ -297,7 +320,14 @@ class Recorder(threading.Thread):
 		self.log.debug("exitting...")
 		self._exitFlag = True
 		if self.subProc:
-			self.subProc.communicate("q")
+			# 出力は録画スレッドが読んでいるため、communicate()は使わずに標準入力だけを操作する
+			try:
+				self.subProc.stdin.write("q")
+				self.subProc.stdin.close()
+			except (OSError, ValueError):
+				# ffmpegがすでに終了している
+				pass
+			self.subProc.wait()
 
 def getRecordingUsers(self=None):
 	"""現在録画中のユーザ名のリストを返す
