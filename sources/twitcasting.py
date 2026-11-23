@@ -1251,7 +1251,7 @@ class SessionManager:
 					errorCodes.LOGIN_TWITCASTING_ERROR: _("ログイン中にエラーが発生しました。"),
 					errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT: _("パスワードが正しくありません。"),
 					errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT: _("パスワードが正しくありません。なお、ULTRA Version 1.5.2の更新に伴い、ツイキャスの「ログインパスワード」を使用してログインするようになりました。ツイキャスのサイトでログインパスワードを設定し、そのパスワードをULTRAに設定する必要があります。"),
-					errorCodes.LOGIN_RECAPTCHA_NEEDED: _("reCAPTCHAによる認証が必要です。ブラウザからTwitterにログインし、認証を行ってください。"),
+					errorCodes.LOGIN_RECAPTCHA_NEEDED: _("短時間に多数のログインを行ったため、ツイキャスからreCAPTCHAによる認証を求められました。しばらく時間を置いてから再度お試しください。"),
 					errorCodes.LOGIN_TWITTER_ERROR: _("ログイン中にエラーが発生しました。"),
 					errorCodes.LOGIN_CONFIRM_NEEDED: _("認証が必要です。ブラウザで操作を完了してください。"),
 				}
@@ -1268,7 +1268,8 @@ class SessionManager:
 	def login(self):
 		while True:
 			result = self._login()
-			if result in (errorCodes.OK, errorCodes.CANCELED):
+			# reCAPTCHAを求められた場合、続けてログインを試みると解除されにくくなるため再試行しない
+			if result in (errorCodes.OK, errorCodes.CANCELED, errorCodes.LOGIN_RECAPTCHA_NEEDED):
 				break
 		return result == errorCodes.OK
 

@@ -4,6 +4,8 @@
 import requests
 import errorCodes
 
+from . import twitcastingLogin
+
 from bs4 import BeautifulSoup
 
 # IDとpwを用いてログインし、セッションを返却
@@ -47,6 +49,8 @@ def login(id, pw):
     # STEP4: 結果の判定と返却
     if result.status_code != 200 or len(result.history) != 1 or result.history[0].status_code != 302 or result.url != "https://twitcasting.tv/":
         if result.status_code == 200 and len(result.history) == 0 and result.url.startswith("https://twitcasting.tv/indexpasswordlogin.php"):
+            if twitcastingLogin.isRecaptchaRequired(result):
+                return errorCodes.LOGIN_RECAPTCHA_NEEDED
             return errorCodes.LOGIN_TWITTER_WRONG_ACCOUNT
         return errorCodes.LOGIN_TWITTER_ERROR
     return session

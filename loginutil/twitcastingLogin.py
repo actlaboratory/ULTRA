@@ -46,6 +46,17 @@ def login(id,pw):
 	#STEP3: 結果の判定と返却
 	if result.status_code!=200 or len(result.history)==0 or "indexcaslogin" in result.url:
 		if result.status_code==200 and len(result.history)==0 and "indexcaslogin" in result.url:
+			if isRecaptchaRequired(result):
+				return errorCodes.LOGIN_RECAPTCHA_NEEDED
 			return errorCodes.LOGIN_TWITCASTING_WRONG_ACCOUNT
 		return errorCodes.LOGIN_TWITCASTING_ERROR
 	return session
+
+# 短時間に多数のログインを行うと、ログインフォームにreCAPTCHAが追加されて差し戻される
+def isRecaptchaRequired(response):
+	try:
+		soup = BeautifulSoup(response.content, "lxml")
+		form = soup.find("form", {"id":"login-form"})
+		return form is not None and "recaptcha" in str(form).lower()
+	except:
+		return False
