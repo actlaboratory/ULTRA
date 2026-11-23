@@ -21,6 +21,20 @@ DEBUG = 0
 # ffmpegが同じエラーを出し続けてもメモリーを使い切らないように、上限を設ける
 OUTPUT_MAX_LINES = 100
 
+# ffmpegが応答のないサーバーを待つ時間（秒）
+# 指定しないと、ffmpegはいつまでも待ち続ける
+RW_TIMEOUT_SEC = 30
+
+# 録画を再試行するまでの待ち時間（秒）
+RETRY_INTERVAL_SEC = 15
+
+# 何も録画できないまま再試行を続ける回数の上限
+MAX_FAILED_RETRIES = 20
+
+# 録画できたとみなすファイルサイズの下限（バイト）
+# mp4は、データがなくてもヘッダーだけを書き込むことがあるため、0バイトより大きいだけでは判断できない
+MIN_RECORDED_SIZE = 10 * 1024
+
 # ステータス定数
 STATUS_PREPARED = 0
 STATUS_RECORDING = 1
@@ -73,6 +87,8 @@ class Recorder(threading.Thread):
 		super().__init__(daemon=False)
 		self.log.info("stream URL: %s" % self.stream)
 		self._exitFlag = False
+		# 再試行の待ち時間を、終了処理で打ち切るためのイベント
+		self._exitEvent = threading.Event()
 		# ffmpegのpopenオブジェクト
 		self.subProc: subprocess.Popen = None
 		self.status = STATUS_PREPARED
@@ -184,6 +200,8 @@ class Recorder(threading.Thread):
 				'"%s"' % self.cookies,
 			]
 		cmd += [
+			"-rw_timeout",
+			str(RW_TIMEOUT_SEC * 1000000),
 			"-i",
 			'"%s"' % self.stream,
 			"-max_muxing_queue_size",
@@ -201,6 +219,12 @@ class Recorder(threading.Thread):
 		if self.shouldSkip():
 			self.status = STATUS_SKIPED
 			return
+		# 何も録画できないまま再試行した回数
+		failedRetries = 0
+		# いずれかの回で録画できたかどうか
+		recordedAny = False
+		# source.onRecord()を呼んだかどうか
+		onRecordCalled = False
 		# 録画に成功した、あるいは録画を中断すべきと判断するまで処理を繰り返す
 		while True:
 			try:
@@ -224,13 +248,16 @@ class Recorder(threading.Thread):
 					globalVars.app.hMainView.addLog(_("録画エラー"), _("%sのライブの録画処理を中断しました。") % self.userName)
 					return
 			self.log.debug("command: " + " ".join(cmd))
-			globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
-			globalVars.app.tb.setAlternateText(_("録画中"))
 			# 録画開始前に終了処理が行われていたら、ここで動作を終了
 			if self._exitFlag:
 				self.log.debug("Recording canceled")
 				return
-			self.source.onRecord(self.path, self.movie)
+			globalVars.app.hMainView.addLog(_("録画開始"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
+			globalVars.app.tb.setAlternateText(_("録画中"))
+			# コメントの保存などは、ライブが終わるまで続くので、再試行のときには始め直さない
+			if not onRecordCalled:
+				self.source.onRecord(self.path, self.movie)
+				onRecordCalled = True
 			self.status = STATUS_RECORDING
 			self.subProc = subprocess.Popen(" ".join(cmd), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, shell=False, encoding="utf-8", errors="replace", creationflags=subprocess.CREATE_NO_WINDOW)
 			self.log.debug("Subprocess opened, pid: %d" % self.subProc.pid)
@@ -247,23 +274,45 @@ class Recorder(threading.Thread):
 			if self._exitFlag:
 				self.log.debug("recording canceled after saving a file")
 				return
+			returncode = self.subProc.returncode
 			# 標準出力を取得
 			result = "".join(output)
-			# エラーメッセージがない、つまり録画成功
-			if len(result) == 0:
-				self.status = STATUS_SUCCESS
-				break
-			self.log.info("FFMPEG returned some errors.\n" + result)
-			if not self.source.onRecordError(self.movie):
+			clean = returncode == 0 and len(result) == 0
+			if not clean:
+				self.log.info("FFMPEG exited with code %d.\n%s" % (returncode, result))
+			recorded = self.isRecorded()
+			if recorded:
+				recordedAny = True
+			else:
+				self.removeEmptyFile()
+			# ffmpegは、録画の途中で配信が途切れても、終了コード0でエラーも出さずに終わることがある（#63）
+			# そのため、終了コードや出力にかかわらず、ライブが続いているかどうかで再試行するかを決める
+			live = self.source.isMovieLive(self.movie)
+			if live is None:
+				# ライブが続いているか分からない場合は、ffmpegがエラーなく終わっていれば、配信が終わったとみなす
+				live = not clean
+			if not live:
 				self.log.info("End of recording")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
+				if recordedAny:
+					# いずれかの回で録画できていれば成功とする
+					# 最後の回のエラーは、ライブが終わったために起きたものと考えられる。詳細はログに記録してある
+					self.status = STATUS_SUCCESS
+				else:
+					globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + self.getErrorDetail(returncode, result), self.source.friendlyName)
 				break
-			if "404 Not Found" in result:
-				self.log.info("not found")
-				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生しました。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
+			if recorded:
+				failedRetries = 0
+			else:
+				failedRetries += 1
+			if failedRetries > MAX_FAILED_RETRIES:
+				self.log.info("Too many failed retries")
+				globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブの録画を再試行しましたが、録画できなかったため中断しました。") % self.userName) + self.getErrorDetail(returncode, result), self.source.friendlyName)
 				break
-			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブを録画中にエラーが発生したため、再度録画を開始します。") % self.userName) + (_("詳細：%s") % result), self.source.friendlyName)
-			sleep(15)
+			globalVars.app.hMainView.addLog(_("録画エラー"), (_("%sのライブの録画が途切れたため、再度録画を開始します。") % self.userName) + self.getErrorDetail(returncode, result), self.source.friendlyName)
+			# 待っている間に終了処理が行われたら、ここで動作を終了
+			if self._exitEvent.wait(RETRY_INTERVAL_SEC):
+				self.log.debug("Recording canceled while waiting to retry")
+				return
 		globalVars.app.hMainView.addLog(_("録画終了"), _("ユーザ：%(user)s、ムービーID：%(movie)s") % {"user": self.userName, "movie": self.movie}, self.source.friendlyName)
 		if getRecordingUsers(self) == []:
 			globalVars.app.tb.setAlternateText()
@@ -279,6 +328,40 @@ class Recorder(threading.Thread):
 		for line in stream:
 			output.append(line)
 		stream.close()
+
+	def isRecorded(self):
+		"""今回のffmpegの実行で、保存先にデータが書き込まれたかどうかを返す
+
+		ヘッダーだけのファイルを録画できたとみなさないように、MIN_RECORDED_SIZE以上かどうかで判断する
+		"""
+		try:
+			return os.path.getsize(self.path) >= MIN_RECORDED_SIZE
+		except OSError:
+			return False
+
+	def removeEmptyFile(self):
+		"""保存先のファイルが0バイトなら削除する
+		"""
+		try:
+			if os.path.getsize(self.path) == 0:
+				os.remove(self.path)
+				self.log.info("removed empty file: %s" % self.path)
+		except OSError:
+			pass
+
+	def getErrorDetail(self, returncode, result):
+		"""ログに表示するエラーの詳細を返す
+
+		:param returncode: ffmpegの終了コード
+		:type returncode: int
+		:param result: ffmpegの出力
+		:type result: str
+		"""
+		if result:
+			return _("詳細：%s") % result
+		if returncode != 0:
+			return _("詳細：ffmpegの終了コード%d") % returncode
+		return ""
 
 	def shouldSkip(self):
 		return self.skipExisting and os.path.exists(self.getOutputFile())
@@ -319,6 +402,7 @@ class Recorder(threading.Thread):
 	def exit(self):
 		self.log.debug("exitting...")
 		self._exitFlag = True
+		self._exitEvent.set()
 		if self.subProc:
 			# 出力は録画スレッドが読んでいるため、communicate()は使わずに標準入力だけを操作する
 			try:

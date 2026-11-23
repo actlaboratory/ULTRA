@@ -819,15 +819,24 @@ class Twitcasting(SourceBase):
 			c = CommentGetter(self, os.path.splitext(path)[0] + ".txt", movieId)
 			c.start()
 
-	def onRecordError(self, movie):
-		movieInfo = self.getMovieInfo(movie)
-		if movieInfo == None:
-			if self.verifyCredentials(False):
-				# ネットには繋がっているがムービー情報が取れない、つまりライブは終わっている
-				return False
-			# ネットには繋がっていない。ライブがまだ続いている可能性もある。
-			return True
-		return movieInfo["movie"]["is_live"]
+	def isMovieLive(self, movie):
+		# 録画のスレッドから、録画が終わるたびに呼ばれるため、getMovieInfo()は使わずダイアログを出さない
+		if self.initialized == 0:
+			return None
+		try:
+			req = requests.get("https://apiv2.twitcasting.tv/movies/%s" % movie, headers=self.header)
+		except requests.RequestException:
+			# ネットには繋がっていない。ライブがまだ続いているかどうか分からない
+			self.log.error(traceback.format_exc())
+			return None
+		if req.status_code == 200:
+			return req.json()["movie"]["is_live"]
+		if req.status_code == 404:
+			# ムービーが見つからない、つまりライブは終わっている
+			return False
+		# トークンが無効な場合など。ライブがまだ続いているかどうか分からない
+		self.log.warning("Failed to get movie info. status: %d, body: %s" % (req.status_code, req.text))
+		return None
 
 	def record(self, userName):
 		"""指定したユーザのライブを録画。

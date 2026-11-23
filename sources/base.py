@@ -63,13 +63,15 @@ class SourceBase(threading.Thread):
 		"""
 		wx.CallAfter(globalVars.app.hMainView.statusList.SetItem, self.index, 1, status)
 
-	def onRecordError(self, movie):
-		"""[summary]
+	def isMovieLive(self, movie):
+		"""録画中のライブが続いているかどうかを返す
 
-		:param movie: エラーが起きた動画の識別子
+		録画のffmpegが終了するたびに呼ばれ、ライブが続いていれば録画を再試行する。
+
+		:param movie: 録画中の動画の識別子
 		:type movie: str
-		:return: 再試行するかどうか
-		:rtype: bool
+		:return: 続いていればTrue、終わっていればFalse、確認できなければNone
+		:rtype: bool | None
 		"""
 		return False
 
